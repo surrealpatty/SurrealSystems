@@ -1,57 +1,42 @@
 const express = require('express');
-const router = express.Router();
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const { User } = require('../models/User');
+const router = express.Router();
 
-// --------- REGISTER ---------
+// -------- REGISTER --------
 router.post('/register', async (req, res) => {
-    try {
-        const { username, email, password } = req.body;
-        const user = await User.create({ username, email, password });
-
-        const { password: _, ...userData } = user.toJSON();
-        res.status(201).json({ message: 'User created successfully', user: userData });
-    } catch (err) {
-        if (err.name === 'SequelizeUniqueConstraintError') {
-            return res.status(400).json({ error: 'Username or email already exists' });
-        }
-        res.status(400).json({ error: err.message });
-    }
+  try {
+    const { username, email, password } = req.body;
+    const hashed = await bcrypt.hash(password, 10);
+    const user = await User.create({ username, email, password: hashed });
+    res.json({ message: '✅ User registered successfully', user: { id: user.id, username, email } });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
-// --------- LOGIN ---------
+// -------- LOGIN --------
 router.post('/login', async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        const user = await User.findOne({ where: { email } });
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ where: { email } });
 
-        if (!user) return res.status(404).json({ error: 'User not found' });
+    if (!user) return res.status(400).json({ error: 'User not found' });
 
-        const isMatch = await user.checkPassword(password);
-        if (!isMatch) return res.status(400).json({ error: 'Incorrect password' });
+    const valid = await bcrypt.compare(password, user.password);
+    if (!valid) return res.status(400).json({ error: 'Invalid password' });
 
-        // Create JWT
-        const token = jwt.sign(
-            { id: user.id, username: user.username, email: user.email },
-            'supersecretkey', // TODO: move to .env
-            { expiresIn: '1h' }
-        );
+    const token = jwt.sign(
+      { id: user.id, username: user.username, email: user.email },
+      'supersecretkey',
+      { expiresIn: '1h' }
+    );
 
-        const { password: _, ...userData } = user.toJSON();
-        res.json({ message: 'Login successful', token, user: userData });
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
-});
-
-// --------- GET USERS (no passwords) ---------
-router.get('/', async (req, res) => {
-    try {
-        const users = await User.findAll({ attributes: { exclude: ['password'] } });
-        res.json(users);
-    } catch (err) {
-        res.status(500).json({ error: err.message });
-    }
+    res.json({ message: '✅ Login successful', token, user: { id: user.id, username: user.username, email: user.email } });
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 });
 
 module.exports = router;
