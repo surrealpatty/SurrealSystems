@@ -14,17 +14,25 @@
       <button id="logoutBtn">Logout</button>
     </header>
 
+    <!-- Post a Service -->
     <section class="form-section">
       <h2>Post a Service</h2>
       <form id="serviceForm">
+        <label for="serviceTitle">Service Title</label>
         <input type="text" id="serviceTitle" placeholder="Service Title" required /><br>
+
+        <label for="serviceDesc">Description</label>
         <textarea id="serviceDesc" placeholder="Service Description" required></textarea><br>
+
+        <label for="servicePrice">Price</label>
         <input type="number" id="servicePrice" placeholder="Price" required /><br>
+
         <button type="submit">Post Service</button>
       </form>
       <p id="serviceMessage" class="message"></p>
     </section>
 
+    <!-- Services List -->
     <section class="form-section">
       <h2>All Services</h2>
       <div id="services-list"></div>
@@ -33,19 +41,17 @@
 
   <script src="app.js"></script>
   <script>
-    // Check if user is logged in
+    // Redirect if not logged in
     const token = localStorage.getItem('token');
-    if (!token) {
-      window.location.href = 'index.html'; // redirect if not logged in
-    }
+    if (!token) window.location.href = 'index.html';
 
-    // Welcome message
+    // Display welcome message
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     document.getElementById('welcomeMsg').textContent = user.username 
       ? `Welcome, ${user.username}!`
       : 'Welcome!';
 
-    // Logout
+    // Logout button
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');

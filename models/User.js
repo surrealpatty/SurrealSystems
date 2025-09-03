@@ -1,40 +1,10 @@
-const { DataTypes, Model } = require('sequelize');
-const sequelize = require('../config/database');
-const bcrypt = require('bcrypt');
+const { Sequelize, DataTypes } = require('sequelize');
+const sequelize = new Sequelize('sqlite:database.sqlite'); // replace with MySQL if needed
 
-class User extends Model {
-    async checkPassword(password) {
-        return await bcrypt.compare(password, this.password);
-    }
-}
-
-User.init({
-    username: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
-    email: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true
-    },
-    password: {
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    role: {
-        type: DataTypes.STRING,
-        defaultValue: 'user'
-    }
-}, {
-    sequelize,
-    modelName: 'User',
-    hooks: {
-        beforeCreate: async (user) => {
-            user.password = await bcrypt.hash(user.password, 10);
-        }
-    }
+const User = sequelize.define('User', {
+  username: { type: DataTypes.STRING, allowNull: false },
+  email: { type: DataTypes.STRING, unique: true, allowNull: false },
+  password: { type: DataTypes.STRING, allowNull: false }
 });
 
-module.exports = User;
+module.exports = { User, sequelize };
