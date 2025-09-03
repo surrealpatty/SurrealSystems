@@ -4,9 +4,9 @@
   "description": "A Fiverr-like platform for posting and browsing coding services",
   "main": "server/index.js",
   "scripts": {
-    "start": "node server/index.js",
-    "dev": "nodemon server/index.js"
-  },
+  "start": "node index.js",
+  "dev": "nodemon index.js"
+},
   "keywords": [
     "fiverr",
     "services",
