@@ -5,12 +5,15 @@ function showMessage(elementId, message, isSuccess) {
   el.className = "message " + (isSuccess ? "success" : "error");
 }
 
-// Handle registration
+// ----------------------
+// Registration
+// ----------------------
 document.getElementById("registerForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const username = document.getElementById("regUsername").value;
-  const email = document.getElementById("regEmail").value;
-  const password = document.getElementById("regPassword").value;
+
+  const username = document.getElementById("regUsername").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const password = document.getElementById("regPassword").value.trim();
 
   try {
     const res = await fetch("http://localhost:3000/users/register", {
@@ -18,19 +21,24 @@ document.getElementById("registerForm").addEventListener("submit", async (e) => 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ username, email, password }),
     });
+
     const data = await res.json();
     showMessage("registerMessage", data.message || "Registration failed.", res.ok);
+
     if (res.ok) document.getElementById("registerForm").reset();
   } catch (err) {
     showMessage("registerMessage", "Error: " + err.message, false);
   }
 });
 
-// Handle login
+// ----------------------
+// Login
+// ----------------------
 document.getElementById("loginForm").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const email = document.getElementById("loginEmail").value;
-  const password = document.getElementById("loginPassword").value;
+
+  const email = document.getElementById("loginEmail").value.trim();
+  const password = document.getElementById("loginPassword").value.trim();
 
   try {
     const res = await fetch("http://localhost:3000/users/login", {
@@ -38,9 +46,15 @@ document.getElementById("loginForm").addEventListener("submit", async (e) => {
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
     });
+
     const data = await res.json();
     showMessage("loginMessage", data.message || "Login failed.", res.ok);
-    if (res.ok) document.getElementById("loginForm").reset();
+
+    if (res.ok) {
+      document.getElementById("loginForm").reset();
+      // Optional: redirect to dashboard
+      // window.location.href = "/dashboard.html";
+    }
   } catch (err) {
     showMessage("loginMessage", "Error: " + err.message, false);
   }
