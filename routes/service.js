@@ -1,30 +1,35 @@
 const express = require('express');
 const router = express.Router();
-const Service = require('../models/Service');
-const User = require('../models/User');
+const Service = require('./models/service'); // ensure lowercase file name
+const User = require('./models/user');
 
 // Create a new service
 router.post('/', async (req, res) => {
     try {
         const { title, description, price, userId } = req.body;
 
-        const service = await Service.create({
-            title,
-            description,
-            price,
-            userId
-        });
+        // Optional: validate required fields
+        if (!title || !description || price == null || !userId) {
+            return res.status(400).json({ error: 'All fields are required' });
+        }
 
-        res.status(201).json({ message: 'Service created', service });
+        const service = await Service.create({ title, description, price, userId });
+
+        res.status(201).json({ message: 'Service created successfully', service });
     } catch (err) {
         res.status(400).json({ error: err.message });
     }
 });
 
-// Get all services
+// Get all services with associated users (excluding passwords)
 router.get('/', async (req, res) => {
     try {
-        const services = await Service.findAll({ include: User });
+        const services = await Service.findAll({
+            include: {
+                model: User,
+                attributes: { exclude: ['password'] }
+            }
+        });
         res.json(services);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -34,8 +39,15 @@ router.get('/', async (req, res) => {
 // Get a single service by ID
 router.get('/:id', async (req, res) => {
     try {
-        const service = await Service.findByPk(req.params.id, { include: User });
+        const service = await Service.findByPk(req.params.id, {
+            include: {
+                model: User,
+                attributes: { exclude: ['password'] }
+            }
+        });
+
         if (!service) return res.status(404).json({ error: 'Service not found' });
+
         res.json(service);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -49,7 +61,7 @@ router.delete('/:id', async (req, res) => {
         if (!service) return res.status(404).json({ error: 'Service not found' });
 
         await service.destroy();
-        res.json({ message: 'Service deleted' });
+        res.json({ message: 'Service deleted successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
