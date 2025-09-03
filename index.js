@@ -10,15 +10,15 @@ const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
 
 // Middleware
-app.use(cors({ origin: '*' })); // allow all origins
+app.use(cors({ origin: '*' })); // allow frontend to call backend
 app.use(express.json());
-app.use(express.static('public')); // frontend files
+app.use(express.static('public')); // serve frontend files
 
 // Routes
 app.use('/users', userRoutes);
 app.use('/services', serviceRoutes);
 
-// Use Render port
+// Use Render's port
 const PORT = process.env.PORT || 3000;
 
 // Sync database & start server
