@@ -5,26 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Dashboard - CodeCrowds</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* Screen-reader only labels */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+  </style>
 </head>
 <body>
   <div class="container">
     <header>
       <h1>CodeCrowds Dashboard</h1>
-      <p id="welcomeMsg"></p>
-      <button id="logoutBtn">Logout</button>
+      <div>
+        <span id="welcomeMsg"></span>
+        <button id="logoutBtn">Logout</button>
+      </div>
     </header>
 
-    <!-- Post a Service -->
     <section class="form-section">
       <h2>Post a Service</h2>
       <form id="serviceForm">
-        <label for="serviceTitle">Service Title</label>
+        <label for="serviceTitle" class="sr-only">Service Title</label>
         <input type="text" id="serviceTitle" placeholder="Service Title" required /><br>
 
-        <label for="serviceDesc">Description</label>
+        <label for="serviceDesc" class="sr-only">Service Description</label>
         <textarea id="serviceDesc" placeholder="Service Description" required></textarea><br>
 
-        <label for="servicePrice">Price</label>
+        <label for="servicePrice" class="sr-only">Price</label>
         <input type="number" id="servicePrice" placeholder="Price" required /><br>
 
         <button type="submit">Post Service</button>
@@ -32,7 +52,6 @@
       <p id="serviceMessage" class="message"></p>
     </section>
 
-    <!-- Services List -->
     <section class="form-section">
       <h2>All Services</h2>
       <div id="services-list"></div>
@@ -41,17 +60,19 @@
 
   <script src="app.js"></script>
   <script>
-    // Redirect if not logged in
+    // --------- LOGIN CHECK ---------
     const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'index.html';
+    if (!token) {
+      window.location.href = 'index.html'; // redirect if not logged in
+    }
 
-    // Display welcome message
+    // Welcome message
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     document.getElementById('welcomeMsg').textContent = user.username 
       ? `Welcome, ${user.username}!`
       : 'Welcome!';
 
-    // Logout button
+    // Logout
     document.getElementById('logoutBtn').addEventListener('click', () => {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
