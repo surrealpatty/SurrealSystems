@@ -1,4 +1,5 @@
-const API_URL = window.location.origin; // works on Render
+// Use your Render backend URL here
+const API_URL = 'https://codecrowds.onrender.com';
 
 function showMessage(elementId, message, isSuccess) {
     const el = document.getElementById(elementId);
@@ -7,9 +8,7 @@ function showMessage(elementId, message, isSuccess) {
     el.className = "message " + (isSuccess ? "success" : "error");
 }
 
-// ----------------------
 // Register
-// ----------------------
 document.getElementById('registerForm')?.addEventListener('submit', async e => {
     e.preventDefault();
     const username = document.getElementById('regUsername').value.trim();
@@ -33,9 +32,7 @@ document.getElementById('registerForm')?.addEventListener('submit', async e => {
     }
 });
 
-// ----------------------
 // Login
-// ----------------------
 document.getElementById('loginForm')?.addEventListener('submit', async e => {
     e.preventDefault();
     const email = document.getElementById('loginEmail').value.trim();
@@ -58,9 +55,7 @@ document.getElementById('loginForm')?.addEventListener('submit', async e => {
     }
 });
 
-// ----------------------
 // Load services
-// ----------------------
 async function loadServices() {
     const list = document.getElementById('services-list');
     if (!list) return;
@@ -84,9 +79,7 @@ async function loadServices() {
     }
 }
 
-// ----------------------
 // Add service
-// ----------------------
 document.getElementById('service-form')?.addEventListener('submit', async e => {
     e.preventDefault();
     const title = document.getElementById('service-title').value.trim();
