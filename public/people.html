@@ -3,25 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CodeCrowds - Freelancers</title>
+    <title>CodeCrowds - Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>CodeCrowds</h1>
+    <div class="container">
+        <h1>Your Dashboard</h1>
+        <p>Welcome, <span id="usernameDisplay">User</span>!</p>
         <nav>
-            <a href="index.html">Home</a> | 
-            <a href="login.html">Log In</a> | 
-            <a href="register.html">Sign Up</a> | 
-            <a href="services.html">Services</a> | 
-            <a href="people.html">Freelancers</a>
+            <a href="services.html"><button>Go to Services</button></a>
         </nav>
-    </header>
-
-    <main class="container">
-        <h2>Freelancers</h2>
-        <div id="people-list"></div>
-    </main>
+    </div>
 
     <script src="script.js"></script>
 </body>
