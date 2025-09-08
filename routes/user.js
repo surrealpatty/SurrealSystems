@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
+const { Op, fn, col } = require('sequelize');
 const User = require('../models/User');
 
 // Register
@@ -11,14 +12,22 @@ router.post('/register', async (req, res) => {
   }
 
   try {
-    // Check if email is already used
-    const existingEmail = await User.findOne({ where: { email } });
+    // Case-insensitive email check
+    const existingEmail = await User.findOne({
+      where: fn('lower', col('email')), // convert column to lowercase
+      [Op.eq]: email.toLowerCase()      // compare with lowercase input
+    });
+
     if (existingEmail) {
       return res.status(400).json({ error: 'Email is already in use' });
     }
 
-    // Check if username is already taken
-    const existingUsername = await User.findOne({ where: { username } });
+    // Case-insensitive username check
+    const existingUsername = await User.findOne({
+      where: fn('lower', col('username')),
+      [Op.eq]: username.toLowerCase()
+    });
+
     if (existingUsername) {
       return res.status(400).json({ error: 'Username is already taken' });
     }
