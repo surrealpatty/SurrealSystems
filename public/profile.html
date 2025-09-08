@@ -13,41 +13,38 @@ body, html {
     background: linear-gradient(135deg, #6cc1ff, #3a8dff);
     display: flex;
     justify-content: center;
-    align-items: flex-start;
     padding: 2rem 0;
 }
 
 .container {
-    text-align: center;
     background: rgba(255,255,255,0.95);
-    padding: 3rem 2rem;
     border-radius: 16px;
     box-shadow: 0 12px 30px rgba(0,0,0,0.2);
     width: 100%;
     max-width: 600px;
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* symmetric horizontal alignment */
+    padding: 3rem 2rem;
+    gap: 1.5rem; /* space between elements */
 }
 
 h1 {
     font-size: 2rem;
-    margin-bottom: 1rem;
     color: #007bff;
+    margin: 0;
 }
 
-h2 {
-    color: #007bff;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-}
-
-p {
-    color: #333;
+form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
 input, textarea {
     width: 100%;
     padding: 0.75rem;
-    margin: 0.5rem 0;
     border-radius: 8px;
     border: 1px solid #ccc;
     font-size: 1rem;
@@ -63,7 +60,6 @@ button {
     font-size: 1rem;
     cursor: pointer;
     transition: background 0.3s, transform 0.2s;
-    margin-top: 1rem;
 }
 
 button:hover {
@@ -71,11 +67,18 @@ button:hover {
     transform: translateY(-2px);
 }
 
+h2 {
+    color: #007bff;
+    font-size: 1.5rem;
+    margin: 1rem 0 0.5rem 0;
+    align-self: flex-start; /* align left for heading consistency */
+}
+
 #services-list {
-    display: grid;
-    grid-template-columns: 1fr;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
     gap: 1rem;
-    margin-top: 1rem;
 }
 
 .service-card {
@@ -101,10 +104,9 @@ button:hover {
 <div class="container">
     <h1 id="usernameDisplay">User</h1>
 
-    <!-- Editable profile form -->
     <form id="profileForm">
         <input type="text" id="username" placeholder="Username">
-        <textarea id="description" rows="3" placeholder="Describe the work you provide or have done"></textarea>
+        <textarea id="description" rows="3" placeholder="Describe your work"></textarea>
         <button type="submit">Update Profile</button>
     </form>
 
@@ -117,12 +119,12 @@ button:hover {
 <script>
 const API_URL = 'https://codecrowds.onrender.com';
 
-// Load existing user info from localStorage
+// Load user info
 document.getElementById('usernameDisplay').textContent = localStorage.getItem('username') || 'User';
 document.getElementById('username').value = localStorage.getItem('username') || '';
 document.getElementById('description').value = localStorage.getItem('description') || '';
 
-// Load user's services
+// Load user services
 async function loadUserServices() {
     const list = document.getElementById('services-list');
     const userId = localStorage.getItem('userId');
@@ -155,14 +157,14 @@ async function loadUserServices() {
 
 loadUserServices();
 
-// Handle profile updates
+// Update profile
 document.getElementById('profileForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const username = document.getElementById('username').value.trim();
     const description = document.getElementById('description').value.trim();
     const userId = localStorage.getItem('userId');
 
-    if (!username) return alert('Username is required');
+    if (!username) return alert('Username required');
 
     try {
         const res = await fetch(`${API_URL}/users/${userId}`, {
@@ -173,7 +175,6 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         const data = await res.json();
         alert(data.message || data.error);
 
-        // Update localStorage and display
         localStorage.setItem('username', username);
         localStorage.setItem('description', description);
         document.getElementById('usernameDisplay').textContent = username;
