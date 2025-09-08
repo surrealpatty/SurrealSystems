@@ -12,23 +12,17 @@ router.post('/register', async (req, res) => {
     }
 
     try {
-        // Check if email already exists
+        // Check if email or username already exists
         const existingEmail = await User.findOne({ where: { email } });
-        if (existingEmail) {
-            return res.status(400).json({ error: 'Email is already in use' });
-        }
+        if (existingEmail) return res.status(400).json({ error: 'Email is already in use' });
 
-        // Check if username already exists
         const existingUsername = await User.findOne({ where: { username } });
-        if (existingUsername) {
-            return res.status(400).json({ error: 'Username is already taken' });
-        }
+        if (existingUsername) return res.status(400).json({ error: 'Username is already taken' });
 
         // Hash password and create user
         const hash = await bcrypt.hash(password, 10);
         const newUser = await User.create({ username, email, password: hash });
 
-        // Return user info
         res.json({
             message: 'User registered successfully',
             user: {
