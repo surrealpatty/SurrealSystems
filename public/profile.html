@@ -1,61 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Profile - CodeCrowds</title>
-<link rel="stylesheet" href="style.css">
-<style>
-    body, html {
-        height: 100%;
-        margin: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #6cc1ff, #3a8dff);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .container {
-        text-align: center;
-        background: rgba(255,255,255,0.95);
-        padding: 4rem 3rem;
-        border-radius: 16px;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-        width: 100%;
-        max-width: 450px;
-    }
-
-    h1 {
-        font-size: 2.2rem;
-        margin-bottom: 2rem;
-        color: #007bff;
-    }
-
-    button {
-        width: 100%;
-        padding: 0.75rem;
-        border-radius: 8px;
-        border: none;
-        background: #007bff;
-        color: #fff;
-        font-size: 1rem;
-        cursor: pointer;
-        transition: background 0.3s, transform 0.2s;
-    }
-
-    button:hover {
-        background: #0056b3;
-        transform: translateY(-2px);
-    }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile - CodeCrowds</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div class="fullscreen-center">
     <div class="container">
-        <h1>Your Profile</h1>
-        <p>Welcome, <span id="usernameDisplay">User</span>!</p>
-        <a href="services.html"><button>Go to Services</button></a>
+      <h1>Your Profile</h1>
+      <p>Welcome, <span id="usernameDisplay">User</span>!</p>
+      <a href="services.html" class="btn">Go to Services</a>
     </div>
-    <script src="script.js"></script>
+  </div>
+  <script src="script.js"></script>
 </body>
 </html>
