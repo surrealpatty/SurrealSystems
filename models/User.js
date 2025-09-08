@@ -21,13 +21,13 @@ const User = sequelize.define('User', {
         allowNull: true
     }
 }, {
-    tableName: 'users',   // ensure lowercase table name
+    tableName: 'users',   // ensures lowercase table name
     timestamps: true
 });
 
-// Optional: sync table automatically for development
+// Sync table (development only)
 User.sync({ alter: true })
-    .then(() => console.log('User table synced'))
-    .catch(err => console.error('Failed to sync User table:', err));
+    .then(() => console.log('✅ User table synced'))
+    .catch(err => console.error('❌ Failed to sync User table:', err));
 
 module.exports = User;
