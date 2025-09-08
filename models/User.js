@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // adjust path if needed
+const sequelize = require('../config/database');
 
-// Define the User model
 const User = sequelize.define('User', {
     username: {
         type: DataTypes.STRING,
@@ -22,12 +21,12 @@ const User = sequelize.define('User', {
         allowNull: true
     }
 }, {
-    tableName: 'users',   // ensures Sequelize uses lowercase table name
+    tableName: 'users',   // ensure lowercase table name
     timestamps: true
 });
 
-// Optional: sync table automatically (for development only)
-User.sync({ alter: true }) // use { force: true } to drop & recreate table
+// Optional: sync table automatically for development
+User.sync({ alter: true })
     .then(() => console.log('User table synced'))
     .catch(err => console.error('Failed to sync User table:', err));
 

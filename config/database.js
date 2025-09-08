@@ -1,13 +1,13 @@
 const { Sequelize } = require('sequelize');
 
-// Replace '' with your MySQL root password if you have one
+// MySQL connection for Render or local
 const sequelize = new Sequelize('codecrowds', 'root', '', {
-    host: 'localhost',
+    host: 'localhost',   // Change to your Render DB host if needed
     dialect: 'mysql',
-    logging: false, // set to console.log to see SQL queries
+    logging: false
 });
 
-// Test the connection
+// Test connection
 sequelize.authenticate()
     .then(() => console.log('Database connected!'))
     .catch(err => console.error('Database connection failed:', err));
