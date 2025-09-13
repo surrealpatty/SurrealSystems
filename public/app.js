@@ -1,4 +1,4 @@
-const API_URL = 'https://codecrowds.onrender.com'; // use your live URL
+const API_URL = 'https://codecrowds.onrender.com'; // live backend
 
 // ---------- Helpers ----------
 function showMessage(elId, msg, isSuccess=true){
@@ -9,7 +9,10 @@ function showMessage(elId, msg, isSuccess=true){
 }
 
 function getToken(){ return localStorage.getItem('token'); }
-function getUser(){ return JSON.parse(localStorage.getItem('user')); }
+function getUser(){ 
+  const user = localStorage.getItem('user');
+  return user ? JSON.parse(user) : null;
+}
 
 // ---------- REGISTER ----------
 document.getElementById('registerForm')?.addEventListener('submit', async e=>{
@@ -21,9 +24,11 @@ document.getElementById('registerForm')?.addEventListener('submit', async e=>{
 
   try{
     const res=await fetch(`${API_URL}/users/register`,{
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({username,email,password})
     });
+
     const data = await res.json();
     if(res.ok){ 
       localStorage.setItem('token', data.token);
@@ -43,9 +48,11 @@ document.getElementById('loginForm')?.addEventListener('submit', async e=>{
 
   try{
     const res=await fetch(`${API_URL}/users/login`,{
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
       body:JSON.stringify({email,password})
     });
+
     const data = await res.json();
     if(res.ok){
       localStorage.setItem('token', data.token);
@@ -82,13 +89,17 @@ document.getElementById('serviceForm')?.addEventListener('submit', async e=>{
   const msg = document.getElementById('serviceMessage');
 
   const token = getToken();
-  if(!token){ showMessage('serviceMessage','You must log in',false); return; }
+  const user = getUser();
+  if(!token || !user){ showMessage('serviceMessage','You must log in',false); return; }
 
   try{
     const res = await fetch(`${API_URL}/services`,{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
-      body:JSON.stringify({title,description,price,userId:getUser().id})
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${token}`
+      },
+      body:JSON.stringify({title,description,price,userId:user.id})
     });
     const data = await res.json();
     if(res.ok){ showMessage('serviceMessage', 'Service added!'); e.target.reset(); loadServices(); }
