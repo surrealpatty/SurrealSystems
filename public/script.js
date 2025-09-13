@@ -1,4 +1,4 @@
-const API_URL = 'https://codecrowds.onrender.com/api'; // backend base URL
+const API_URL = 'https://codecrowds.onrender.com/api'; // make sure /api matches your backend
 
 // ---------- Helpers ----------
 function showMessage(elementId, message, isSuccess = true) {
@@ -10,6 +10,17 @@ function showMessage(elementId, message, isSuccess = true) {
 
 function getToken() { return localStorage.getItem('token'); }
 function getUserId() { return localStorage.getItem('userId'); }
+
+// ---------- Safe JSON parser ----------
+async function safeParseJSON(res) {
+    try {
+        const text = await res.text();         // read body once
+        return text ? JSON.parse(text) : {};   // parse or return empty object
+    } catch (e) {
+        console.error('Failed to parse JSON:', e);
+        return { error: 'Invalid server response' };
+    }
+}
 
 // ---------- SIGNUP ----------
 const signupForm = document.getElementById('signupForm');
@@ -28,15 +39,7 @@ signupForm?.addEventListener('submit', async (e) => {
             body: JSON.stringify({ username, email, password })
         });
 
-        let data;
-        try { 
-            data = await res.json(); 
-            console.log('Signup response:', data);
-        } 
-        catch(e) { 
-            console.error('Failed to parse signup JSON:', e, await res.text());
-            data = { error: 'Invalid server response' }; 
-        }
+        const data = await safeParseJSON(res);
 
         if (res.ok) {
             localStorage.setItem('token', data.token);
@@ -68,15 +71,7 @@ loginForm?.addEventListener('submit', async (e) => {
             body: JSON.stringify({ email, password })
         });
 
-        let data;
-        try { 
-            data = await res.json(); 
-            console.log('Login response:', data);
-        } 
-        catch(e) { 
-            console.error('Failed to parse login JSON:', e, await res.text());
-            data = { error: 'Invalid server response' }; 
-        }
+        const data = await safeParseJSON(res);
 
         if (res.ok) {
             localStorage.setItem('token', data.token);
@@ -117,22 +112,11 @@ if(profileForm){
         try{
             const res = await fetch(`${API_URL}/users/${userId}`, {
                 method:'PUT',
-                headers:{ 
-                    'Content-Type':'application/json', 
-                    'Authorization': `Bearer ${token}` 
-                },
+                headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ username, description })
             });
 
-            let data;
-            try { 
-                data = await res.json(); 
-                console.log('Profile update response:', data);
-            } 
-            catch(e) { 
-                console.error('Failed to parse profile JSON:', e, await res.text());
-                data = { error: 'Invalid server response' }; 
-            }
+            const data = await safeParseJSON(res);
 
             if(res.ok){
                 alert('Profile updated!');
@@ -147,18 +131,8 @@ if(profileForm){
     // ---------- SERVICES ----------
     async function loadServices(){
         try{
-            const res = await fetch(`${API_URL}/services`, { 
-                headers: { 'Authorization': `Bearer ${token}` } 
-            });
-            let services;
-            try { 
-                services = await res.json(); 
-                console.log('Load services response:', services);
-            } 
-            catch(e) { 
-                console.error('Failed to parse services JSON:', e, await res.text());
-                services = []; 
-            }
+            const res = await fetch(`${API_URL}/services`, { headers: { 'Authorization': `Bearer ${token}` } });
+            const services = await safeParseJSON(res);
 
             servicesList.innerHTML='';
             services.filter(s=>s.userId==userId).forEach(s=>{
@@ -171,8 +145,8 @@ if(profileForm){
                 servicesList.appendChild(div);
             });
 
-        } catch(err){ 
-            servicesList.innerHTML='<p class="error">Failed to load services</p>'; 
+        } catch(err){
+            servicesList.innerHTML='<p class="error">Failed to load services</p>';
             console.error(err);
         }
     }
@@ -186,35 +160,23 @@ if(profileForm){
 
         if(!title || !description || !price) return alert('All fields required');
 
-        console.log('Adding service:', { title, description, price });
-
         try{
             const res = await fetch(`${API_URL}/services`, {
                 method:'POST',
-                headers:{ 
-                    'Content-Type':'application/json', 
-                    'Authorization': `Bearer ${token}` 
-                },
+                headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ title, description, price })
             });
 
-            let data;
-            try {
-                data = await res.json();
-                console.log('Add service response:', data);
-            } catch(e){
-                console.error('Failed to parse add service JSON:', e, await res.text());
-                data = { error: 'Invalid server response' };
-            }
+            const data = await safeParseJSON(res);
 
             if(res.ok){
                 document.getElementById('serviceForm').reset();
                 loadServices();
-            } else alert(data.error || 'Service creation failed');
+            } else {
+                alert(data.error || 'Service creation failed');
+            }
 
-        } catch(err){ 
-            alert('Network error: '+err.message); 
-        }
+        } catch(err){ alert('Network error: '+err.message); }
     });
 
     function editService(service){
@@ -225,19 +187,12 @@ if(profileForm){
 
         fetch(`${API_URL}/services/${service.id}`, {
             method:'PUT',
-            headers:{ 
-                'Content-Type':'application/json', 
-                'Authorization': `Bearer ${token}` 
-            },
+            headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ title:newTitle, description:newDesc, price:newPrice })
         }).then(async res=>{
+            const data = await safeParseJSON(res);
             if(res.ok) loadServices();
-            else {
-                let data;
-                try { data = await res.json(); } 
-                catch(e){ data = { error: 'Invalid server response' }; }
-                alert(data.error || 'Failed to update service');
-            }
+            else alert(data.error || 'Failed to update service');
         }).catch(err=>alert('Network error: '+err.message));
     }
 
@@ -245,12 +200,9 @@ if(profileForm){
         if(!confirm('Delete this service?')) return;
         fetch(`${API_URL}/services/${id}`, { method:'DELETE', headers:{ 'Authorization': `Bearer ${token}` } })
         .then(async res=>{
+            const data = await safeParseJSON(res);
             if(res.ok) loadServices();
-            else {
-                let data;
-                try { data = await res.json(); } catch(e){ data = { error: 'Invalid server response' }; }
-                alert(data.error || 'Failed to delete service');
-            }
+            else alert(data.error || 'Failed to delete service');
         }).catch(err=>alert('Network error: '+err.message));
     }
 
