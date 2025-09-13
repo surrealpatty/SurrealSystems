@@ -4,17 +4,21 @@ document.getElementById('profileForm')?.addEventListener('submit', async (e) => 
     e.preventDefault();
 
     const userId = localStorage.getItem('userId');
+    const token = localStorage.getItem('token'); // ✅ get JWT from localStorage
     const username = document.getElementById('profileUsername').value.trim();
     const description = document.getElementById('profileDescription').value.trim();
 
-    if (!userId) {
-        return alert("No user logged in!");
+    if (!userId || !token) {
+        return alert("You must be logged in to update your profile!");
     }
 
     try {
         const res = await fetch(`${API_URL}/users/${userId}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}` // ✅ attach token
+            },
             body: JSON.stringify({ username, description }),
         });
 
