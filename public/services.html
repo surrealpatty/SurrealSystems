@@ -5,24 +5,97 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Services - CodeCrowds</title>
 <link rel="stylesheet" href="style.css">
+<style>
+/* Container */
+.container {
+    max-width: 800px;
+    width: 100%;
+    padding: 2.5rem 2rem;
+    background: rgba(255,255,255,0.95);
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+    margin: 2rem auto;
+}
+
+/* Service Cards Grid */
+#services-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+/* Individual Service Card */
+.service-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 1rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.service-card h3 {
+    margin: 0;
+    color: #007bff;
+}
+
+.service-card p {
+    margin: 0;
+    color: #555;
+}
+
+/* Buttons inside cards */
+.service-card button {
+    padding: 0.5rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background 0.3s;
+}
+
+.service-card .edit-btn {
+    background: #28a745;
+    color: #fff;
+}
+
+.service-card .edit-btn:hover {
+    background: #1e7e34;
+}
+
+.service-card .delete-btn {
+    background: #ff4d4f;
+    color: #fff;
+}
+
+.service-card .delete-btn:hover {
+    background: #c30000;
+}
+
+/* Form and Buttons */
+form input, form textarea, form button {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+</style>
 </head>
 <body>
-<div class="fullscreen-center">
-    <div class="container">
-        <h1>Available Services</h1>
-        <div id="services-list"></div>
+<div class="container">
+    <h1>Available Services</h1>
+    <div id="services-list"></div>
 
-        <h2>Add a New Service</h2>
-        <form id="serviceForm">
-            <input type="text" id="service-title" placeholder="Service Title" required>
-            <textarea id="service-description" placeholder="Service Description" required></textarea>
-            <input type="number" id="service-price" placeholder="Price" required>
-            <button type="submit">Add Service</button>
-        </form>
-        <p id="service-message" class="message"></p>
+    <h2>Add a New Service</h2>
+    <form id="serviceForm">
+        <input type="text" id="service-title" placeholder="Service Title" required>
+        <textarea id="service-description" placeholder="Service Description" required></textarea>
+        <input type="number" id="service-price" placeholder="Price" required>
+        <button type="submit">Add Service</button>
+    </form>
+    <p id="service-message" class="message"></p>
 
-        <button id="backProfileBtn" class="btn">Back to Profile</button>
-    </div>
+    <button id="backProfileBtn" class="btn">Back to Profile</button>
 </div>
 
 <script>
@@ -54,8 +127,16 @@ async function loadServices() {
                 <h3>${s.title}</h3>
                 <p>${s.description}</p>
                 <p><strong>Price:</strong> $${s.price}</p>
-                <p><strong>By User ID:</strong> ${s.userId}</p>
+                <p><strong>By:</strong> ${s.username || s.userId}</p>
+                ${s.userId == userId ? `
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                ` : ''}
             `;
+            // Edit functionality
+            div.querySelector('.edit-btn')?.addEventListener('click', () => editService(s));
+            // Delete functionality
+            div.querySelector('.delete-btn')?.addEventListener('click', () => deleteService(s.id));
             servicesList.appendChild(div);
         });
     } catch (err) {
@@ -88,7 +169,7 @@ serviceForm.addEventListener('submit', async (e) => {
             serviceMessage.textContent = 'Service added successfully!';
             serviceMessage.className = 'message success';
             serviceForm.reset();
-            loadServices(); // Reload services
+            loadServices();
         } else {
             serviceMessage.textContent = data.error || 'Failed to add service';
             serviceMessage.className = 'message error';
@@ -99,6 +180,44 @@ serviceForm.addEventListener('submit', async (e) => {
         console.error(err);
     }
 });
+
+// Edit a service
+function editService(service) {
+    const newTitle = prompt('Edit title', service.title);
+    const newDesc = prompt('Edit description', service.description);
+    const newPrice = prompt('Edit price', service.price);
+    if (!newTitle || !newDesc || !newPrice) return;
+
+    fetch(`${API_URL}/services/${service.id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ title: newTitle, description: newDesc, price: parseFloat(newPrice) })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) alert(data.error);
+        loadServices();
+    })
+    .catch(err => alert('Network error: ' + err.message));
+}
+
+// Delete a service
+function deleteService(serviceId) {
+    if (!confirm('Are you sure you want to delete this service?')) return;
+    fetch(`${API_URL}/services/${serviceId}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) alert(data.error);
+        loadServices();
+    })
+    .catch(err => alert('Network error: ' + err.message));
+}
 
 // Back to profile button
 document.getElementById('backProfileBtn').addEventListener('click', () => {
