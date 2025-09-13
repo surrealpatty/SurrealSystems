@@ -20,10 +20,9 @@ document.getElementById('registerForm')?.addEventListener('submit', async e=>{
   const username=document.getElementById('regUsername').value.trim();
   const email=document.getElementById('regEmail').value.trim();
   const password=document.getElementById('regPassword').value.trim();
-  const msg=document.getElementById('registerMessage');
 
   try{
-    const res=await fetch(`${API_URL}/users/register`,{
+    const res = await fetch(`${API_URL}/users/register`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({username,email,password})
@@ -44,10 +43,9 @@ document.getElementById('loginForm')?.addEventListener('submit', async e=>{
   e.preventDefault();
   const email=document.getElementById('loginEmail').value.trim();
   const password=document.getElementById('loginPassword').value.trim();
-  const msg=document.getElementById('loginMessage');
 
   try{
-    const res=await fetch(`${API_URL}/users/login`,{
+    const res = await fetch(`${API_URL}/users/login`,{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({email,password})
@@ -89,8 +87,7 @@ document.getElementById('serviceForm')?.addEventListener('submit', async e=>{
   const msg = document.getElementById('serviceMessage');
 
   const token = getToken();
-  const user = getUser();
-  if(!token || !user){ showMessage('serviceMessage','You must log in',false); return; }
+  if(!token){ showMessage('serviceMessage','You must log in',false); return; }
 
   try{
     const res = await fetch(`${API_URL}/services`,{
@@ -99,11 +96,15 @@ document.getElementById('serviceForm')?.addEventListener('submit', async e=>{
         'Content-Type':'application/json',
         'Authorization':`Bearer ${token}`
       },
-      body:JSON.stringify({title,description,price,userId:user.id})
+      body:JSON.stringify({title, description, price}) // ✅ Do NOT send userId
     });
+
     const data = await res.json();
-    if(res.ok){ showMessage('serviceMessage', 'Service added!'); e.target.reset(); loadServices(); }
-    else showMessage('serviceMessage', data.error||'Failed', false);
+    if(res.ok){ 
+      showMessage('serviceMessage', 'Service added!');
+      e.target.reset(); 
+      loadServices(); 
+    } else showMessage('serviceMessage', data.error||'Failed', false);
   } catch(err){ showMessage('serviceMessage','Network error: '+err.message,false); }
 });
 
