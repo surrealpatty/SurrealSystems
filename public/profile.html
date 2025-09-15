@@ -5,6 +5,118 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Profile - CodeCrowds</title>
 <link rel="stylesheet" href="style.css">
+<style>
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    color: #333;
+}
+
+/* Container */
+.container {
+    max-width: 900px;
+    width: 90%;
+    margin: 40px auto;
+    padding: 30px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+/* Headings */
+h1 {
+    color: #4e54c8;
+    text-align: center;
+}
+
+/* Inputs & Buttons */
+input, textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+textarea { resize: vertical; }
+
+button, .btn {
+    padding: 12px 20px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+    background: #4e54c8;
+    color: #fff;
+    transition: background 0.3s, transform 0.2s;
+}
+
+button:hover, .btn:hover {
+    background: #00aaff;
+    transform: translateY(-2px);
+}
+
+/* Services Section */
+.services-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.service-card, .add-service-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+    transition: transform 0.2s;
+}
+
+.service-card:hover, .add-service-card:hover {
+    transform: translateY(-5px);
+}
+
+.service-card h3, .add-service-card h3 {
+    margin-bottom: 15px;
+    color: #4e54c8;
+}
+
+.service-card p {
+    margin: 5px 0;
+    color: #555;
+}
+
+.service-card button {
+    margin-top: 10px;
+    margin-right: 5px;
+}
+
+/* Logout */
+.logout-btn {
+    width: 200px;
+    align-self: center;
+    margin-top: 20px;
+    background: #ff4d4f;
+}
+
+.logout-btn:hover {
+    background: #c30000;
+}
+
+/* Responsive */
+@media (max-width: 480px) {
+    .container {
+        padding: 20px;
+        gap: 20px;
+    }
+}
+</style>
 </head>
 <body>
 
@@ -14,7 +126,7 @@
     <form id="profileForm">
         <input id="username" type="text" placeholder="Username" readonly>
         <textarea id="description" placeholder="About Me" readonly></textarea>
-        <button type="button" id="editProfileBtn">Edit Profile</button>
+        <button type="button" id="editProfileBtn" class="btn">Edit Profile</button>
     </form>
 
     <!-- Services Section -->
@@ -24,12 +136,12 @@
             <input id="service-title" placeholder="Title" required>
             <textarea id="service-description" placeholder="Description" required></textarea>
             <input id="service-price" type="number" placeholder="Price" required>
-            <button type="submit">Add Service</button>
+            <button type="submit" class="btn">Add Service</button>
         </form>
         <div id="services-list"></div>
     </section>
 
-    <button class="logout-btn" id="logoutBtn">Logout</button>
+    <button class="logout-btn btn" id="logoutBtn">Logout</button>
 </div>
 
 <script src="script.js"></script>
