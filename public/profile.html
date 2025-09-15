@@ -16,6 +16,28 @@
         min-height: 100%;
     }
 
+    /* ---------- Header ---------- */
+    header {
+        background: #4e54c8;
+        color: #fff;
+        padding: 60px 20px;
+        text-align: center;
+    }
+
+    header h1 {
+        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+
+    header h1 .brand {
+        color: #00aaff;
+        text-shadow:
+            2px 2px 0 #060606,
+           -2px 2px 0 #060606,
+            2px -2px 0 #060606,
+           -2px -2px 0 #060606;
+    }
+
     /* ---------- Container ---------- */
     .container {
         max-width: 900px;
@@ -24,14 +46,14 @@
         background: rgba(255, 255, 255, 0.95);
         border-radius: 16px;
         box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-        margin: 2rem auto;
+        margin: -80px auto 2rem auto;
         display: flex;
         flex-direction: column;
         gap: 2rem;
     }
 
     /* ---------- Headings ---------- */
-    h1 {
+    h1.profile-name {
         color: #4e54c8;
         text-align: center;
         margin-bottom: 1rem;
@@ -132,9 +154,14 @@
 </head>
 <body>
 
+<header>
+    <h1><span class="brand">CodeCrowds</span></h1>
+    <p>Showcase your coding skills, offer services, and connect with clients worldwide!</p>
+</header>
+
 <div class="container">
     <!-- Profile Info -->
-    <h1 id="usernameDisplay">User</h1>
+    <h1 class="profile-name" id="usernameDisplay">User</h1>
     <form id="profileForm">
         <input id="username" type="text" placeholder="Username" readonly>
         <textarea id="description" placeholder="About Me" readonly></textarea>
@@ -157,60 +184,5 @@
 </div>
 
 <script src="script.js"></script>
-<script>
-    // ---------- Profile Edit/Save ----------
-    const usernameInput = document.getElementById('username');
-    const descInput = document.getElementById('description');
-    const usernameDisplay = document.getElementById('usernameDisplay');
-    const editBtn = document.getElementById('editProfileBtn');
-    const token = localStorage.getItem('token');
-    const userId = localStorage.getItem('userId');
-
-    // Populate fields
-    usernameInput.value = localStorage.getItem('username') || '';
-    descInput.value = localStorage.getItem('description') || '';
-    usernameDisplay.textContent = localStorage.getItem('username') || 'User';
-
-    let editing = false;
-
-    editBtn.addEventListener('click', async () => {
-        if (!editing) {
-            usernameInput.readOnly = false;
-            descInput.readOnly = false;
-            editBtn.textContent = 'Save Profile';
-            editing = true;
-        } else {
-            const newUsername = usernameInput.value.trim();
-            const newDesc = descInput.value.trim();
-            if (!newUsername) return alert('Username cannot be empty');
-
-            try {
-                const res = await fetch(`https://codecrowds.onrender.com/users/${userId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ username: newUsername, description: newDesc })
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'Failed to save profile');
-
-                localStorage.setItem('username', data.user.username);
-                localStorage.setItem('description', data.user.description || '');
-                usernameDisplay.textContent = data.user.username;
-
-                usernameInput.readOnly = true;
-                descInput.readOnly = true;
-                editBtn.textContent = 'Edit Profile';
-                editing = false;
-
-                alert('Profile updated successfully!');
-            } catch (err) {
-                alert('Error saving profile: ' + err.message);
-            }
-        }
-    });
-</script>
 </body>
 </html>
