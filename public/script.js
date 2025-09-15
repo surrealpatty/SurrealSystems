@@ -49,7 +49,6 @@ registerForm?.addEventListener('submit', async (e) => {
             body: JSON.stringify({ username, email, password })
         });
 
-        // Save token & user info
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.user.id);
         localStorage.setItem('username', data.user.username);
@@ -106,7 +105,49 @@ if (profileForm) {
     usernameInput.value = localStorage.getItem('username') || '';
     descInput.value = localStorage.getItem('description') || '';
 
-    // Update Profile
+    // ---------- LOCKABLE ABOUT ME ----------
+    let locked = true;
+    descInput.readOnly = locked;
+
+    const toggleLockBtn = document.createElement('button');
+    toggleLockBtn.type = 'button';
+    toggleLockBtn.textContent = 'Unlock About Me';
+    profileForm.insertBefore(toggleLockBtn, profileForm.querySelector('button'));
+
+    const saveDescBtn = document.createElement('button');
+    saveDescBtn.type = 'button';
+    saveDescBtn.textContent = 'Save About Me';
+    saveDescBtn.disabled = true;
+    profileForm.insertBefore(saveDescBtn, profileForm.querySelector('button'));
+
+    toggleLockBtn.addEventListener('click', () => {
+        locked = !locked;
+        descInput.readOnly = locked;
+        toggleLockBtn.textContent = locked ? 'Unlock About Me' : 'Lock About Me';
+        saveDescBtn.disabled = locked;
+    });
+
+    saveDescBtn.addEventListener('click', async () => {
+        const description = descInput.value.trim();
+        if (!description) return alert('Description cannot be empty');
+        try {
+            const data = await safeFetch(`${API_URL}/users/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({ description })
+            });
+            localStorage.setItem('description', data.user.description || '');
+            alert('About Me updated successfully!');
+            locked = true;
+            descInput.readOnly = true;
+            toggleLockBtn.textContent = 'Unlock About Me';
+            saveDescBtn.disabled = true;
+        } catch (err) {
+            alert('Failed to update About Me: ' + err.message);
+        }
+    });
+
+    // ---------- Update Profile ----------
     profileForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         const username = usernameInput.value.trim();
@@ -128,7 +169,7 @@ if (profileForm) {
         }
     });
 
-    // Load Services
+    // ---------- Load Services ----------
     async function loadServices() {
         try {
             const services = await safeFetch(`${API_URL}/services`, { headers: { 'Authorization': `Bearer ${token}` } });
@@ -153,7 +194,7 @@ if (profileForm) {
     }
     loadServices();
 
-    // Add Service
+    // ---------- Add Service ----------
     serviceForm?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const title = document.getElementById('service-title').value.trim();
@@ -175,7 +216,7 @@ if (profileForm) {
         }
     });
 
-    // Edit Service
+    // ---------- Edit Service ----------
     async function editService(service) {
         const newTitle = prompt('Edit title', service.title);
         const newDesc = prompt('Edit description', service.description);
@@ -195,7 +236,7 @@ if (profileForm) {
         }
     }
 
-    // Delete Service
+    // ---------- Delete Service ----------
     async function deleteService(id) {
         if (!confirm('Delete this service?')) return;
         try {
@@ -209,7 +250,7 @@ if (profileForm) {
         }
     }
 
-    // Logout
+    // ---------- Logout ----------
     document.getElementById('logoutBtn')?.addEventListener('click', () => {
         localStorage.clear();
         window.location.href = 'login.html';
