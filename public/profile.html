@@ -6,138 +6,142 @@
 <title>Profile - CodeCrowds</title>
 <link rel="stylesheet" href="style.css">
 <style>
-    body, html {
-        margin: 0;
-        padding: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: #f0f4f8;
-        color: #333;
-    }
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f0f4f8;
+    color: #333;
+}
 
-    header {
-        background: #4e54c8;
-        color: #fff;
-        padding: 60px 20px;
-        text-align: center;
-    }
+header {
+    background: #4e54c8;
+    color: #fff;
+    padding: 60px 20px;
+    text-align: center;
+}
 
-    header h1 {
-        font-size: 3rem;
-        margin-bottom: 20px;
-    }
+header h1 {
+    font-size: 3rem;
+    margin-bottom: 20px;
+}
 
-    header h1 .brand {
-        color: #00aaff;
-        text-shadow:
-            2px 2px 0 #060606,
-           -2px 2px 0 #060606,
-            2px -2px 0 #060606,
-           -2px -2px 0 #060606;
-    }
+header h1 .brand {
+    color: #00aaff;
+    text-shadow:
+        2px 2px 0 #060606,
+       -2px 2px 0 #060606,
+        2px -2px 0 #060606,
+       -2px -2px 0 #060606;
+}
 
-    header p {
-        font-size: 1.3rem;
-        max-width: 600px;
-        margin: 0 auto 30px;
-    }
+header p {
+    font-size: 1.3rem;
+    max-width: 600px;
+    margin: 0 auto 30px;
+}
 
-    .profile-container {
-        max-width: 800px;
-        margin: 40px auto;
-        background: #fff;
-        padding: 30px;
-        border-radius: 12px;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    }
+section {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 30px 20px;
+    gap: 20px;
+}
 
-    .profile-container h2, .profile-container h3 {
-        color: #4e54c8;
-    }
+.feature-card, .service-card, .profile-section {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px;
+    width: 300px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
 
-    .profile-container input, 
-    .profile-container textarea {
-        width: 95%;
-        padding: 12px;
-        margin: 8px 0;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-        font-size: 1rem;
-    }
+.feature-card:hover, .service-card:hover {
+    transform: translateY(-5px);
+}
 
-    .profile-container button {
-        padding: 12px 25px;
-        margin: 10px 0;
-        font-size: 1rem;
-        color: #4e54c8;
-        background-color: #fff;
-        border: none;
-        border-radius: 8px;
-        cursor: pointer;
-        text-decoration: none;
-        transition: 0.3s;
-    }
+.feature-card h3, .service-card h3 {
+    color: #4e54c8;
+    margin-bottom: 10px;
+}
 
-    .profile-container button:hover {
-        background-color: #ddd;
-    }
+.feature-card p, .service-card p {
+    color: #555;
+}
 
-    .services-list {
-        margin-top: 30px;
-    }
+.profile-section h2 {
+    color: #4e54c8;
+    margin-bottom: 15px;
+    text-align: center;
+}
 
-    .service-card {
-        background: #f9f9f9;
-        border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
+.profile-section input, .profile-section textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+}
 
-    .service-card h4 {
-        margin: 0 0 10px 0;
-        color: #4e54c8;
-    }
+.profile-section button {
+    width: 100%;
+    padding: 12px 0;
+    margin-top: 10px;
+    font-size: 1rem;
+    color: #4e54c8;
+    background-color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.3s;
+}
 
-    .service-card p {
-        margin: 0 0 10px 0;
-    }
+.profile-section button:hover {
+    background-color: #ddd;
+}
 
-    footer {
-        text-align: center;
-        padding: 20px;
-        background: #eee;
-        font-size: 0.9rem;
-        color: #555;
-        margin-top: 40px;
-    }
+footer {
+    text-align: center;
+    padding: 20px;
+    background: #eee;
+    font-size: 0.9rem;
+    color: #555;
+    margin-top: 40px;
+}
 
-    .lock-btns {
-        display: flex;
-        gap: 10px;
-        margin-bottom: 15px;
-    }
+.logout-btn {
+    margin-top: 20px;
+    background-color: #ff6666;
+    color: #fff;
+}
+
+.logout-btn:hover {
+    background-color: #ff4c4c;
+}
 </style>
 </head>
 <body>
 
 <header>
     <h1><span class="brand">CodeCrowds</span></h1>
-    <p>Showcase your coding skills, offer services, and connect with clients worldwide. Manage your profile and services below.</p>
+    <p>Manage your profile, showcase your skills, and connect with clients worldwide.</p>
 </header>
 
-<div class="profile-container">
+<section class="profile-section">
     <h2 id="usernameDisplay">User</h2>
     <form id="profileForm">
         <input id="username" type="text" placeholder="Username" required>
-        <div class="lock-btns">
-            <button type="button" id="toggleLockBtn">Unlock About Me</button>
-            <button type="button" id="saveDescBtn" disabled>Save About Me</button>
-        </div>
         <textarea id="description" placeholder="About Me"></textarea>
         <button type="submit">Update Profile</button>
     </form>
+</section>
 
-    <h3>My Services</h3>
+<section class="profile-section">
+    <h2>My Services</h2>
     <form id="serviceForm">
         <input id="service-title" placeholder="Title" required>
         <textarea id="service-description" placeholder="Description" required></textarea>
@@ -145,13 +149,12 @@
         <button type="submit">Add Service</button>
     </form>
 
-    <div class="services-list" id="services-list"></div>
-    <button class="logout-btn" id="logoutBtn">Logout</button>
-</div>
+    <div id="services-list"></div>
+</section>
 
-<footer>
-    &copy; 2025 CodeCrowds. All rights reserved.
-</footer>
+<section class="profile-section">
+    <button class="logout-btn" id="logoutBtn">Logout</button>
+</section>
 
 <script src="script.js"></script>
 </body>
