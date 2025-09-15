@@ -14,109 +14,94 @@ body, html {
     color: #333;
 }
 
-header {
+/* Blue section behind profile info */
+.profile-header {
     background: #4e54c8;
     color: #fff;
-    padding: 60px 20px;
+    padding: 40px 20px;
     text-align: center;
+    border-radius: 0 0 20px 20px;
 }
 
-header h1 {
-    font-size: 3rem;
-    margin-bottom: 20px;
+.profile-header h1 {
+    margin: 0 0 10px;
+    font-size: 2.5rem;
 }
 
-header h1 .brand {
-    color: #00aaff;
-    text-shadow:
-        2px 2px 0 #060606,
-       -2px 2px 0 #060606,
-        2px -2px 0 #060606,
-       -2px -2px 0 #060606;
-}
-
-header p {
-    font-size: 1.3rem;
-    max-width: 600px;
-    margin: 0 auto 30px;
-}
-
-section {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    padding: 30px 20px;
-    gap: 20px;
-}
-
-.feature-card, .service-card, .profile-section {
-    background: #fff;
-    border-radius: 12px;
-    padding: 25px;
-    width: 300px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    transition: transform 0.2s;
-}
-
-.feature-card:hover, .service-card:hover {
-    transform: translateY(-5px);
-}
-
-.feature-card h3, .service-card h3 {
-    color: #4e54c8;
-    margin-bottom: 10px;
-}
-
-.feature-card p, .service-card p {
-    color: #555;
-}
-
-.profile-section h2 {
-    color: #4e54c8;
-    margin-bottom: 15px;
-    text-align: center;
-}
-
-.profile-section input, .profile-section textarea {
+.profile-header textarea, 
+.profile-header input {
     width: 100%;
     padding: 12px;
     margin: 8px 0;
     border-radius: 8px;
-    border: 1px solid #ccc;
+    border: none;
     font-size: 1rem;
 }
 
-.profile-section button {
-    width: 100%;
-    padding: 12px 0;
-    margin-top: 10px;
+.profile-header textarea:disabled, 
+.profile-header input:disabled {
+    background-color: #5a5fc8;
+    color: #eee;
+}
+
+.profile-header button {
+    padding: 12px 25px;
     font-size: 1rem;
     color: #4e54c8;
     background-color: #fff;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    text-decoration: none;
     transition: 0.3s;
 }
 
-.profile-section button:hover {
+.profile-header button:hover {
     background-color: #ddd;
 }
 
-footer {
-    text-align: center;
+/* Services section */
+.services-section {
+    padding: 30px 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
+
+.service-card {
+    background: #fff;
+    border-radius: 12px;
     padding: 20px;
-    background: #eee;
-    font-size: 0.9rem;
+    width: 250px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+}
+
+.service-card h3 {
+    color: #4e54c8;
+    margin-bottom: 10px;
+}
+
+.service-card p {
     color: #555;
-    margin-top: 40px;
+    margin-bottom: 5px;
+}
+
+.service-card button {
+    padding: 8px 12px;
+    margin: 5px 5px 0 0;
+    font-size: 0.9rem;
+    cursor: pointer;
 }
 
 .logout-btn {
-    margin-top: 20px;
+    display: block;
+    margin: 30px auto;
     background-color: #ff6666;
     color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 25px;
+    cursor: pointer;
 }
 
 .logout-btn:hover {
@@ -126,23 +111,20 @@ footer {
 </head>
 <body>
 
-<header>
-    <h1><span class="brand">CodeCrowds</span></h1>
-    <p>Manage your profile, showcase your skills, and connect with clients worldwide.</p>
-</header>
-
-<section class="profile-section">
-    <h2 id="usernameDisplay">User</h2>
+<!-- Blue profile header -->
+<div class="profile-header">
+    <h1 id="usernameDisplay">User</h1>
     <form id="profileForm">
         <input id="username" type="text" placeholder="Username" required>
         <textarea id="description" placeholder="About Me"></textarea>
         <button type="submit">Update Profile</button>
     </form>
-</section>
+</div>
 
-<section class="profile-section">
-    <h2>My Services</h2>
-    <form id="serviceForm">
+<!-- Services section -->
+<section class="services-section">
+    <form id="serviceForm" class="service-card">
+        <h3>Add New Service</h3>
         <input id="service-title" placeholder="Title" required>
         <textarea id="service-description" placeholder="Description" required></textarea>
         <input id="service-price" type="number" placeholder="Price" required>
@@ -152,9 +134,7 @@ footer {
     <div id="services-list"></div>
 </section>
 
-<section class="profile-section">
-    <button class="logout-btn" id="logoutBtn">Logout</button>
-</section>
+<button class="logout-btn" id="logoutBtn">Logout</button>
 
 <script src="script.js"></script>
 </body>
