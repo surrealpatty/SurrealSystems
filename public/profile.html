@@ -14,34 +14,42 @@ body, html {
     color: #333;
 }
 
-/* Blue section behind profile info */
+/* Profile header card with blue background */
 .profile-header {
+    max-width: 600px;
+    margin: 40px auto;
     background: #4e54c8;
     color: #fff;
-    padding: 40px 20px;
+    padding: 30px 25px;
+    border-radius: 20px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
     text-align: center;
-    border-radius: 0 0 20px 20px;
 }
 
 .profile-header h1 {
-    margin: 0 0 10px;
     font-size: 2.5rem;
+    margin-bottom: 15px;
 }
 
-.profile-header textarea, 
-.profile-header input {
+.profile-header p {
+    font-size: 1rem;
+    margin-bottom: 20px;
+    color: #f0f4f8;
+}
+
+.profile-header input,
+.profile-header textarea {
     width: 100%;
     padding: 12px;
     margin: 8px 0;
     border-radius: 8px;
     border: none;
     font-size: 1rem;
+    box-sizing: border-box;
 }
 
-.profile-header textarea:disabled, 
-.profile-header input:disabled {
-    background-color: #5a5fc8;
-    color: #eee;
+.profile-header textarea {
+    resize: vertical;
 }
 
 .profile-header button {
@@ -52,6 +60,7 @@ body, html {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    margin-top: 10px;
     transition: 0.3s;
 }
 
@@ -61,29 +70,37 @@ body, html {
 
 /* Services section */
 .services-section {
-    padding: 30px 20px;
+    max-width: 900px;
+    margin: 30px auto;
     display: flex;
     flex-wrap: wrap;
     gap: 20px;
     justify-content: center;
 }
 
-.service-card {
+/* Add service card (same style as homepage cards) */
+.service-card, .add-service-card {
     background: #fff;
     border-radius: 12px;
-    padding: 20px;
+    padding: 25px;
     width: 250px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
 }
 
-.service-card h3 {
+.service-card:hover, .add-service-card:hover {
+    transform: translateY(-5px);
+}
+
+.service-card h3, .add-service-card h3 {
+    margin-bottom: 15px;
     color: #4e54c8;
-    margin-bottom: 10px;
 }
 
 .service-card p {
+    font-size: 1rem;
     color: #555;
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
 .service-card button {
@@ -95,13 +112,15 @@ body, html {
 
 .logout-btn {
     display: block;
-    margin: 30px auto;
+    max-width: 200px;
+    margin: 30px auto 50px auto;
     background-color: #ff6666;
     color: #fff;
     border: none;
     border-radius: 8px;
     padding: 12px 25px;
     cursor: pointer;
+    transition: 0.3s;
 }
 
 .logout-btn:hover {
@@ -111,7 +130,7 @@ body, html {
 </head>
 <body>
 
-<!-- Blue profile header -->
+<!-- Profile header -->
 <div class="profile-header">
     <h1 id="usernameDisplay">User</h1>
     <form id="profileForm">
@@ -123,7 +142,8 @@ body, html {
 
 <!-- Services section -->
 <section class="services-section">
-    <form id="serviceForm" class="service-card">
+    <!-- Add new service card -->
+    <form id="serviceForm" class="add-service-card">
         <h3>Add New Service</h3>
         <input id="service-title" placeholder="Title" required>
         <textarea id="service-description" placeholder="Description" required></textarea>
@@ -131,6 +151,7 @@ body, html {
         <button type="submit">Add Service</button>
     </form>
 
+    <!-- Existing services will appear here -->
     <div id="services-list"></div>
 </section>
 
