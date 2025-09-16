@@ -1,10 +1,11 @@
 const API_URL = 'https://codecrowds.onrender.com';
 
+// ---------- Auth ---------- 
 function getToken() {
     const token = localStorage.getItem('token');
     if (!token) {
-        alert('You are not logged in. Redirecting to login page.');
         window.location.href = 'index.html';
+        return null;
     }
     return token;
 }
@@ -12,13 +13,13 @@ function getToken() {
 function getUserId() {
     const userId = localStorage.getItem('userId');
     if (!userId) {
-        alert('You are not logged in. Redirecting to login page.');
         window.location.href = 'index.html';
+        return null;
     }
     return userId;
 }
 
-// ---------- Profile ----------
+// ---------- Profile Elements ----------
 const usernameInput = document.getElementById('username');
 const descInput = document.getElementById('description');
 const usernameDisplay = document.getElementById('usernameDisplay');
@@ -31,6 +32,10 @@ usernameDisplay.textContent = localStorage.getItem('username') || 'User';
 let editing = false;
 
 editBtn.addEventListener('click', async () => {
+    const token = getToken();
+    const userId = getUserId();
+    if (!token || !userId) return;
+
     if (!editing) {
         usernameInput.readOnly = false;
         descInput.readOnly = false;
@@ -39,8 +44,6 @@ editBtn.addEventListener('click', async () => {
     } else {
         const newUsername = usernameInput.value.trim();
         const newDesc = descInput.value.trim();
-        const token = getToken();
-        const userId = getUserId();
 
         if (!newUsername) return alert('Username cannot be empty');
 
@@ -56,6 +59,7 @@ editBtn.addEventListener('click', async () => {
             const data = await res.json();
             if (!res.ok) throw new Error(data.error || 'Profile update failed');
 
+            // Save updated info
             localStorage.setItem('username', data.user.username);
             localStorage.setItem('description', data.user.description || '');
             usernameDisplay.textContent = data.user.username;
@@ -79,6 +83,7 @@ const serviceForm = document.getElementById('serviceForm');
 async function loadServices() {
     const token = getToken();
     const userId = getUserId();
+    if (!token || !userId) return;
 
     try {
         const res = await fetch(`${API_URL}/services`, {
@@ -88,20 +93,22 @@ async function loadServices() {
         if (!res.ok) throw new Error(services.error || 'Failed to load services');
 
         servicesList.innerHTML = '';
-        services.filter(s => s.userId == userId).forEach(s => {
-            const div = document.createElement('div');
-            div.className = 'service-card';
-            div.innerHTML = `
-                <h3>${s.title}</h3>
-                <p>${s.description}</p>
-                <p><strong>Price:</strong> $${s.price}</p>
-                <button class="edit-btn">Edit</button>
-                <button class="delete-btn">Delete</button>
-            `;
-            div.querySelector('.edit-btn').addEventListener('click', () => editService(s));
-            div.querySelector('.delete-btn').addEventListener('click', () => deleteService(s.id));
-            servicesList.appendChild(div);
-        });
+        services
+            .filter(s => s.userId == userId) // convert types if needed
+            .forEach(s => {
+                const div = document.createElement('div');
+                div.className = 'service-card';
+                div.innerHTML = `
+                    <h3>${s.title}</h3>
+                    <p>${s.description}</p>
+                    <p><strong>Price:</strong> $${s.price}</p>
+                    <button class="edit-btn">Edit</button>
+                    <button class="delete-btn">Delete</button>
+                `;
+                div.querySelector('.edit-btn').addEventListener('click', () => editService(s));
+                div.querySelector('.delete-btn').addEventListener('click', () => deleteService(s.id));
+                servicesList.appendChild(div);
+            });
     } catch (err) {
         console.error(err);
         servicesList.innerHTML = `<p class="error">Failed to load services: ${err.message}</p>`;
@@ -109,7 +116,7 @@ async function loadServices() {
 }
 loadServices();
 
-// Service form
+// ---------- Add Service ----------
 serviceForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     const title = document.getElementById('service-title').value.trim();
@@ -117,7 +124,7 @@ serviceForm.addEventListener('submit', async (e) => {
     const price = parseFloat(document.getElementById('service-price').value);
     const token = getToken();
 
-    if (!title || !description || isNaN(price)) return alert('All fields required');
+    if (!title || !description || isNaN(price)) return alert('All fields are required');
 
     try {
         const res = await fetch(`${API_URL}/services`, {
@@ -137,12 +144,13 @@ serviceForm.addEventListener('submit', async (e) => {
     }
 });
 
-// Edit service
+// ---------- Edit Service ----------
 async function editService(service) {
     const newTitle = prompt('Edit title', service.title);
     const newDesc = prompt('Edit description', service.description);
     const newPrice = parseFloat(prompt('Edit price', service.price));
     const token = getToken();
+    if (!token) return;
 
     if (!newTitle || !newDesc || isNaN(newPrice)) return;
 
@@ -163,10 +171,11 @@ async function editService(service) {
     }
 }
 
-// Delete service
+// ---------- Delete Service ----------
 async function deleteService(id) {
     if (!confirm('Delete this service?')) return;
     const token = getToken();
+    if (!token) return;
 
     try {
         const res = await fetch(`${API_URL}/services/${id}`, {
@@ -181,7 +190,7 @@ async function deleteService(id) {
     }
 }
 
-// Logout
+// ---------- Logout ----------
 document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.clear();
     window.location.href = 'index.html';
