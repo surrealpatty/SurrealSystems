@@ -1,14 +1,14 @@
 const API_URL = 'https://codecrowds.onrender.com';
-
 const loginForm = document.getElementById('loginForm');
 
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value.trim();
+    const message = document.getElementById('loginMessage');
 
-    if (!email || !password) return alert('All fields are required');
+    if (!email || !password) return message.textContent = 'All fields are required';
 
     try {
         const res = await fetch(`${API_URL}/users/login`, {
@@ -21,7 +21,7 @@ loginForm.addEventListener('submit', async (e) => {
 
         if (!res.ok) throw new Error(data.error || 'Login failed');
 
-        // Save token & userId for profile page
+        // Save token & user info
         localStorage.setItem('token', data.token);
         localStorage.setItem('userId', data.user.id);
         localStorage.setItem('username', data.user.username);
@@ -30,6 +30,6 @@ loginForm.addEventListener('submit', async (e) => {
         window.location.href = 'profile.html';
     } catch (err) {
         console.error('Login error:', err);
-        alert('Login failed: ' + err.message);
+        message.textContent = err.message;
     }
 });
