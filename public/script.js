@@ -1,8 +1,17 @@
 const API_URL = 'https://codecrowds.onrender.com';
 
 // ---------- Helpers ----------
-function getToken() { return localStorage.getItem('token'); }
-function getUserId() { return localStorage.getItem('userId'); }
+function getToken() {
+    const token = localStorage.getItem('token');
+    if (!token) console.warn('No token found in localStorage');
+    return token;
+}
+
+function getUserId() {
+    const userId = localStorage.getItem('userId');
+    if (!userId) console.warn('No userId found in localStorage');
+    return userId;
+}
 
 async function safeFetch(url, options = {}) {
     try {
@@ -10,8 +19,8 @@ async function safeFetch(url, options = {}) {
         const contentType = res.headers.get('content-type') || '';
         let data;
         if (contentType.includes('application/json')) data = await res.json();
-        else throw new Error(await res.text());
-        if (!res.ok) throw new Error(data.error || 'Server error');
+        else data = await res.text();
+        if (!res.ok) throw new Error(data.error || data || 'Server error');
         return data;
     } catch (err) {
         console.error('Fetch error:', err);
@@ -26,7 +35,6 @@ const usernameDisplay = document.getElementById('usernameDisplay');
 const editBtn = document.getElementById('editProfileBtn');
 
 const userId = getUserId();
-
 usernameInput.value = localStorage.getItem('username') || '';
 descInput.value = localStorage.getItem('description') || '';
 usernameDisplay.textContent = localStorage.getItem('username') || 'User';
@@ -42,13 +50,19 @@ editBtn.addEventListener('click', async () => {
     } else {
         const newUsername = usernameInput.value.trim();
         const newDesc = descInput.value.trim();
+        const token = getToken();
+
+        if (!token) return alert('You are not logged in');
         if (!newUsername) return alert('Username cannot be empty');
 
         try {
-            const token = getToken(); // fetch fresh token
+            console.log('Updating profile with token:', token);
             const data = await safeFetch(`${API_URL}/users/${userId}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ username: newUsername, description: newDesc })
             });
 
@@ -62,6 +76,7 @@ editBtn.addEventListener('click', async () => {
             editing = false;
             alert('Profile updated successfully!');
         } catch (err) {
+            console.error('Profile update error:', err);
             alert('Error saving profile: ' + err.message);
         }
     }
@@ -72,8 +87,11 @@ const servicesList = document.getElementById('services-list');
 const serviceForm = document.getElementById('serviceForm');
 
 async function loadServices() {
+    const token = getToken();
+    if (!token) return servicesList.innerHTML = '<p>Please login to load services</p>';
+
     try {
-        const token = getToken(); // fetch fresh token
+        console.log('Loading services with token:', token);
         const services = await safeFetch(`${API_URL}/services`, { 
             headers: { 'Authorization': `Bearer ${token}` } 
         });
@@ -89,13 +107,13 @@ async function loadServices() {
                 <button class="edit-btn">Edit</button>
                 <button class="delete-btn">Delete</button>
             `;
-
             div.querySelector('.edit-btn').addEventListener('click', () => editService(s));
             div.querySelector('.delete-btn').addEventListener('click', () => deleteService(s.id));
             servicesList.appendChild(div);
         });
     } catch (err) {
-        servicesList.innerHTML = '<p class="error">Failed to load services</p>';
+        console.error('Load services error:', err);
+        servicesList.innerHTML = `<p class="error">Failed to load services: ${err.message}</p>`;
     }
 }
 loadServices();
@@ -105,10 +123,13 @@ serviceForm.addEventListener('submit', async (e) => {
     const title = document.getElementById('service-title').value.trim();
     const description = document.getElementById('service-description').value.trim();
     const price = parseFloat(document.getElementById('service-price').value);
+    const token = getToken();
+
+    if (!token) return alert('You are not logged in');
     if (!title || !description || isNaN(price)) return alert('All fields required');
 
     try {
-        const token = getToken(); // fetch fresh token
+        console.log('Adding service with token:', token);
         await safeFetch(`${API_URL}/services`, {
             method: 'POST',
             headers: { 
@@ -120,6 +141,7 @@ serviceForm.addEventListener('submit', async (e) => {
         serviceForm.reset();
         loadServices();
     } catch (err) {
+        console.error('Add service error:', err);
         alert('Failed to add service: ' + err.message);
     }
 });
@@ -128,31 +150,40 @@ async function editService(service) {
     const newTitle = prompt('Edit title', service.title);
     const newDesc = prompt('Edit description', service.description);
     const newPrice = parseFloat(prompt('Edit price', service.price));
+    const token = getToken();
+
+    if (!token) return alert('You are not logged in');
     if (!newTitle || !newDesc || isNaN(newPrice)) return;
 
     try {
-        const token = getToken(); // fetch fresh token
         await safeFetch(`${API_URL}/services/${service.id}`, {
             method: 'PUT',
-            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            headers: { 
+                'Content-Type': 'application/json', 
+                'Authorization': `Bearer ${token}` 
+            },
             body: JSON.stringify({ title: newTitle, description: newDesc, price: newPrice })
         });
         loadServices();
     } catch (err) {
+        console.error('Edit service error:', err);
         alert('Failed to update service: ' + err.message);
     }
 }
 
 async function deleteService(id) {
     if (!confirm('Delete this service?')) return;
+    const token = getToken();
+    if (!token) return alert('You are not logged in');
+
     try {
-        const token = getToken(); // fetch fresh token
         await safeFetch(`${API_URL}/services/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
         loadServices();
     } catch (err) {
+        console.error('Delete service error:', err);
         alert('Failed to delete service: ' + err.message);
     }
 }
