@@ -11,8 +11,8 @@
         margin: 0;
         padding: 0;
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #4e54c8; /* light background */
-        color: #333;
+        background-color: #4e54c8; /* bold blue like index header */
+        color: #fff;
         min-height: 100%;
     }
 
@@ -21,9 +21,9 @@
         max-width: 900px;
         width: 90%;
         padding: 2.5rem 2rem;
-        background: #fff; /* white card background */
+        background: rgba(255, 255, 255, 0.95); /* slightly transparent white */
         border-radius: 16px;
-        box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        box-shadow: 0 12px 30px rgba(0,0,0,0.25); /* stronger shadow for contrast */
         margin: 50px auto 2rem auto;
         display: flex;
         flex-direction: column;
@@ -31,6 +31,12 @@
         color: #333;
     }
 
+    /* ---------- Headings ---------- */
+    h1.profile-name {
+        color: #4e54c8;
+        text-align: center;
+        margin-bottom: 1rem;
+    }
 
     /* ---------- Profile Form ---------- */
     #profileForm input,
@@ -53,7 +59,7 @@
         padding: 12px 25px;
         font-size: 1rem;
         color: #fff; /* white text */
-        background-color: #4e54c8; /* blue button like header */
+        background-color: #4e54c8; /* bold blue button */
         border: none;
         border-radius: 8px;
         cursor: pointer;
