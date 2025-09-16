@@ -1,213 +1,192 @@
-// --------------------- Helper: Get token ---------------------
+const API_URL = 'https://codecrowds.onrender.com';
+
+// ---------- Helpers ----------
 function getToken() {
-    return localStorage.getItem("token");
-}
-
-// --------------------- Register (Sign Up) ---------------------
-const registerForm = document.getElementById("registerForm");
-if (registerForm) {
-    registerForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const username = document.getElementById("registerUsername").value;
-        const email = document.getElementById("registerEmail").value;
-        const password = document.getElementById("registerPassword").value;
-
-        try {
-            const res = await fetch("/api/auth/signup", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ username, email, password })
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-                localStorage.setItem("token", data.token);
-                window.location.href = "profile.html";
-            } else {
-                document.getElementById("registerMessage").innerText = data.message || "Error signing up.";
-            }
-        } catch (err) {
-            console.error("Signup error:", err);
-        }
-    });
-}
-
-// --------------------- Login ---------------------
-const loginForm = document.getElementById("loginForm");
-if (loginForm) {
-    loginForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-
-        const email = document.getElementById("loginEmail").value;
-        const password = document.getElementById("loginPassword").value;
-
-        try {
-            const res = await fetch("/api/auth/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ email, password })
-            });
-
-            const data = await res.json();
-            if (res.ok) {
-                localStorage.setItem("token", data.token);
-                window.location.href = "profile.html";
-            } else {
-                document.getElementById("loginMessage").innerText = data.message || "Login failed.";
-            }
-        } catch (err) {
-            console.error("Login error:", err);
-        }
-    });
-}
-
-// --------------------- Profile Page ---------------------
-const profileForm = document.getElementById("profileForm");
-const editProfileBtn = document.getElementById("editProfileBtn");
-if (profileForm && editProfileBtn) {
-    const usernameInput = document.getElementById("username");
-    const descriptionInput = document.getElementById("description");
-    const usernameDisplay = document.getElementById("usernameDisplay");
-
-    // Load profile on page load
-    async function loadProfile() {
-        try {
-            const res = await fetch("/api/profile", {
-                headers: { "Authorization": `Bearer ${getToken()}` }
-            });
-            const data = await res.json();
-            if (res.ok) {
-                usernameInput.value = data.username || "";
-                descriptionInput.value = data.description || "";
-                usernameDisplay.innerText = data.username || "User";
-            } else {
-                console.warn("Profile load failed:", data.message);
-            }
-        } catch (err) {
-            console.error("Error loading profile:", err);
-        }
+    const token = localStorage.getItem('token');
+    if (!token) {
+        alert('You are not logged in. Redirecting to login page.');
+        window.location.href = 'index.html';
     }
-    loadProfile();
-
-    // Toggle edit/save
-    editProfileBtn.addEventListener("click", async () => {
-        if (editProfileBtn.innerText === "Edit Profile") {
-            usernameInput.removeAttribute("readonly");
-            descriptionInput.removeAttribute("readonly");
-            editProfileBtn.innerText = "Save Profile";
-        } else {
-            try {
-                const res = await fetch("/api/profile", {
-                    method: "PUT",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${getToken()}`
-                    },
-                    body: JSON.stringify({
-                        username: usernameInput.value,
-                        description: descriptionInput.value
-                    })
-                });
-
-                const data = await res.json();
-                if (res.ok) {
-                    usernameDisplay.innerText = data.username;
-                    usernameInput.setAttribute("readonly", true);
-                    descriptionInput.setAttribute("readonly", true);
-                    editProfileBtn.innerText = "Edit Profile";
-                } else {
-                    alert("Error saving profile: " + (data.message || "Invalid token"));
-                }
-            } catch (err) {
-                console.error("Save profile error:", err);
-            }
-        }
-    });
+    return token;
 }
 
-// --------------------- Services ---------------------
-const serviceForm = document.getElementById("serviceForm");
-const servicesList = document.getElementById("services-list");
-if (serviceForm && servicesList) {
-    async function loadServices() {
-        try {
-            const res = await fetch("/api/services", {
-                headers: { "Authorization": `Bearer ${getToken()}` }
-            });
-            const data = await res.json();
-            if (res.ok) {
-                servicesList.innerHTML = "";
-                data.forEach(service => {
-                    const div = document.createElement("div");
-                    div.className = "service-card";
-                    div.innerHTML = `
-                        <h3>${service.title}</h3>
-                        <p>${service.description}</p>
-                        <p><strong>$${service.price}</strong></p>
-                        <button class="edit-btn" data-id="${service.id}">Edit</button>
-                        <button class="delete-btn" data-id="${service.id}">Delete</button>
-                    `;
-                    servicesList.appendChild(div);
-                });
-            }
-        } catch (err) {
-            console.error("Error loading services:", err);
-        }
+// ---------- Profile ----------
+const usernameInput = document.getElementById('username');
+const descInput = document.getElementById('description');
+const usernameDisplay = document.getElementById('usernameDisplay');
+const editBtn = document.getElementById('editProfileBtn');
+
+let editing = false;
+
+async function loadProfile() {
+    const token = getToken();
+    try {
+        const res = await fetch(`${API_URL}/users/me`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to load profile');
+        
+        usernameInput.value = data.username || '';
+        descInput.value = data.description || '';
+        usernameDisplay.textContent = data.username || 'User';
+    } catch (err) {
+        console.error('Load profile error:', err);
+        alert('Failed to load profile. Please log in again.');
+        localStorage.removeItem('token');
+        window.location.href = 'index.html';
     }
-    loadServices();
+}
 
-    // Add new service
-    serviceForm.addEventListener("submit", async (e) => {
-        e.preventDefault();
-        const title = document.getElementById("service-title").value;
-        const description = document.getElementById("service-description").value;
-        const price = document.getElementById("service-price").value;
+loadProfile();
+
+editBtn.addEventListener('click', async () => {
+    const token = getToken();
+    if (!editing) {
+        usernameInput.removeAttribute('readonly');
+        descInput.removeAttribute('readonly');
+        editBtn.textContent = 'Save Profile';
+        editing = true;
+    } else {
+        const username = usernameInput.value.trim();
+        const description = descInput.value.trim();
+
+        if (!username) return alert('Username cannot be empty');
 
         try {
-            const res = await fetch("/api/services", {
-                method: "POST",
+            const res = await fetch(`${API_URL}/users/me`, {
+                method: 'PUT',
                 headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${getToken()}`
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ title, description, price })
+                body: JSON.stringify({ username, description })
             });
-            if (res.ok) {
-                serviceForm.reset();
-                loadServices();
-            } else {
-                const data = await res.json();
-                alert("Error adding service: " + (data.message || "Invalid token"));
-            }
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Failed to update profile');
+
+            usernameDisplay.textContent = data.username;
+            usernameInput.setAttribute('readonly', true);
+            descInput.setAttribute('readonly', true);
+            editBtn.textContent = 'Edit Profile';
+            editing = false;
+
+            alert('Profile updated successfully!');
         } catch (err) {
-            console.error("Error adding service:", err);
+            console.error('Profile update error:', err);
+            alert('Error saving profile: ' + err.message);
         }
-    });
+    }
+});
 
-    // Handle edit/delete buttons
-    servicesList.addEventListener("click", async (e) => {
-        if (e.target.classList.contains("delete-btn")) {
-            const id = e.target.dataset.id;
-            try {
-                const res = await fetch(`/api/services/${id}`, {
-                    method: "DELETE",
-                    headers: { "Authorization": `Bearer ${getToken()}` }
-                });
-                if (res.ok) loadServices();
-            } catch (err) {
-                console.error("Delete error:", err);
-            }
-        }
-        // Editing logic can be added later
-    });
+// ---------- Services ----------
+const serviceForm = document.getElementById('serviceForm');
+const servicesList = document.getElementById('services-list');
+
+async function loadServices() {
+    const token = getToken();
+    try {
+        const res = await fetch(`${API_URL}/services`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const services = await res.json();
+        if (!res.ok) throw new Error(services.message || 'Failed to load services');
+
+        servicesList.innerHTML = '';
+        services.forEach(service => {
+            const div = document.createElement('div');
+            div.className = 'service-card';
+            div.innerHTML = `
+                <h3>${service.title}</h3>
+                <p>${service.description}</p>
+                <p><strong>$${service.price}</strong></p>
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>
+            `;
+            div.querySelector('.edit-btn').addEventListener('click', () => editService(service));
+            div.querySelector('.delete-btn').addEventListener('click', () => deleteService(service.id));
+            servicesList.appendChild(div);
+        });
+    } catch (err) {
+        console.error('Load services error:', err);
+        servicesList.innerHTML = `<p class="error">Failed to load services</p>`;
+    }
 }
 
-// --------------------- Logout ---------------------
-const logoutBtn = document.getElementById("logoutBtn");
-if (logoutBtn) {
-    logoutBtn.addEventListener("click", () => {
-        localStorage.removeItem("token");
-        window.location.href = "login.html";
-    });
+loadServices();
+
+serviceForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const token = getToken();
+    const title = document.getElementById('service-title').value.trim();
+    const description = document.getElementById('service-description').value.trim();
+    const price = parseFloat(document.getElementById('service-price').value);
+
+    if (!title || !description || isNaN(price)) return alert('All fields are required');
+
+    try {
+        const res = await fetch(`${API_URL}/services`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ title, description, price })
+        });
+        if (!res.ok) throw new Error('Failed to add service');
+
+        serviceForm.reset();
+        loadServices();
+    } catch (err) {
+        console.error('Add service error:', err);
+        alert('Failed to add service: ' + err.message);
+    }
+});
+
+async function editService(service) {
+    const token = getToken();
+    const title = prompt('Edit title', service.title);
+    const description = prompt('Edit description', service.description);
+    const price = parseFloat(prompt('Edit price', service.price));
+
+    if (!title || !description || isNaN(price)) return;
+
+    try {
+        const res = await fetch(`${API_URL}/services/${service.id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ title, description, price })
+        });
+        if (!res.ok) throw new Error('Failed to update service');
+        loadServices();
+    } catch (err) {
+        console.error('Edit service error:', err);
+        alert('Failed to update service: ' + err.message);
+    }
 }
+
+async function deleteService(id) {
+    const token = getToken();
+    if (!confirm('Delete this service?')) return;
+
+    try {
+        const res = await fetch(`${API_URL}/services/${id}`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (!res.ok) throw new Error('Failed to delete service');
+        loadServices();
+    } catch (err) {
+        console.error('Delete service error:', err);
+        alert('Failed to delete service: ' + err.message);
+    }
+}
+
+// ---------- Logout ----------
+document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.clear();
+    window.location.href = 'index.html';
+});
