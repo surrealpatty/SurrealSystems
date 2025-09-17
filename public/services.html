@@ -38,10 +38,6 @@
     padding: 20px;
     box-shadow: 0 6px 18px rgba(0,0,0,0.08);
     transition: transform 0.2s, box-shadow 0.2s;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
   }
 
   .service-card:hover {
@@ -49,24 +45,9 @@
     box-shadow: 0 12px 24px rgba(0,0,0,0.12);
   }
 
-  .service-title {
-    font-size: 1.3rem;
-    font-weight: 600;
-    color: #4e54c8;
-    margin-bottom: 8px;
-  }
-
-  .service-description {
-    font-size: 0.95rem;
-    margin-bottom: 12px;
-    color: #555;
-  }
-
-  .service-user {
-    font-size: 0.85rem;
-    color: #777;
-    margin-bottom: 12px;
-  }
+  .service-title { font-size: 1.3rem; font-weight: 600; color: #4e54c8; margin-bottom: 8px; }
+  .service-description { font-size: 0.95rem; margin-bottom: 12px; color: #555; }
+  .service-user { font-size: 0.85rem; color: #777; margin-bottom: 12px; }
 </style>
 </head>
 <body>
@@ -78,7 +59,6 @@
 <script>
 const API_URL = 'https://codecrowds.onrender.com';
 const token = localStorage.getItem('token');
-const userId = localStorage.getItem('userId');
 const servicesList = document.getElementById('servicesList');
 
 // ---------- Load Services ----------
@@ -90,7 +70,7 @@ async function loadServices() {
             headers: { 'Authorization': `Bearer ${token}` }
         });
 
-        // Check if response is JSON
+        // Ensure response is JSON
         const contentType = res.headers.get('content-type');
         let services = [];
         if (contentType && contentType.includes('application/json')) {
