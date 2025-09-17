@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 // Use environment secret if available, else fallback
-const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
+const JWT_SECRET = process.env.JWT_SECRET || 's7n3!vZx@9qK4m1L';
 if (!process.env.JWT_SECRET) {
     console.warn('⚠️ Warning: JWT_SECRET is not set in environment variables. Using fallback secret.');
 }
