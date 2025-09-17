@@ -4,12 +4,12 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const authenticateToken = require('../middlewares/authenticateToken');
 
-// Auth routes
+// Public
 router.post('/register', userController.registerUser);
 router.post('/login', userController.loginUser);
 
-// User routes
-router.get('/', authenticateToken, userController.getUsers); // protected
-router.put('/:id', authenticateToken, userController.updateProfile); // protected
+// Protected
+router.get('/', authenticateToken, userController.getUsers);
+router.put('/:id', authenticateToken, userController.updateProfile);
 
 module.exports = router;
