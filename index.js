@@ -1,8 +1,10 @@
+// index.js (or app.js at project root)
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-
 const sequelize = require('./config/database');
+
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
 const messageRoutes = require('./routes/message');
@@ -21,7 +23,7 @@ app.use('/messages', messageRoutes);
 // Serve static files
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Optional: serve front-end HTML pages
+// Serve specific HTML pages
 app.get(['/dashboard.html','/profile.html','/login.html','/register.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'public', req.path));
 });

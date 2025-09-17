@@ -30,7 +30,11 @@ exports.registerUser = async (req, res) => {
         });
 
         // Create JWT
-        const token = jwt.sign({ id: newUser.id, email: newUser.email }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: newUser.id, email: newUser.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
         res.status(201).json({
             message: 'User created successfully',
@@ -43,7 +47,7 @@ exports.registerUser = async (req, res) => {
             }
         });
     } catch (err) {
-        console.error(err);
+        console.error('Register error:', err);
         res.status(500).json({ error: 'Failed to register user' });
     }
 };
@@ -64,7 +68,11 @@ exports.loginUser = async (req, res) => {
         if (!isMatch) return res.status(400).json({ error: 'Invalid password' });
 
         // Create JWT
-        const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: user.id, email: user.email },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
         res.json({
             message: 'Login successful',
@@ -77,22 +85,23 @@ exports.loginUser = async (req, res) => {
             }
         });
     } catch (err) {
-        console.error(err);
+        console.error('Login error:', err);
         res.status(500).json({ error: 'Login failed' });
     }
 };
 
-// Get all users (optional)
+// Get all users (protected)
 exports.getUsers = async (req, res) => {
     try {
         const users = await User.findAll();
         res.json(users);
     } catch (err) {
+        console.error('Get users error:', err);
         res.status(500).json({ error: err.message });
     }
 };
 
-// Update profile
+// Update profile (protected)
 exports.updateProfile = async (req, res) => {
     try {
         const { username, description } = req.body;
@@ -115,7 +124,7 @@ exports.updateProfile = async (req, res) => {
             }
         });
     } catch (err) {
-        console.error(err);
+        console.error('Update profile error:', err);
         res.status(500).json({ error: 'Failed to update profile' });
     }
 };
