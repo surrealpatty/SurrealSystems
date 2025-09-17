@@ -6,17 +6,23 @@ const User = require('../models/User');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
-// Middleware to authenticate JWT token
+// Centralized middleware to authenticate JWT
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+    if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+
+    // Token must start with "Bearer "
+    const token = authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token provided' });
 
-    jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ error: 'Invalid token' });
-        req.user = user;
+    try {
+        const decoded = jwt.verify(token, JWT_SECRET);
+        req.user = decoded; // { id, username }
         next();
-    });
+    } catch (err) {
+        console.error('JWT verification failed:', err);
+        res.status(403).json({ error: 'Invalid or expired token' });
+    }
 }
 
 // GET messages for the logged-in user
@@ -49,13 +55,19 @@ router.post('/', authenticateToken, async (req, res) => {
     if (!receiverId || !content) return res.status(400).json({ error: 'Receiver and content required' });
 
     try {
+        // Use req.user.id as senderId to prevent client-side spoofing
         const message = await Message.create({
             senderId: req.user.id,
             receiverId,
             content
         });
 
-        res.json({ message: 'Message sent!', data: message });
+        // Optionally fetch sender info for response
+        const fullMessage = await Message.findByPk(message.id, {
+            include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }]
+        });
+
+        res.json({ message: 'Message sent!', data: fullMessage });
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to send message' });
