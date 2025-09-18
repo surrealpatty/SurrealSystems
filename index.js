@@ -12,13 +12,15 @@ require('./models/Message');
 // Routes
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
-const messageRoutes = require('./routes/message'); // Ensure file name is message.js
+const messageRoutes = require('./routes/message'); // Make sure file name is message.js
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve all files inside 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
 
 // API Routes
@@ -26,17 +28,7 @@ app.use('/users', userRoutes);
 app.use('/services', serviceRoutes);
 app.use('/messages', messageRoutes);
 
-// Serve HTML pages
-app.get([
-    '/index.html',
-    '/register.html',   // ✅ Correct page name
-    '/profile.html',
-    '/services.html'
-], (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', req.path));
-});
-
-// Catch-all for root
+// Root route -> serves index.html
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
