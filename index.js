@@ -4,45 +4,51 @@ const cors = require('cors');
 const path = require('path');
 const { sequelize } = require('./config/database');
 
-// Models
+// Import models
 require('./models/User');
 require('./models/Service');
 require('./models/Message');
 
-// Routes
+// Import routes
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
-const messageRoutes = require('./routes/messages'); // ✅ matches the file name exactly
+const messageRoutes = require('./routes/message'); // ✅ make sure the filename matches
 
 const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Middlewares
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-// API
+// API routes
 app.use('/users', userRoutes);
 app.use('/services', serviceRoutes);
-app.use('/messages', messageRoutes); // ✅ route matches import
+app.use('/messages', messageRoutes);
 
 // Serve HTML pages
 app.get(['/index.html', '/signup.html', '/profile.html', '/services.html'], (req, res) => {
     res.sendFile(path.join(__dirname, 'public', req.path));
 });
 
-// 404 for API routes
+// Catch-all API 404
 app.use((req, res, next) => {
-    if (
-        req.path.startsWith('/users') ||
-        req.path.startsWith('/services') ||
-        req.path.startsWith('/messages')
-    ) {
+    if (req.path.startsWith('/users') || req.path.startsWith('/services') || req.path.startsWith('/messages')) {
         return res.status(404).json({ error: 'API route not found' });
     }
     next();
 });
 
-const PORT = process.env.PORT || 3000;
-
+// Start server after syncing database
 sequelize.sync({ alter: true })
-    .then(() => console.log(`✅ DB synced & server running on port ${PORT}`))
-    .catch(err => console.error('❌ DB sync failed', err));
+    .then(() => {
+        console.log(`✅ DB synced`);
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on port ${PORT}`);
+        });
+    })
+    .catch(err => {
+        console.error('❌ DB sync failed', err);
+        process.exit(1);
+    });
