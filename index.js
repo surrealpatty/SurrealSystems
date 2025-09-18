@@ -12,7 +12,7 @@ require('./models/Message');
 // Routes
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
-const messageRoutes = require('./routes/message'); // make sure the file name matches
+const messageRoutes = require('./routes/messages'); // ✅ matches the file name exactly
 
 const app = express();
 app.use(cors());
@@ -22,29 +22,27 @@ app.use(express.static(path.join(__dirname, 'public')));
 // API
 app.use('/users', userRoutes);
 app.use('/services', serviceRoutes);
-app.use('/messages', messageRoutes);
+app.use('/messages', messageRoutes); // ✅ route matches import
 
-// Serve HTML pages dynamically
-app.get('/:page', (req, res, next) => {
-    const page = req.params.page;
-    const filePath = path.join(__dirname, 'public', page);
-
-    res.sendFile(filePath, err => {
-        if (err) {
-            next(); // pass to next middleware if file not found
-        }
-    });
+// Serve HTML pages
+app.get(['/index.html', '/signup.html', '/profile.html', '/services.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', req.path));
 });
 
 // 404 for API routes
 app.use((req, res, next) => {
-    if (req.path.startsWith('/users') || req.path.startsWith('/services') || req.path.startsWith('/messages')) {
+    if (
+        req.path.startsWith('/users') ||
+        req.path.startsWith('/services') ||
+        req.path.startsWith('/messages')
+    ) {
         return res.status(404).json({ error: 'API route not found' });
     }
-    res.status(404).send('Page not found');
+    next();
 });
 
 const PORT = process.env.PORT || 3000;
+
 sequelize.sync({ alter: true })
     .then(() => console.log(`✅ DB synced & server running on port ${PORT}`))
     .catch(err => console.error('❌ DB sync failed', err));
