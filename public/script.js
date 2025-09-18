@@ -32,7 +32,7 @@ if (loginForm) {
             } else {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('userId', data.user.id);
-                window.location.href = 'services.html';
+                window.location.href = 'profile.html';
             }
         } catch (err) {
             loginMessage.textContent = 'Network error: ' + err.message;
