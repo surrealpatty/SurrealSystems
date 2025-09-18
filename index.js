@@ -26,18 +26,17 @@ app.use('/users', userRoutes);
 app.use('/services', serviceRoutes);
 app.use('/messages', messageRoutes);
 
-// Serve HTML pages (include register.html)
+// Serve HTML pages
 app.get([
     '/index.html',
-    '/signup.html',
-    '/register.html',   // ✅ Add this
+    '/register.html',   // ✅ Correct page name
     '/profile.html',
     '/services.html'
 ], (req, res) => {
     res.sendFile(path.join(__dirname, 'public', req.path));
 });
 
-// Catch-all route for main page
+// Catch-all for root
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
