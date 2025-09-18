@@ -3,11 +3,13 @@ const API_URL = 'https://codecrowds.onrender.com';
 // ---------- AUTH ----------
 function getToken() {
     const token = localStorage.getItem('token');
-    return token; // don't redirect here, let the calling function handle it
+    if (!token) window.location.href = 'index.html';
+    return token;
 }
 
 function getUserId() {
     const userId = localStorage.getItem('userId');
+    if (!userId) window.location.href = 'index.html';
     return userId;
 }
 
@@ -22,7 +24,7 @@ if (loginForm) {
         try {
             const res = await fetch(`${API_URL}/users/login`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ email, password })
             });
             const data = await res.json();
@@ -51,7 +53,7 @@ if (registerForm) {
         try {
             const res = await fetch(`${API_URL}/users/register`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({ username, email, password })
             });
             const data = await res.json();
@@ -70,7 +72,6 @@ const usernameInput = document.getElementById('username');
 const descInput = document.getElementById('description');
 const usernameDisplay = document.getElementById('usernameDisplay');
 const editBtn = document.getElementById('editProfileBtn');
-
 if (usernameInput) {
     usernameInput.value = localStorage.getItem('username') || '';
     descInput.value = localStorage.getItem('description') || '';
@@ -82,8 +83,6 @@ if (editBtn) {
     editBtn.addEventListener('click', async () => {
         const token = getToken();
         const userId = getUserId();
-        if (!token || !userId) return window.location.href = 'index.html';
-
         if (!editing) {
             usernameInput.readOnly = false;
             descInput.readOnly = false;
@@ -129,19 +128,19 @@ const serviceForm = document.getElementById('serviceForm');
 async function loadServices() {
     const token = getToken();
     const userId = getUserId();
-    if (!servicesList) return;
+    if (!token || !servicesList) return;
 
     try {
         const res = await fetch(`${API_URL}/services`, {
-            headers: token ? { 'Authorization': `Bearer ${token}` } : {}
+            headers: { 'Authorization': `Bearer ${token}` }
         });
         const services = await res.json();
         if (!res.ok) throw new Error(services.error || 'Failed to load services');
 
         servicesList.innerHTML = '';
         services.forEach(s => {
-            // Use s.User.id if backend includes user association
-            if (userId && s.User?.id != userId) return; // show only user's services
+            const serviceUserId = s.User?.id; // included from backend
+            const isOwnService = userId && serviceUserId == userId;
 
             const div = document.createElement('div');
             div.className = 'service-card';
@@ -151,7 +150,7 @@ async function loadServices() {
                 <p><strong>Price:</strong> $${s.price}</p>
             `;
 
-            if (userId && s.User?.id == userId) {
+            if (isOwnService) {
                 const editBtn = document.createElement('button');
                 editBtn.textContent = 'Edit';
                 editBtn.className = 'edit-btn';
@@ -180,19 +179,16 @@ if (serviceForm) {
         const description = document.getElementById('service-description').value.trim();
         const price = parseFloat(document.getElementById('service-price').value);
         const token = getToken();
-        if (!token) return window.location.href = 'index.html';
+        const userId = getUserId();
         if (!title || !description || isNaN(price)) return alert('All fields required');
 
         try {
             const res = await fetch(`${API_URL}/services`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify({ title, description, price }) // backend assigns userId
+                body: JSON.stringify({ title, description, price })
             });
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.error || 'Failed to add service');
-            }
+            if (!res.ok) throw new Error('Failed to add service');
             serviceForm.reset();
             loadServices();
         } catch (err) {
@@ -216,34 +212,22 @@ async function editService(service) {
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             body: JSON.stringify({ title: newTitle, description: newDesc, price: newPrice })
         });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || 'Failed to update service');
-        }
+        if (!res.ok) throw new Error('Failed to update service');
         loadServices();
-    } catch (err) {
-        alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
 }
 
 async function deleteService(id) {
     if (!confirm('Delete this service?')) return;
     const token = getToken();
-    if (!token) return;
-
     try {
         const res = await fetch(`${API_URL}/services/${id}`, {
             method: 'DELETE',
             headers: { 'Authorization': `Bearer ${token}` }
         });
-        if (!res.ok) {
-            const err = await res.json();
-            throw new Error(err.error || 'Failed to delete service');
-        }
+        if (!res.ok) throw new Error('Failed to delete service');
         loadServices();
-    } catch (err) {
-        alert(err.message);
-    }
+    } catch (err) { alert(err.message); }
 }
 
 // ---------- LOGOUT ----------
