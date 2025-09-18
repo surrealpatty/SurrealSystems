@@ -2,15 +2,11 @@ const API_URL = 'https://codecrowds.onrender.com';
 
 // ---------- AUTH ----------
 function getToken() {
-    const token = localStorage.getItem('token');
-    if (!token) window.location.href = 'index.html';
-    return token;
+    return localStorage.getItem('token');
 }
 
 function getUserId() {
-    const userId = localStorage.getItem('userId');
-    if (!userId) window.location.href = 'index.html';
-    return userId;
+    return localStorage.getItem('userId');
 }
 
 // ---------- LOGIN ----------
@@ -24,7 +20,7 @@ if (loginForm) {
         try {
             const res = await fetch(`${API_URL}/users/login`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
             });
             const data = await res.json();
@@ -53,7 +49,7 @@ if (registerForm) {
         try {
             const res = await fetch(`${API_URL}/users/register`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password })
             });
             const data = await res.json();
@@ -126,21 +122,17 @@ const servicesList = document.getElementById('services-list');
 const serviceForm = document.getElementById('serviceForm');
 
 async function loadServices() {
-    const token = getToken();
-    const userId = getUserId();
-    if (!token || !servicesList) return;
+    if (!servicesList) return;
 
     try {
-        const res = await fetch(`${API_URL}/services`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
+        const res = await fetch(`${API_URL}/services`); // ✅ no token needed
         const services = await res.json();
         if (!res.ok) throw new Error(services.error || 'Failed to load services');
 
         servicesList.innerHTML = '';
         services.forEach(s => {
-            const serviceUserId = s.User?.id; // included from backend
-            const isOwnService = userId && serviceUserId == userId;
+            const userId = getUserId();
+            const isOwnService = userId && s.userId == userId;
 
             const div = document.createElement('div');
             div.className = 'service-card';
@@ -148,6 +140,7 @@ async function loadServices() {
                 <h3>${s.title}</h3>
                 <p>${s.description}</p>
                 <p><strong>Price:</strong> $${s.price}</p>
+                <p><em>Posted by: ${s.username}</em></p>
             `;
 
             if (isOwnService) {
@@ -179,7 +172,6 @@ if (serviceForm) {
         const description = document.getElementById('service-description').value.trim();
         const price = parseFloat(document.getElementById('service-price').value);
         const token = getToken();
-        const userId = getUserId();
         if (!title || !description || isNaN(price)) return alert('All fields required');
 
         try {
