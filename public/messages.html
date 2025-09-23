@@ -28,6 +28,7 @@ body, html {
     color: #333;
     text-align: center;
 }
+h1 { color: #4e54c8; margin-bottom: 1rem; }
 button {
     padding: 10px 20px;
     font-size: 1rem;
@@ -50,28 +51,51 @@ button:hover { background-color: #3b40a1; }
     border-radius: 12px;
     padding: 20px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    transition: transform 0.2s;
     color: #333;
+    text-align: left;
 }
-.card h3 { margin-bottom: 10px; color: #4e54c8; }
+.card:hover { transform: translateY(-5px); }
+.card h3 { margin-bottom: 5px; color: #4e54c8; }
 .card p { margin: 5px 0; color: #555; }
+.card .timestamp { font-size: 0.8rem; color: #999; }
+.reply-section {
+    margin-top: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.reply-section textarea {
+    width: 100%;
+    min-height: 50px;
+    padding: 5px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
 </style>
 </head>
 <body>
-
 <div class="container">
-    <h1>Messages</h1>
+    <h1>Your Messages</h1>
+    <button id="goBackBtn">Back to Profile</button>
     <div id="messages-list"><p>Loading messages...</p></div>
-    <button id="backBtn">Back to Profile</button>
 </div>
 
 <script>
 const API_URL = 'https://codecrowds.onrender.com';
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'index.html';
+
 const messagesList = document.getElementById('messages-list');
-const backBtn = document.getElementById('backBtn');
+const goBackBtn = document.getElementById('goBackBtn');
 const userId = localStorage.getItem('userId');
 
+// Go back to profile
+goBackBtn.addEventListener('click', () => {
+    window.location.href = 'profile.html';
+});
+
+// Load messages
 async function loadMessages() {
     try {
         const res = await fetch(`${API_URL}/messages?userId=${userId}`, {
@@ -91,20 +115,49 @@ async function loadMessages() {
             const div = document.createElement('div');
             div.className = 'card';
             div.innerHTML = `
-                <p><strong>From:</strong> ${m.sender?.username || 'Unknown'}</p>
+                <h3>From: ${m.sender?.username || 'Unknown'}</h3>
                 <p>${m.content}</p>
+                <p class="timestamp">${new Date(m.createdAt).toLocaleString()}</p>
+                <div class="reply-section">
+                    <textarea placeholder="Type your reply..."></textarea>
+                    <button class="replyBtn">Reply</button>
+                </div>
             `;
             messagesList.appendChild(div);
+
+            // Reply button functionality
+            const replyBtn = div.querySelector('.replyBtn');
+            const replyInput = div.querySelector('textarea');
+            replyBtn.addEventListener('click', async () => {
+                const replyContent = replyInput.value.trim();
+                if (!replyContent) return alert('Please type a message.');
+
+                try {
+                    const res = await fetch(`${API_URL}/messages`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${token}`
+                        },
+                        body: JSON.stringify({
+                            recipientId: m.sender.id,
+                            content: replyContent
+                        })
+                    });
+                    if (!res.ok) throw new Error('Failed to send message');
+                    alert('Reply sent!');
+                    replyInput.value = '';
+                } catch (err) {
+                    console.error(err);
+                    alert('Failed to send reply.');
+                }
+            });
         });
     } catch (err) {
         console.error(err);
         messagesList.innerHTML = '<p class="error">Failed to load messages</p>';
     }
 }
-
-backBtn.addEventListener('click', () => {
-    window.location.href = 'profile.html';
-});
 
 window.addEventListener('load', loadMessages);
 </script>
