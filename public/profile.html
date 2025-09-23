@@ -29,7 +29,7 @@ body, html {
     text-align: center;
 }
 h1 { color: #4e54c8; margin-bottom: 0.5rem; }
-#profile-description { margin-bottom: 10px; min-height: 50px; transition: background 0.3s, border 0.3s; }
+#profile-description { margin-bottom: 10px; min-height: 50px; }
 #profile-description[contenteditable="true"] {
     border: 1px solid #4e54c8;
     padding: 5px;
@@ -90,6 +90,8 @@ button:hover { background-color: #3b40a1; }
 <script>
 const API_URL = 'https://codecrowds.onrender.com';
 const token = localStorage.getItem('token');
+
+// Redirect if no token
 if (!token) window.location.href = 'index.html';
 
 const profileUsername = document.getElementById('profile-username');
@@ -101,13 +103,9 @@ const logoutBtn = document.getElementById('logoutBtn');
 
 let userId = localStorage.getItem('userId');
 
-// Show cached username instantly
-if (localStorage.getItem('username')) {
-    profileUsername.textContent = localStorage.getItem('username');
-}
-if (localStorage.getItem('description')) {
-    profileDescription.textContent = localStorage.getItem('description');
-}
+// Show cached data immediately
+profileUsername.textContent = localStorage.getItem('username') || 'Loading username...';
+profileDescription.textContent = localStorage.getItem('description') || 'Loading description...';
 
 // ---------------- Load Profile ----------------
 async function loadProfile() {
@@ -133,16 +131,15 @@ async function loadProfile() {
     }
 }
 
-// ---------------- Inline Edit / Save Description ----------------
+// ---------------- Edit / Save Description ----------------
 let editing = false;
 editDescBtn.addEventListener('click', async () => {
     editing = !editing;
     profileDescription.contentEditable = editing ? 'true' : 'false';
-    editDescBtn.textContent = editing ? 'Save' : 'Edit Description';
+    editDescBtn.textContent = editing ? 'Save Description' : 'Edit Description';
 
     if (!editing && userId) {
         const newDesc = profileDescription.textContent.trim();
-        profileDescription.style.backgroundColor = '#fff'; // visual feedback
         try {
             const res = await fetch(`${API_URL}/users/${userId}`, {
                 method: 'PUT',
@@ -156,17 +153,15 @@ editDescBtn.addEventListener('click', async () => {
             const data = await res.json();
             const updatedUser = data.user ? data.user : data;
 
+            profileUsername.textContent = updatedUser.username || profileUsername.textContent;
             profileDescription.textContent = updatedUser.description || newDesc;
             localStorage.setItem('description', updatedUser.description || newDesc);
-            profileDescription.style.backgroundColor = '#f0f0f0'; // revert to normal
+            alert('Profile updated successfully!');
         } catch (err) {
             console.error(err);
             profileDescription.textContent = localStorage.getItem('description') || 'Failed to save';
-            profileDescription.style.backgroundColor = '#f8d7da'; // error highlight
+            alert('Failed to save description.');
         }
-    } else if (editing) {
-        profileDescription.style.backgroundColor = '#f0f0f0';
-        profileDescription.focus();
     }
 });
 
@@ -243,9 +238,9 @@ logoutBtn.addEventListener('click', () => {
 
 // ---------------- Initialize ----------------
 window.addEventListener('load', async () => {
-    await loadProfile();
-    await loadServices();
-    await loadMessages();
+    await loadProfile();  // ensure userId is set
+    await loadServices();  // only load after profile
+    await loadMessages();  // only load after profile
 });
 </script>
 </body>
