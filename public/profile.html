@@ -35,7 +35,6 @@ h1 {
     margin-bottom: 0.5rem;
 }
 
-/* Editable description */
 #profile-description {
     margin-bottom: 10px;
     min-height: 50px;
@@ -91,7 +90,6 @@ button:hover { background-color: #3b40a1; }
 <body>
 
 <div class="container">
-    <!-- Username will show here -->
     <h1 id="profile-username">Loading username...</h1>
 
     <p id="profile-description">Loading description...</p>
@@ -133,14 +131,15 @@ async function loadProfile() {
         const res = await fetch(`${API_URL}/users/${userId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
+        if (!res.ok) throw new Error('Failed to fetch user');
         const user = await res.json();
 
-        // ✅ Show username at top
         profileUsername.textContent = user.username || "Unknown User";
         profileDescription.textContent = user.description || 'No description yet.';
     } catch (err) {
         console.error(err);
-        profileUsername.textContent = 'Failed to load username';
+        profileUsername.textContent = 'Unknown User';
+        profileDescription.textContent = 'Failed to load description';
     }
 }
 
@@ -161,7 +160,7 @@ editDescBtn.addEventListener('click', async () => {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ description: profileDescription.textContent })
+                body: JSON.stringify({ description: profileDescription.textContent.trim() })
             });
             if (!res.ok) throw new Error('Failed to update description');
         } catch (err) {
@@ -171,13 +170,15 @@ editDescBtn.addEventListener('click', async () => {
     }
 });
 
-// Load User Services
+// Load Services
 async function loadServices() {
     try {
-        const res = await fetch(`${API_URL}/services`, {
+        const res = await fetch(`${API_URL}/services?userId=${userId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
+        if (!res.ok) throw new Error('Failed to fetch services');
         const services = await res.json();
+
         servicesList.innerHTML = '';
         services.forEach(s => {
             const div = document.createElement('div');
@@ -198,10 +199,12 @@ async function loadServices() {
 // Load Messages
 async function loadMessages() {
     try {
-        const res = await fetch(`${API_URL}/messages`, {
+        const res = await fetch(`${API_URL}/messages?userId=${userId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
+        if (!res.ok) throw new Error('Failed to fetch messages');
         const messages = await res.json();
+
         messagesList.innerHTML = '';
         messages.forEach(m => {
             const div = document.createElement('div');
@@ -218,7 +221,7 @@ async function loadMessages() {
     }
 }
 
-// Load everything on page load
+// Load everything
 window.addEventListener('load', () => {
     loadProfile();
     loadServices();
