@@ -110,19 +110,18 @@ const logoutBtn = document.getElementById('logoutBtn');
 
 let userId = null;
 
-// ================= Load Profile =================
+// Load profile
 async function loadProfile() {
     try {
-        const res = await fetch(`${API_URL}/profile`, {
+        const res = await fetch(`${API_URL}/profile`, { 
             headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch profile');
-
         const user = await res.json();
 
         userId = user.id;
         localStorage.setItem('userId', userId);
-        localStorage.setItem('username', user.username || '');
+        localStorage.setItem('username', user.username);
 
         profileUsername.textContent = user.username || 'Unknown User';
         profileDescription.textContent = user.description || 'No description yet.';
@@ -134,7 +133,7 @@ async function loadProfile() {
     }
 }
 
-// ================= Edit / Save Description =================
+// Edit / Save description
 let editing = false;
 editDescBtn.addEventListener('click', async () => {
     editing = !editing;
@@ -151,6 +150,8 @@ editDescBtn.addEventListener('click', async () => {
                 },
                 body: JSON.stringify({ description: profileDescription.textContent.trim() })
             });
+            if (!res.ok) throw new Error('Failed to update description');
+
             const data = await res.json();
             profileDescription.textContent = data.user?.description || profileDescription.textContent;
             profileUsername.textContent = data.user?.username || profileUsername.textContent;
@@ -163,18 +164,19 @@ editDescBtn.addEventListener('click', async () => {
     }
 });
 
-// ================= Load Services =================
+// Load services
 async function loadServices() {
     if (!userId || !servicesList) return;
     try {
-        const res = await fetch(`${API_URL}/services`, {
+        const res = await fetch(`${API_URL}/services?userId=${userId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch services');
-        const services = await res.json();
+        const data = await res.json();
+        const services = data.services || data;
 
         servicesList.innerHTML = '';
-        services.filter(s => s.User?.id == userId).forEach(s => {
+        services.forEach(s => {
             const div = document.createElement('div');
             div.className = 'card';
             div.innerHTML = `
@@ -190,7 +192,7 @@ async function loadServices() {
     }
 }
 
-// ================= Load Messages =================
+// Load messages
 async function loadMessages() {
     if (!userId || !messagesList) return;
     try {
@@ -198,7 +200,8 @@ async function loadMessages() {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch messages');
-        const messages = await res.json();
+        const data = await res.json();
+        const messages = data.messages || data;
 
         messagesList.innerHTML = '';
         messages.forEach(m => {
@@ -216,15 +219,15 @@ async function loadMessages() {
     }
 }
 
-// ================= Logout =================
+// Logout
 logoutBtn.addEventListener('click', () => {
     localStorage.clear();
     window.location.href = 'index.html';
 });
 
-// ================= Initialize =================
+// Initialize
 window.addEventListener('load', async () => {
-    await loadProfile(); // ensures userId is set first
+    await loadProfile(); // ensures userId is set
     loadServices();
     loadMessages();
 });
