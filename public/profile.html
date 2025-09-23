@@ -32,8 +32,36 @@ body, html {
 
 h1 {
     color: #4e54c8;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
+
+/* Editable description */
+#profile-description {
+    margin-bottom: 10px;
+    min-height: 50px;
+}
+
+#profile-description[contenteditable="true"] {
+    border: 1px solid #4e54c8;
+    padding: 5px;
+    border-radius: 8px;
+    background-color: #f0f0f0;
+    color: #333;
+}
+
+button {
+    padding: 10px 20px;
+    font-size: 1rem;
+    color: #fff;
+    background-color: #4e54c8;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 5px;
+    transition: 0.3s;
+}
+
+button:hover { background-color: #3b40a1; }
 
 #services-list, #messages-list {
     display: grid;
@@ -55,20 +83,6 @@ h1 {
 .card p { margin: 5px 0; color: #555; }
 .card .username { font-style: italic; color: #888; }
 
-button {
-    padding: 12px 25px;
-    font-size: 1rem;
-    color: #fff;
-    background-color: #4e54c8;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: 0.3s;
-}
-
-button:hover { background-color: #3b40a1; }
-
 @media (max-width: 480px) {
     .container { padding: 2rem 1rem; }
 }
@@ -77,9 +91,9 @@ button:hover { background-color: #3b40a1; }
 <body>
 
 <div class="container">
-    <h1>Profile</h1>
-    <p id="profile-username">Username: Loading...</p>
-    <p id="profile-description">Description: Loading...</p>
+    <h1 id="profile-username">Loading...</h1>
+    <p id="profile-description">Loading description...</p>
+    <button type="button" id="editDescBtn">Edit Description</button>
 
     <h2>Your Services</h2>
     <div id="services-list"><p>Loading services...</p></div>
@@ -91,18 +105,17 @@ button:hover { background-color: #3b40a1; }
 </div>
 
 <script>
-// ================= API & Auth =================
 const API_URL = 'https://codecrowds.onrender.com';
 const token = localStorage.getItem('token');
 const userId = localStorage.getItem('userId');
 
 if (!token || !userId) window.location.href = 'index.html';
 
-// DOM Elements
-const servicesList = document.getElementById('services-list');
-const messagesList = document.getElementById('messages-list');
 const profileUsername = document.getElementById('profile-username');
 const profileDescription = document.getElementById('profile-description');
+const editDescBtn = document.getElementById('editDescBtn');
+const servicesList = document.getElementById('services-list');
+const messagesList = document.getElementById('messages-list');
 const logoutBtn = document.getElementById('logoutBtn');
 
 // Logout
@@ -119,13 +132,40 @@ async function loadProfile() {
             headers: { Authorization: `Bearer ${token}` }
         });
         const user = await res.json();
-        profileUsername.textContent = `Username: ${user.username}`;
-        profileDescription.textContent = `Description: ${user.description || 'No description yet.'}`;
+        profileUsername.textContent = user.username;
+        profileDescription.textContent = user.description || 'No description yet.';
     } catch (err) {
         console.error(err);
-        profileUsername.textContent = `Failed to load profile`;
+        profileUsername.textContent = 'Failed to load profile';
     }
 }
+
+// Edit / Save Description
+editDescBtn.addEventListener('click', async () => {
+    if (editDescBtn.textContent === 'Edit Description') {
+        profileDescription.contentEditable = 'true';
+        profileDescription.focus();
+        editDescBtn.textContent = 'Save Description';
+    } else {
+        profileDescription.contentEditable = 'false';
+        editDescBtn.textContent = 'Edit Description';
+
+        try {
+            const res = await fetch(`${API_URL}/users/${userId}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ description: profileDescription.textContent })
+            });
+            if (!res.ok) throw new Error('Failed to update description');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to save description.');
+        }
+    }
+});
 
 // Load User Services
 async function loadServices() {
@@ -174,7 +214,7 @@ async function loadMessages() {
     }
 }
 
-// Load all data
+// Load all data on page load
 window.addEventListener('load', () => {
     loadProfile();
     loadServices();
