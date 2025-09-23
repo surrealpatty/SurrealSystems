@@ -87,7 +87,7 @@ goToServicesBtn.addEventListener('click', () => {
 
 // ================= Load User Services =================
 async function loadUserServices() {
-    if (!servicesList) return;
+    if (!servicesList || !userId) return;
 
     try {
         const res = await fetch(`${API_URL}/services`, {
@@ -117,7 +117,7 @@ async function loadUserServices() {
 }
 
 // ================= Load everything on page load =================
-window.addEventListener('load', () => {
-    loadProfile();
-    loadUserServices();
+window.addEventListener('load', async () => {
+    await loadProfile(); // wait for profile to finish
+    loadUserServices();  // now userId is set, so services will load
 });
