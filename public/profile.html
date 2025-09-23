@@ -29,7 +29,7 @@ body, html {
     text-align: center;
 }
 h1 { color: #4e54c8; margin-bottom: 0.5rem; }
-#profile-description { margin-bottom: 10px; min-height: 50px; }
+#profile-description { margin-bottom: 10px; min-height: 50px; transition: background 0.3s, border 0.3s; }
 #profile-description[contenteditable="true"] {
     border: 1px solid #4e54c8;
     padding: 5px;
@@ -99,11 +99,14 @@ const servicesList = document.getElementById('services-list');
 const messagesList = document.getElementById('messages-list');
 const logoutBtn = document.getElementById('logoutBtn');
 
-let userId = localStorage.getItem('userId'); // persist userId
+let userId = localStorage.getItem('userId');
 
 // Show cached username instantly
 if (localStorage.getItem('username')) {
     profileUsername.textContent = localStorage.getItem('username');
+}
+if (localStorage.getItem('description')) {
+    profileDescription.textContent = localStorage.getItem('description');
 }
 
 // ---------------- Load Profile ----------------
@@ -130,14 +133,16 @@ async function loadProfile() {
     }
 }
 
-// ---------------- Edit / Save Description ----------------
+// ---------------- Inline Edit / Save Description ----------------
 let editing = false;
 editDescBtn.addEventListener('click', async () => {
     editing = !editing;
     profileDescription.contentEditable = editing ? 'true' : 'false';
-    editDescBtn.textContent = editing ? 'Save Description' : 'Edit Description';
+    editDescBtn.textContent = editing ? 'Save' : 'Edit Description';
 
     if (!editing && userId) {
+        const newDesc = profileDescription.textContent.trim();
+        profileDescription.style.backgroundColor = '#fff'; // visual feedback
         try {
             const res = await fetch(`${API_URL}/users/${userId}`, {
                 method: 'PUT',
@@ -145,21 +150,23 @@ editDescBtn.addEventListener('click', async () => {
                     'Content-Type': 'application/json',
                     Authorization: `Bearer ${token}`
                 },
-                body: JSON.stringify({ description: profileDescription.textContent.trim() })
+                body: JSON.stringify({ description: newDesc })
             });
             if (!res.ok) throw new Error('Failed to update description');
-
             const data = await res.json();
             const updatedUser = data.user ? data.user : data;
 
-            profileUsername.textContent = updatedUser.username || profileUsername.textContent;
-            profileDescription.textContent = updatedUser.description || profileDescription.textContent;
-            localStorage.setItem('description', updatedUser.description || '');
-            alert('Profile updated successfully!');
+            profileDescription.textContent = updatedUser.description || newDesc;
+            localStorage.setItem('description', updatedUser.description || newDesc);
+            profileDescription.style.backgroundColor = '#f0f0f0'; // revert to normal
         } catch (err) {
             console.error(err);
-            alert('Failed to save description.');
+            profileDescription.textContent = localStorage.getItem('description') || 'Failed to save';
+            profileDescription.style.backgroundColor = '#f8d7da'; // error highlight
         }
+    } else if (editing) {
+        profileDescription.style.backgroundColor = '#f0f0f0';
+        profileDescription.focus();
     }
 });
 
