@@ -98,7 +98,6 @@ button:hover { background-color: #3b40a1; }
 <script>
 const API_URL = 'https://codecrowds.onrender.com';
 const token = localStorage.getItem('token');
-
 if (!token) window.location.href = 'index.html';
 
 const profileUsername = document.getElementById('profile-username');
@@ -110,7 +109,7 @@ const logoutBtn = document.getElementById('logoutBtn');
 
 let userId = null;
 
-// ================= Load profile =================
+// ================= Load Profile =================
 async function loadProfile() {
     try {
         const res = await fetch(`${API_URL}/profile`, { 
@@ -119,7 +118,7 @@ async function loadProfile() {
         if (!res.ok) throw new Error('Failed to fetch profile');
         const userData = await res.json();
 
-        // Some APIs return user object inside 'user', some return directly
+        // Support both { user: {...} } and direct {...}
         const user = userData.user ? userData.user : userData;
 
         userId = user.id;
@@ -169,7 +168,7 @@ editDescBtn.addEventListener('click', async () => {
     }
 });
 
-// ================= Load services =================
+// ================= Load Services =================
 async function loadServices() {
     if (!userId || !servicesList) return;
     try {
@@ -197,7 +196,7 @@ async function loadServices() {
     }
 }
 
-// ================= Load messages =================
+// ================= Load Messages =================
 async function loadMessages() {
     if (!userId || !messagesList) return;
     try {
