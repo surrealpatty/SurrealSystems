@@ -65,6 +65,8 @@ button:hover { background-color: #3b40a1; }
 .card:hover { transform: translateY(-5px); }
 .card h3 { margin-bottom: 10px; color: #4e54c8; }
 .card p { margin: 5px 0; color: #555; }
+
+/* New Service Section */
 #newServiceSection {
     display: none;
     flex-direction: column;
@@ -85,11 +87,13 @@ button:hover { background-color: #3b40a1; }
     <h1 id="profile-username">Loading username...</h1>
     <p id="profile-description">Loading description...</p>
     <button type="button" id="editDescBtn">Edit Description</button>
+    <button type="button" id="goToServicesBtn">Go to Services</button>
+    <button type="button" id="goToMessagesBtn">Go to Messages</button>
 
     <h2>Your Services</h2>
     <div id="services-list"><p>Loading services...</p></div>
 
-    <!-- New Service Section -->
+    <!-- Create Service Section -->
     <button type="button" id="toggleNewServiceBtn">Add New Service</button>
     <div id="newServiceSection">
         <input type="text" id="newServiceTitle" placeholder="Service Title">
@@ -109,6 +113,8 @@ if (!token) window.location.href = 'index.html';
 const profileUsername = document.getElementById('profile-username');
 const profileDescription = document.getElementById('profile-description');
 const editDescBtn = document.getElementById('editDescBtn');
+const goToServicesBtn = document.getElementById('goToServicesBtn');
+const goToMessagesBtn = document.getElementById('goToMessagesBtn');
 const servicesList = document.getElementById('services-list');
 const logoutBtn = document.getElementById('logoutBtn');
 
@@ -193,8 +199,7 @@ async function loadServices() {
         const data = await res.json();
         const services = data.services || data;
 
-        // Filter only the logged-in user's services
-        const userServices = services.filter(s => s.user?.id === userId);
+        const userServices = services.filter(s => s.user?.id == userId);
 
         servicesList.innerHTML = '';
         if (!userServices.length) {
@@ -258,6 +263,10 @@ logoutBtn.addEventListener('click', () => {
     localStorage.clear();
     window.location.href = 'index.html';
 });
+
+// ---------------- Go to other pages ----------------
+goToServicesBtn.addEventListener('click', () => { window.location.href = 'services.html'; });
+goToMessagesBtn.addEventListener('click', () => { window.location.href = 'messages.html'; });
 
 // ---------------- Initialize ----------------
 window.addEventListener('load', async () => {
