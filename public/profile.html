@@ -50,22 +50,28 @@ button {
     padding: 10px 20px;
     font-size: 1rem;
     color: #fff;
-    background-color: #4e54c8;
     border: none;
     border-radius: 8px;
     cursor: pointer;
     margin-top: 5px;
     transition: 0.3s;
 }
-button:hover { background-color: #3b40a1; }
 
-.button-group {
-    display: flex;
-    gap: 10px;
-    justify-content: center;
-    flex-wrap: wrap;
-    margin-bottom: 20px;
+/* ---------- Floating Buttons on Side ---------- */
+.floating-btn {
+    position: fixed;
+    right: 20px;
+    width: 150px;
+    text-align: center;
+    border-radius: 50px;
+    padding: 15px;
+    font-weight: bold;
 }
+#goToServicesBtn { background-color: #28a745; bottom: 160px; }
+#goToMessagesBtn { background-color: #17a2b8; bottom: 100px; }
+#addNewServiceBtn { background-color: #ffc107; bottom: 40px; }
+
+.floating-btn:hover { opacity: 0.85; }
 
 /* ---------- Services Grid ---------- */
 #services-list {
@@ -104,22 +110,13 @@ button:hover { background-color: #3b40a1; }
     justify-content: center;
 }
 
-/* ---------- Bottom Add Service Button ---------- */
-#addNewServiceBtn {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    background-color: #28a745;
-}
-#addNewServiceBtn:hover { background-color: #218838; }
-
 /* ---------- Logout ---------- */
 .logout-btn { background-color: #ff4d4f; }
 .logout-btn:hover { background-color: #c30000; }
 
 @media (max-width: 480px) {
     .container { padding: 2rem 1rem; }
-    button { font-size: 0.9rem; padding: 8px 16px; }
+    .floating-btn { width: 120px; padding: 12px; right: 10px; }
 }
 </style>
 </head>
@@ -130,21 +127,19 @@ button:hover { background-color: #3b40a1; }
     <p id="profile-description">Loading description...</p>
     <button type="button" id="editDescBtn">Edit Description</button>
 
-    <div class="button-group">
-        <button type="button" id="goToServicesBtn">Go to Services</button>
-        <button type="button" id="goToMessagesBtn">Go to Messages</button>
-    </div>
-
     <h2>Your Services</h2>
     <div id="services-list"><p>Loading services...</p></div>
 
     <button type="button" id="logoutBtn" class="logout-btn">Logout</button>
 </div>
 
-<!-- Bottom Add Service Button -->
-<button id="addNewServiceBtn">+ Add Service</button>
+<!-- Floating Buttons -->
+<button type="button" id="goToServicesBtn" class="floating-btn">Services</button>
+<button type="button" id="goToMessagesBtn" class="floating-btn">Messages</button>
+<button id="addNewServiceBtn" class="floating-btn">+ Add Service</button>
 
 <script>
+// ---------------- Constants ----------------
 const API_URL = 'https://codecrowds.onrender.com';
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'index.html';
@@ -161,7 +156,7 @@ const addNewServiceBtn = document.getElementById('addNewServiceBtn');
 
 let userId = localStorage.getItem('userId');
 
-// ---------------- Navigation Buttons ----------------
+// ---------------- Navigation ----------------
 goToServicesBtn.addEventListener('click', () => { window.location.href = 'services.html'; });
 goToMessagesBtn.addEventListener('click', () => { window.location.href = 'messages.html'; });
 
@@ -245,7 +240,7 @@ async function loadServices() {
     }
 }
 
-// ---------------- Create Service Card ----------------
+// ---------------- Service Card Creation ----------------
 function createServiceCard(service) {
     const div = document.createElement('div');
     div.className = 'card';
@@ -274,7 +269,6 @@ function createServiceCard(service) {
     const cancelBtn = div.querySelectorAll('.cancelEditBtn')[0];
 
     if (!service.id) {
-        // New blank service
         editBtn.addEventListener('click', async () => {
             const title = div.querySelector('.editTitle').value.trim();
             const description = div.querySelector('.editDesc').value.trim();
@@ -299,7 +293,6 @@ function createServiceCard(service) {
         });
         cancelBtn.addEventListener('click', () => { div.remove(); });
     } else {
-        // Existing service edit
         editBtn.addEventListener('click', () => {
             div.querySelector('.service-content').style.display = 'none';
             div.querySelector('.service-edit').style.display = 'block';
@@ -360,7 +353,7 @@ function createServiceCard(service) {
 // ---------------- Add Blank Service ----------------
 addNewServiceBtn.addEventListener('click', () => {
     const newCard = createServiceCard({ title:'', description:'', price:'' });
-    servicesList.prepend(newCard); // Add at top
+    servicesList.prepend(newCard); 
     newCard.querySelector('.service-edit').style.display = 'block';
     newCard.querySelector('.editServiceBtn').textContent = 'Save';
     newCard.querySelector('.cancelEditBtn').style.display = 'inline-block';
