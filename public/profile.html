@@ -61,7 +61,7 @@ button:hover { opacity: 0.85; }
 .logout-btn { background-color: #ff4d4f; }
 .logout-btn:hover { background-color: #c30000; }
 
-/* ---------- Floating Buttons ---------- */
+/* ---------- Floating Buttons (Desktop) ---------- */
 .floating-btn {
     position: fixed;
     right: 20px;
@@ -127,29 +127,27 @@ button:hover { opacity: 0.85; }
     text-align: center;
 }
 
+/* ---------- Mobile Button Row ---------- */
+.mobile-button-row {
+    display: none; /* hidden on desktop */
+    position: fixed;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    padding: 0 10px;
+    box-sizing: border-box;
+    gap: 5px;
+}
+
 /* ---------- Mobile Adjustments ---------- */
 @media (max-width: 480px) {
-    .container { padding: 2rem 1rem; }
+    /* Hide desktop floating buttons on mobile */
+    .floating-btn { display: none; }
 
-    .floating-btn {
-        position: static;
-        width: auto;
-        transform: none;
-        display: inline-block;
-        margin: 5px 0;
-    }
-
-    .mobile-button-row {
-        position: fixed;
-        bottom: 10px;
-        left: 0;
-        width: 100%;
-        display: flex;
-        justify-content: space-around;
-        padding: 0 10px;
-        box-sizing: border-box;
-        gap: 5px;
-    }
+    /* Show mobile row */
+    .mobile-button-row { display: flex; }
 }
 </style>
 </head>
@@ -186,6 +184,7 @@ button:hover { opacity: 0.85; }
 </div>
 
 <script>
+// ---------- Variables ----------
 const API_URL = 'https://codecrowds.onrender.com';
 const token = localStorage.getItem('token');
 if (!token) window.location.href = 'index.html';
@@ -211,7 +210,7 @@ const mobMessagesBtn = document.getElementById('mobMessagesBtn');
 
 let userId = localStorage.getItem('userId');
 
-// ------------- Load Profile ----------------
+// ---------- Load Profile ----------
 async function loadProfile() {
     try {
         const res = await fetch(`${API_URL}/profile`, { headers: { Authorization: `Bearer ${token}` } });
@@ -233,7 +232,7 @@ async function loadProfile() {
     }
 }
 
-// ------------- Edit Description ----------------
+// ---------- Edit Description ----------
 let editingDesc = false;
 editDescBtn.addEventListener('click', async () => {
     editingDesc = !editingDesc;
@@ -264,7 +263,7 @@ editDescBtn.addEventListener('click', async () => {
     }
 });
 
-// ------------- Load Services ----------------
+// ---------- Load Services ----------
 async function loadServices() {
     if (!userId) return;
     try {
@@ -368,7 +367,7 @@ async function loadServices() {
     }
 }
 
-// ------------- Add New Service ----------------
+// ---------- Add New Service ----------
 function toggleNewService() {
     newServiceSection.style.display = newServiceSection.style.display === 'flex' ? 'none' : 'flex';
 }
@@ -402,7 +401,7 @@ createServiceBtn.addEventListener('click', async () => {
     }
 });
 
-// ------------- Navigation ----------------
+// ---------- Navigation ----------
 function goToServices() { window.location.href = 'services.html'; }
 function goToMessages() { window.location.href = 'messages.html'; }
 
@@ -411,13 +410,13 @@ goToMessagesBtn.addEventListener('click', goToMessages);
 mobServicesBtn.addEventListener('click', goToServices);
 mobMessagesBtn.addEventListener('click', goToMessages);
 
-// ------------- Logout ----------------
+// ---------- Logout ----------
 logoutBtn.addEventListener('click', () => {
     localStorage.clear();
     window.location.href = 'index.html';
 });
 
-// ------------- Initialize ----------------
+// ---------- Initialize ----------
 window.addEventListener('load', async () => {
     await loadProfile();
     await loadServices();
