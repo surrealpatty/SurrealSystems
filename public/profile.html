@@ -38,7 +38,6 @@ h1, h2 { color: #4e54c8; margin-bottom: 0.5rem; }
 #profile-description {
     min-height: 50px;
     margin-bottom: 10px;
-    cursor: text;
 }
 #profile-description[contenteditable="true"] {
     border: 1px solid #4e54c8;
@@ -83,7 +82,12 @@ button:hover { transform: translateY(-5px); opacity: 0.9; }
 .card p { margin: 5px 0; color: #555; }
 
 /* ---------- New Service Section ---------- */
-#newServiceSection { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
+#newServiceSection {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
 #newServiceSection input, #newServiceSection textarea {
     padding: 10px;
     border-radius: 8px;
@@ -91,7 +95,7 @@ button:hover { transform: translateY(-5px); opacity: 0.9; }
     width: 100%;
 }
 
-/* ---------- Floating Side Buttons (Desktop) ---------- */
+/* ---------- Floating Buttons ---------- */
 .floating-btn {
     position: fixed;
     right: 20px;
@@ -108,7 +112,7 @@ button:hover { transform: translateY(-5px); opacity: 0.9; }
 #goToMessagesBtn { background-color: #17a2b8; bottom: 100px; }
 #addNewServiceBtn { background-color: #ffc107; color: #333; bottom: 40px; }
 
-/* ---------- Mobile Bottom Row Buttons ---------- */
+/* ---------- Mobile Bottom Row ---------- */
 .mobile-button-row {
     display: none;
     position: fixed;
@@ -146,6 +150,7 @@ button:hover { transform: translateY(-5px); opacity: 0.9; }
 <div class="container">
     <h1 id="profile-username">Loading username...</h1>
     <p id="profile-description">Loading description...</p>
+    <button type="button" id="editDescBtn">Edit Description</button>
 
     <h2>Your Services</h2>
     <div id="services-list"><p>Loading services...</p></div>
@@ -179,6 +184,7 @@ if (!token) window.location.href = 'index.html';
 
 const profileUsername = document.getElementById('profile-username');
 const profileDescription = document.getElementById('profile-description');
+const editDescBtn = document.getElementById('editDescBtn');
 const servicesList = document.getElementById('services-list');
 const logoutBtn = document.getElementById('logoutBtn');
 
@@ -188,65 +194,65 @@ const newServiceTitle = document.getElementById('newServiceTitle');
 const newServiceDesc = document.getElementById('newServiceDesc');
 const newServicePrice = document.getElementById('newServicePrice');
 
-let userId = localStorage.getItem('userId');
+let userId = localStorage.getItem('profileUserId') || localStorage.getItem('userId');
 
-// ---------- Load Profile ----------
+// Load profile
 async function loadProfile() {
-    if (!userId) { profileUsername.textContent = 'Not logged in'; return; }
+    if (!userId) {
+        profileUsername.textContent = 'Not logged in';
+        return;
+    }
     try {
-        const res = await fetch(`${API_URL}/users/${userId}`, { headers: { Authorization: `Bearer ${token}` } });
+        const res = await fetch(`${API_URL}/users/${userId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
         if (!res.ok) throw new Error('Failed to fetch profile');
         const user = await res.json();
+
         profileUsername.textContent = user.username || 'Unknown User';
         profileDescription.textContent = user.description || 'No description yet.';
-        localStorage.setItem('description', user.description || '');
+
+        if (user.id == localStorage.getItem('userId')) {
+            editDescBtn.style.display = 'inline-block';
+        } else {
+            editDescBtn.style.display = 'none';
+        }
     } catch (err) {
         console.error(err);
         profileUsername.textContent = 'Unknown User';
         profileDescription.textContent = 'Failed to load description';
+        editDescBtn.style.display = 'none';
     }
 }
 
-// ---------- Inline Editing ----------
-profileDescription.addEventListener('click', () => {
-    profileDescription.contentEditable = 'true';
-    profileDescription.focus();
-});
+// Edit description
+let editingDesc = false;
+editDescBtn.addEventListener('click', async () => {
+    editingDesc = !editingDesc;
+    profileDescription.contentEditable = editingDesc ? 'true' : 'false';
+    editDescBtn.textContent = editingDesc ? 'Save Description' : 'Edit Description';
 
-// Save on blur
-profileDescription.addEventListener('blur', async () => {
-    profileDescription.contentEditable = 'false';
-    const newDesc = profileDescription.textContent.trim();
-    if (!newDesc) return;
-
-    try {
-        const res = await fetch(`${API_URL}/users/${userId}`, {
-            method: 'PUT',
-            headers: { 
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ description: newDesc })
-        });
-        const updatedUser = await res.json();
-        profileDescription.textContent = updatedUser.user?.description || newDesc;
-        localStorage.setItem('description', updatedUser.user?.description || newDesc);
-    } catch (err) {
-        console.error(err);
-        profileDescription.textContent = localStorage.getItem('description') || 'Failed to save';
-        alert('Failed to save description.');
+    if (!editingDesc) {
+        const newDesc = profileDescription.textContent.trim();
+        try {
+            const res = await fetch(`${API_URL}/users/${userId}`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    Authorization: `Bearer ${token}` 
+                },
+                body: JSON.stringify({ description: newDesc })
+            });
+            const updatedUser = await res.json();
+            profileDescription.textContent = updatedUser.user?.description || newDesc;
+        } catch (err) {
+            console.error(err);
+            alert('Failed to save description.');
+        }
     }
 });
 
-// Save on Enter key
-profileDescription.addEventListener('keydown', async (e) => {
-    if (e.key === 'Enter') {
-        e.preventDefault();
-        profileDescription.blur();
-    }
-});
-
-// ---------- Services ----------
+// Load services
 async function loadServices() {
     try {
         const res = await fetch(`${API_URL}/services`, { headers: { Authorization: `Bearer ${token}` } });
@@ -254,7 +260,10 @@ async function loadServices() {
         const userServices = services.filter(s => s.user?.id == userId);
         servicesList.innerHTML = '';
 
-        if (!userServices.length) { servicesList.innerHTML = '<p>No services yet.</p>'; return; }
+        if (!userServices.length) {
+            servicesList.innerHTML = '<p>No services yet.</p>';
+            return;
+        }
 
         userServices.forEach(s => {
             const div = document.createElement('div');
@@ -268,13 +277,14 @@ async function loadServices() {
     }
 }
 
-// ---------- New Service ----------
+// Toggle New Service
 function toggleNewService() {
     newServiceSection.style.display = newServiceSection.style.display === 'flex' ? 'none' : 'flex';
 }
 document.getElementById('addNewServiceBtn').addEventListener('click', toggleNewService);
 document.getElementById('mobileAddServiceBtn').addEventListener('click', toggleNewService);
 
+// Create service
 createServiceBtn.addEventListener('click', async () => {
     const title = newServiceTitle.value.trim();
     const description = newServiceDesc.value.trim();
@@ -292,10 +302,13 @@ createServiceBtn.addEventListener('click', async () => {
         newServicePrice.value = '';
         newServiceSection.style.display = 'none';
         await loadServices();
-    } catch (err) { console.error(err); alert('Failed to create service.'); }
+    } catch (err) {
+        console.error(err);
+        alert('Failed to create service.');
+    }
 });
 
-// ---------- Navigation ----------
+// Navigation
 function goToServices() { window.location.href = 'services.html'; }
 function goToMessages() { window.location.href = 'messages.html'; }
 document.getElementById('goToServicesBtn').addEventListener('click', goToServices);
@@ -303,11 +316,14 @@ document.getElementById('goToMessagesBtn').addEventListener('click', goToMessage
 document.getElementById('mobileServicesBtn').addEventListener('click', goToServices);
 document.getElementById('mobileMessagesBtn').addEventListener('click', goToMessages);
 
-// ---------- Logout ----------
+// Logout
 logoutBtn.addEventListener('click', () => { localStorage.clear(); window.location.href = 'index.html'; });
 
-// ---------- Initialize ----------
-window.addEventListener('load', async () => { await loadProfile(); await loadServices(); });
+// On load
+window.addEventListener('load', async () => {
+    await loadProfile();
+    await loadServices();
+});
 </script>
 </body>
 </html>
