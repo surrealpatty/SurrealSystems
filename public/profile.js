@@ -20,21 +20,25 @@ const mobileServicesBtn = document.getElementById('mobileServicesBtn');
 const mobileMessagesBtn = document.getElementById('mobileMessagesBtn');
 const mobileAddServiceBtn = document.getElementById('mobileAddServiceBtn');
 
-let userId = localStorage.getItem('profileUserId') || localStorage.getItem('userId');
+let currentUserId = localStorage.getItem('userId'); // Always use logged-in user's ID
 
 // ---------------- Load Profile ----------------
 async function loadProfile() {
     try {
-        const res = await fetch(`${API_URL}/users/${userId}`, {
+        const res = await fetch(`${API_URL}/users/profile`, {
             headers: { Authorization: `Bearer ${token}` }
         });
+
+        if (!res.ok) throw new Error('Failed to fetch profile');
+
         const user = await res.json();
         profileUsername.textContent = user.username || 'Unknown User';
         profileDescription.textContent = user.description || 'No description yet.';
         profileUsername.classList.add('fade-in');
         profileDescription.classList.add('fade-in');
 
-        if (user.id == localStorage.getItem('userId')) editDescBtn.classList.remove('hidden');
+        // Show edit button only if viewing own profile
+        if (user.id == currentUserId) editDescBtn.classList.remove('hidden');
     } catch (err) {
         console.error(err);
         profileUsername.textContent = 'Unknown User';
@@ -52,13 +56,13 @@ editDescBtn.addEventListener('click', async () => {
     if (!editingDesc) {
         const newDesc = profileDescription.textContent.trim();
         try {
-            const res = await fetch(`${API_URL}/users/${userId}`, {
+            const res = await fetch(`${API_URL}/users/${currentUserId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ description: newDesc })
             });
             const updatedUser = await res.json();
-            profileDescription.textContent = updatedUser.user?.description || newDesc;
+            profileDescription.textContent = updatedUser.description || newDesc;
         } catch (err) {
             console.error(err);
             alert('Failed to save description.');
@@ -75,7 +79,7 @@ async function loadServices() {
             headers: { Authorization: `Bearer ${token}` }
         });
         const services = await res.json();
-        const userServices = services.filter(s => s.user?.id == userId);
+        const userServices = services.filter(s => s.user?.id == currentUserId);
 
         if (!userServices.length) {
             const placeholder = document.createElement('div');
