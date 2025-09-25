@@ -10,7 +10,7 @@ router.post('/login', login);
 // Profile route
 router.get('/profile', authenticateToken, getProfile);
 
-// Upgrade account
+// Upgrade account route
 router.patch('/upgrade', authenticateToken, upgradeToPaid);
 
 module.exports = router;

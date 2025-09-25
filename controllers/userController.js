@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            tier: 'free' // 👈 new users start free
+            tier: 'free' // new users start as free
         });
 
         res.status(201).json({ message: 'User registered successfully', user });
@@ -54,7 +54,7 @@ exports.getProfile = async (req, res) => {
     }
 };
 
-// 👇 Upgrade account to paid
+// Upgrade account to paid
 exports.upgradeToPaid = async (req, res) => {
     try {
         const user = await User.findByPk(req.user.id);
