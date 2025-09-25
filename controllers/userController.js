@@ -12,7 +12,7 @@ exports.register = async (req, res) => {
             username,
             email,
             password: hashedPassword,
-            tier: 'free' // new users start as free
+            tier: 'free' // new users start free
         });
 
         res.status(201).json({ message: 'User registered successfully', user });
@@ -45,7 +45,9 @@ exports.login = async (req, res) => {
 // Get profile
 exports.getProfile = async (req, res) => {
     try {
-        const user = await User.findByPk(req.user.id, { attributes: { exclude: ['password'] } });
+        const user = await User.findByPk(req.user.id, {
+            attributes: ['id', 'username', 'description', 'tier'] // 👈 include username
+        });
         if (!user) return res.status(404).json({ error: 'User not found' });
         res.json(user);
     } catch (err) {

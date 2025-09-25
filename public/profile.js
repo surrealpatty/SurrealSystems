@@ -4,9 +4,9 @@ if (!token) window.location.href = 'index.html';
 
 const profileUsername = document.getElementById('profile-username');
 const profileDescription = document.getElementById('profile-description');
-const profileTier = document.getElementById('profile-tier'); // display free/paid
+const profileTier = document.getElementById('profile-tier');
 const editDescBtn = document.getElementById('editDescBtn');
-const upgradeBtn = document.getElementById('upgradeBtn'); // optional button for upgrading
+const upgradeBtn = document.getElementById('upgradeBtn');
 const servicesList = document.getElementById('services-list');
 const logoutBtn = document.getElementById('logoutBtn');
 const newServiceSection = document.getElementById('newServiceSection');
@@ -15,7 +15,7 @@ const newServiceTitle = document.getElementById('newServiceTitle');
 const newServiceDesc = document.getElementById('newServiceDesc');
 const newServicePrice = document.getElementById('newServicePrice');
 
-let currentUserId = localStorage.getItem('userId'); // always logged-in user
+let currentUserId = localStorage.getItem('userId');
 
 // ---------------- Load Profile ----------------
 async function loadProfile() {
@@ -23,7 +23,6 @@ async function loadProfile() {
         const res = await fetch(`${API_URL}/users/profile`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-
         if (!res.ok) throw new Error('Failed to fetch profile');
 
         const user = await res.json();
@@ -36,7 +35,6 @@ async function loadProfile() {
         profileDescription.classList.add('fade-in');
         profileTier.classList.add('fade-in');
 
-        // Show buttons if viewing own profile
         if (user.id == currentUserId) {
             editDescBtn.classList.remove('hidden');
             if (user.tier === 'free') upgradeBtn.classList.remove('hidden');
@@ -93,7 +91,6 @@ upgradeBtn.addEventListener('click', async () => {
 // ---------------- Load Services ----------------
 async function loadServices() {
     servicesList.innerHTML = '';
-
     try {
         const res = await fetch(`${API_URL}/services`, {
             headers: { Authorization: `Bearer ${token}` }
@@ -104,10 +101,7 @@ async function loadServices() {
         if (!userServices.length) {
             const placeholder = document.createElement('div');
             placeholder.className = 'card fade-in';
-            placeholder.innerHTML = `
-                <h3>No Services Yet</h3>
-                <p>Add your first service using the + Service button</p>
-            `;
+            placeholder.innerHTML = `<h3>No Services Yet</h3><p>Add your first service using the + Service button</p>`;
             servicesList.appendChild(placeholder);
             return;
         }
@@ -124,11 +118,7 @@ async function loadServices() {
 
         const cards = document.querySelectorAll('#services-list .card');
         userServices.forEach((s, i) => {
-            cards[i].innerHTML = `
-                <h3>${s.title}</h3>
-                <p>${s.description}</p>
-                <p><strong>Price:</strong> $${s.price}</p>
-            `;
+            cards[i].innerHTML = `<h3>${s.title}</h3><p>${s.description}</p><p><strong>Price:</strong> $${s.price}</p>`;
         });
     } catch (err) {
         console.error(err);
