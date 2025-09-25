@@ -4,7 +4,9 @@ if (!token) window.location.href = 'index.html';
 
 const profileUsername = document.getElementById('profile-username');
 const profileDescription = document.getElementById('profile-description');
+const profileTier = document.getElementById('profile-tier'); // display free/paid
 const editDescBtn = document.getElementById('editDescBtn');
+const upgradeBtn = document.getElementById('upgradeBtn'); // optional button for upgrading
 const servicesList = document.getElementById('services-list');
 const logoutBtn = document.getElementById('logoutBtn');
 const newServiceSection = document.getElementById('newServiceSection');
@@ -13,14 +15,7 @@ const newServiceTitle = document.getElementById('newServiceTitle');
 const newServiceDesc = document.getElementById('newServiceDesc');
 const newServicePrice = document.getElementById('newServicePrice');
 
-const goToServicesBtn = document.getElementById('goToServicesBtn');
-const goToMessagesBtn = document.getElementById('goToMessagesBtn');
-const addNewServiceBtn = document.getElementById('addNewServiceBtn');
-const mobileServicesBtn = document.getElementById('mobileServicesBtn');
-const mobileMessagesBtn = document.getElementById('mobileMessagesBtn');
-const mobileAddServiceBtn = document.getElementById('mobileAddServiceBtn');
-
-let currentUserId = localStorage.getItem('userId'); // Always use logged-in user's ID
+let currentUserId = localStorage.getItem('userId'); // always logged-in user
 
 // ---------------- Load Profile ----------------
 async function loadProfile() {
@@ -32,17 +27,25 @@ async function loadProfile() {
         if (!res.ok) throw new Error('Failed to fetch profile');
 
         const user = await res.json();
+
         profileUsername.textContent = user.username || 'Unknown User';
         profileDescription.textContent = user.description || 'No description yet.';
+        profileTier.textContent = user.tier === 'paid' ? 'Paid Account' : 'Free Account';
+
         profileUsername.classList.add('fade-in');
         profileDescription.classList.add('fade-in');
+        profileTier.classList.add('fade-in');
 
-        // Show edit button only if viewing own profile
-        if (user.id == currentUserId) editDescBtn.classList.remove('hidden');
+        // Show buttons if viewing own profile
+        if (user.id == currentUserId) {
+            editDescBtn.classList.remove('hidden');
+            if (user.tier === 'free') upgradeBtn.classList.remove('hidden');
+        }
     } catch (err) {
         console.error(err);
         profileUsername.textContent = 'Unknown User';
         profileDescription.textContent = 'Failed to load description';
+        profileTier.textContent = '';
     }
 }
 
@@ -56,7 +59,7 @@ editDescBtn.addEventListener('click', async () => {
     if (!editingDesc) {
         const newDesc = profileDescription.textContent.trim();
         try {
-            const res = await fetch(`${API_URL}/users/${currentUserId}`, {
+            const res = await fetch(`${API_URL}/users/profile`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ description: newDesc })
@@ -67,6 +70,23 @@ editDescBtn.addEventListener('click', async () => {
             console.error(err);
             alert('Failed to save description.');
         }
+    }
+});
+
+// ---------------- Upgrade Account ----------------
+upgradeBtn.addEventListener('click', async () => {
+    try {
+        const res = await fetch(`${API_URL}/users/upgrade`, {
+            method: 'PATCH',
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        const data = await res.json();
+        profileTier.textContent = 'Paid Account';
+        upgradeBtn.classList.add('hidden');
+        alert(data.message);
+    } catch (err) {
+        console.error(err);
+        alert('Failed to upgrade account.');
     }
 });
 
@@ -120,8 +140,8 @@ async function loadServices() {
 function toggleNewService() {
     newServiceSection.style.display = newServiceSection.style.display === 'flex' ? 'none' : 'flex';
 }
-addNewServiceBtn.addEventListener('click', toggleNewService);
-mobileAddServiceBtn.addEventListener('click', toggleNewService);
+document.getElementById('addNewServiceBtn').addEventListener('click', toggleNewService);
+document.getElementById('mobileAddServiceBtn').addEventListener('click', toggleNewService);
 
 // ---------------- Create New Service ----------------
 createServiceBtn.addEventListener('click', async () => {
@@ -148,10 +168,10 @@ createServiceBtn.addEventListener('click', async () => {
 });
 
 // ---------------- Navigation ----------------
-goToServicesBtn.addEventListener('click', () => window.location.href = 'services.html');
-goToMessagesBtn.addEventListener('click', () => window.location.href = 'messages.html');
-mobileServicesBtn.addEventListener('click', () => window.location.href = 'services.html');
-mobileMessagesBtn.addEventListener('click', () => window.location.href = 'messages.html');
+document.getElementById('goToServicesBtn').addEventListener('click', () => window.location.href = 'services.html');
+document.getElementById('goToMessagesBtn').addEventListener('click', () => window.location.href = 'messages.html');
+document.getElementById('mobileServicesBtn').addEventListener('click', () => window.location.href = 'services.html');
+document.getElementById('mobileMessagesBtn').addEventListener('click', () => window.location.href = 'messages.html');
 
 // ---------------- Logout ----------------
 logoutBtn.addEventListener('click', () => {
