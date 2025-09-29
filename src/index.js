@@ -1,33 +1,26 @@
-// src/models/index.js
-const { Sequelize, DataTypes } = require('sequelize');
+const express = require('express');
+const { sequelize, testConnection } = require('./config/database');
+const userRoutes = require('./routes/user');
+const serviceRoutes = require('./routes/service');
+require('dotenv').config();
 
-const { DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT } = process.env;
+const app = express();
+app.use(express.json());
 
-const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-  host: DB_HOST,
-  port: DB_PORT,
-  dialect: 'mysql',
-  logging: false
-});
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/services', serviceRoutes);
 
-// User model
-const User = sequelize.define('User', {
-  username: { type: DataTypes.STRING, allowNull: false, unique: true },
-  email: { type: DataTypes.STRING, allowNull: false, unique: true },
-  password: { type: DataTypes.STRING, allowNull: false },
-  description: { type: DataTypes.TEXT, defaultValue: '' },
-  tier: { type: DataTypes.ENUM('free', 'paid'), defaultValue: 'free' }
-}, { tableName: 'users', timestamps: true });
+const PORT = process.env.PORT || 5000;
 
-// Service model
-const Service = sequelize.define('Service', {
-  title: { type: DataTypes.STRING, allowNull: false },
-  description: { type: DataTypes.TEXT, allowNull: false },
-  price: { type: DataTypes.FLOAT, allowNull: false }
-}, { tableName: 'services', timestamps: true });
+const startServer = async () => {
+  try {
+    await testConnection();
+    await sequelize.sync(); // creates tables if they don't exist
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  } catch (err) {
+    console.error('Server failed to start:', err);
+  }
+};
 
-// Associations
-User.hasMany(Service, { as: 'services', foreignKey: 'userId' });
-Service.belongsTo(User, { as: 'user', foreignKey: 'userId' });
-
-module.exports = { sequelize, User, Service };
+startServer();
