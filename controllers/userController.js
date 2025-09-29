@@ -1,4 +1,4 @@
-const { User } = require('../models');
+const { User } = require('../models'); // correct relative path
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -92,4 +92,5 @@ const upgradeToPaid = async (req, res) => {
     }
 };
 
+// ✅ Correct export
 module.exports = { register, login, getProfile, updateProfile, upgradeToPaid };
