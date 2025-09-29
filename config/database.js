@@ -7,7 +7,7 @@ const sequelize = new Sequelize(
     {
         dialect: 'postgres',
         dialectOptions: { ssl: { rejectUnauthorized: false } }, // required for Render
-        logging: false, // set to console.log for debugging
+        logging: false,
     }
 );
 
