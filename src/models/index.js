@@ -1,15 +1,7 @@
-const { Sequelize, DataTypes } = require('sequelize');
-const { DB_HOST, DB_NAME, DB_USER, DB_PASSWORD, DB_PORT } = process.env;
+const { DataTypes } = require('sequelize');
+const { sequelize } = require('../config/database');
 
-// Initialize Sequelize
-const sequelize = new Sequelize(DB_NAME, DB_USER, DB_PASSWORD, {
-  host: DB_HOST,
-  port: DB_PORT,
-  dialect: 'mysql',
-  logging: false
-});
-
-// Define User model
+// User model
 const User = sequelize.define('User', {
   username: { type: DataTypes.STRING, allowNull: false, unique: true },
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
@@ -18,7 +10,7 @@ const User = sequelize.define('User', {
   tier: { type: DataTypes.ENUM('free', 'paid'), defaultValue: 'free' }
 }, { tableName: 'users', timestamps: true });
 
-// Define Service model
+// Service model
 const Service = sequelize.define('Service', {
   title: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.TEXT, allowNull: false },
