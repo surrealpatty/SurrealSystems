@@ -1,5 +1,6 @@
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
+const { Service } = require('./Service');
 
 const User = sequelize.define('User', {
   username: { type: DataTypes.STRING, allowNull: false, unique: true },
@@ -11,5 +12,8 @@ const User = sequelize.define('User', {
   tableName: 'users',
   timestamps: true
 });
+
+// Associations
+User.hasMany(Service, { as: 'services', foreignKey: 'userId' });
 
 module.exports = { User };
