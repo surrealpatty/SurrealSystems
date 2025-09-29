@@ -8,25 +8,27 @@ const serviceRoutes = require('./routes/service');
 const app = express();
 app.use(express.json());
 
-// API routes
+// ---------------- API Routes ----------------
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
 
-// Serve frontend files
-const publicPath = path.join(__dirname, '..', 'public'); // public folder at project root
+// ---------------- Serve Frontend ----------------
+// public folder is at project root
+const publicPath = path.join(__dirname, '..', 'public');
 app.use(express.static(publicPath));
 
-// SPA routing for frontend (everything not starting with /api)
+// SPA routing: all non-API routes serve index.html
 app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(publicPath, 'index.html'));
 });
 
+// ---------------- Start Server ----------------
 const PORT = process.env.PORT || 5000;
 
 const startServer = async () => {
   try {
     await testConnection();
-    await sequelize.sync();
+    await sequelize.sync(); // ensures tables exist
     app.listen(PORT, () =>
       console.log(`🚀 CodeCrowds API & frontend running on port ${PORT}`)
     );
