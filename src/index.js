@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const path = require('path'); // ✅ Add this
+const path = require('path'); 
 const { sequelize, testConnection } = require('./models/database');
 const {
   register,
@@ -18,19 +18,20 @@ const PORT = process.env.PORT || 10000;
 app.use(cors());
 app.use(express.json());
 
-// ---------- Serve Frontend ----------
-app.use(express.static(path.join(__dirname, 'public'))); // serve static files
-
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html')); // serve homepage
-});
-
 // ---------- API Routes ----------
+// Make sure these come FIRST
 app.post('/register', register);
 app.post('/login', login);
 app.get('/profile/:id?', getProfile);
 app.put('/profile', updateProfile);
 app.post('/upgrade', upgradeToPaid);
+
+// ---------- Serve Frontend ----------
+app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // ---------- Start Server ----------
 (async () => {
