@@ -1,7 +1,6 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database'); // ✅ Import the Sequelize instance correctly
+const sequelize = require('../config/database'); // import the Sequelize instance
 
-// Define the User model
 const User = sequelize.define('User', {
   username: {
     type: DataTypes.STRING,
@@ -26,8 +25,8 @@ const User = sequelize.define('User', {
     defaultValue: 'free'
   }
 }, {
-  tableName: 'users',      // Optional: explicitly name the table
-  timestamps: true         // Adds createdAt and updatedAt
+  tableName: 'users',
+  timestamps: true
 });
 
 module.exports = { User };
