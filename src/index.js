@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
-const { sequelize, testConnection } = require('../database');
+const { sequelize, testConnection } = require('./models/database'); // ✅ fixed path
 const {
     register,
     login,
