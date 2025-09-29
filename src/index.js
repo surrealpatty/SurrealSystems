@@ -1,35 +1,21 @@
 const express = require('express');
-const path = require('path');
-const cors = require('cors');
-require('dotenv').config();
-const { sequelize } = require('./config/database');
+const app = express();
+const bodyParser = require('body-parser');
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
 
-const app = express();
-const PORT = process.env.PORT || 10000;
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Middleware
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Routes
+app.use('/api/users', userRoutes);
+app.use('/api/services', serviceRoutes);
 
-// API routes
-app.use('/users', userRoutes);        // ✅ API prefix matches frontend
-app.use('/services', serviceRoutes);  // ✅ API prefix matches frontend
-
-// Serve frontend files
-app.use(express.static(path.join(__dirname, '../public')));
-
-// SPA fallback
-app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../public/index.html'));
-});
+// Health check
+app.get('/', (req, res) => res.send('API is running'));
 
 // Start server
-sequelize.authenticate()
-  .then(() => {
-    console.log('✅ Database connected');
-    app.listen(PORT, () => console.log(`🚀 Server running on http://localhost:${PORT}`));
-  })
-  .catch(err => console.error('❌ Database connection failed', err));
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, async () => {
+  console.log(`Server running on port ${PORT}`);
+});
