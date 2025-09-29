@@ -1,6 +1,8 @@
+// src/models/index.js
+const { Sequelize, DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
-const { DataTypes } = require('sequelize');
 
+// Define User
 const User = sequelize.define('User', {
   username: { type: DataTypes.STRING, allowNull: false, unique: true },
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
@@ -9,6 +11,7 @@ const User = sequelize.define('User', {
   tier: { type: DataTypes.ENUM('free', 'paid'), defaultValue: 'free' }
 }, { tableName: 'users', timestamps: true });
 
+// Define Service
 const Service = sequelize.define('Service', {
   title: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.TEXT, allowNull: false },
