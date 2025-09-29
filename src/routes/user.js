@@ -1,18 +1,24 @@
 const express = require('express');
 const router = express.Router();
-const { register, login, getProfile, updateProfile, upgradeToPaid } = require('../controllers/userController');
+const { 
+  register, 
+  login, 
+  getProfile, 
+  updateProfile, 
+  upgradeToPaid 
+} = require('../controllers/userController');
 const authenticateToken = require('../middlewares/authenticateToken');
 
-// Auth
+// ---------- Auth ----------
 router.post('/register', register);
 router.post('/login', login);
 
-// Profile
+// ---------- Profile ----------
 router.get('/profile', authenticateToken, getProfile); // own profile
-router.get('/:id', authenticateToken, getProfile);     // any user
-router.put('/:id', authenticateToken, updateProfile);  // update own
+router.get('/:id', authenticateToken, getProfile);     // any user by id
+router.put('/profile', authenticateToken, updateProfile); // update own profile
 
-// Upgrade
+// ---------- Upgrade ----------
 router.patch('/upgrade', authenticateToken, upgradeToPaid);
 
 module.exports = router;
