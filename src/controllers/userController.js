@@ -7,31 +7,18 @@ const jwt = require('jsonwebtoken');
 const register = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-
-    if (!username || !email || !password) {
-      return res.status(400).json({ error: 'All fields are required' });
-    }
+    if (!username || !email || !password) return res.status(400).json({ error: 'All fields are required' });
 
     const existing = await User.findOne({ where: { email } });
     if (existing) return res.status(400).json({ error: 'Email already in use' });
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
     const user = await User.create({ username, email, password: hashedPassword, tier: 'free' });
 
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-    const safeUser = {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      description: user.description,
-      tier: user.tier
-    };
-
-    res.status(201).json({ token, user: safeUser });
+    res.status(201).json({ token, user: { id: user.id, username: user.username, email: user.email, description: user.description, tier: user.tier } });
   } catch (err) {
-    console.error('❌ Registration error:', err);
+    console.error(err);
     res.status(500).json({ error: 'Registration failed' });
   }
 };
@@ -40,7 +27,6 @@ const register = async (req, res) => {
 const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-
     if (!email || !password) return res.status(400).json({ error: 'Email and password are required' });
 
     const user = await User.findOne({ where: { email } });
@@ -50,18 +36,9 @@ const login = async (req, res) => {
     if (!isMatch) return res.status(400).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
-
-    const safeUser = {
-      id: user.id,
-      username: user.username,
-      email: user.email,
-      description: user.description,
-      tier: user.tier
-    };
-
-    res.json({ token, user: safeUser });
+    res.json({ token, user: { id: user.id, username: user.username, email: user.email, description: user.description, tier: user.tier } });
   } catch (err) {
-    console.error('❌ Login error:', err);
+    console.error(err);
     res.status(500).json({ error: 'Login failed' });
   }
 };
@@ -70,16 +47,11 @@ const login = async (req, res) => {
 const getProfile = async (req, res) => {
   try {
     const userId = req.params.id || req.user.id;
-    const user = await User.findByPk(userId, {
-      attributes: ['id', 'username', 'email', 'description', 'tier'],
-      include: [{ model: Service, as: 'services' }]
-    });
-
+    const user = await User.findByPk(userId, { include: [{ model: Service, as: 'services' }] });
     if (!user) return res.status(404).json({ error: 'User not found' });
-
     res.json({ user });
   } catch (err) {
-    console.error('❌ Get profile error:', err);
+    console.error(err);
     res.status(500).json({ error: 'Failed to load profile' });
   }
 };
@@ -87,18 +59,14 @@ const getProfile = async (req, res) => {
 // ---------------- Update Profile ----------------
 const updateProfile = async (req, res) => {
   try {
-    const userId = req.user.id;
-    const { description } = req.body;
-
-    const user = await User.findByPk(userId);
+    const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    user.description = description || user.description;
+    user.description = req.body.description || user.description;
     await user.save();
-
     res.json({ user });
   } catch (err) {
-    console.error('❌ Update profile error:', err);
+    console.error(err);
     res.status(500).json({ error: 'Failed to update profile' });
   }
 };
@@ -111,48 +79,11 @@ const upgradeToPaid = async (req, res) => {
 
     user.tier = 'paid';
     await user.save();
-
     res.json({ message: 'Account upgraded to paid', user });
   } catch (err) {
-    console.error('❌ Upgrade account error:', err);
+    console.error(err);
     res.status(500).json({ error: 'Failed to upgrade account' });
   }
 };
 
-// ---------------- Services ----------------
-const getAllServices = async (req, res) => {
-  try {
-    const services = await Service.findAll({
-      include: [{ model: User, as: 'user', attributes: ['id', 'username', 'email'] }]
-    });
-    res.json({ services });
-  } catch (err) {
-    console.error('❌ Get services error:', err);
-    res.status(500).json({ error: 'Failed to load services' });
-  }
-};
-
-const createService = async (req, res) => {
-  try {
-    const { title, description, price } = req.body;
-    const userId = req.user.id;
-
-    if (!title || !price) return res.status(400).json({ error: 'Title and price are required' });
-
-    const service = await Service.create({ title, description, price, userId });
-    res.status(201).json({ message: 'Service created', service });
-  } catch (err) {
-    console.error('❌ Create service error:', err);
-    res.status(500).json({ error: 'Failed to create service' });
-  }
-};
-
-module.exports = {
-  register,
-  login,
-  getProfile,
-  updateProfile,
-  upgradeToPaid,
-  getAllServices,
-  createService
-};
+module.exports = { register, login, getProfile, updateProfile, upgradeToPaid };

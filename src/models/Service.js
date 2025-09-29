@@ -1,29 +1,13 @@
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/database');
-const { User } = require('./User'); // import User for association
+const { sequelize } = require('../config/database');
+const { User } = require('./User');
 
 const Service = sequelize.define('Service', {
-  id: {
-    type: DataTypes.INTEGER,
-    autoIncrement: true,
-    primaryKey: true
-  },
-  title: {
-    type: DataTypes.STRING,
-    allowNull: false
-  },
-  description: {
-    type: DataTypes.TEXT,
-    defaultValue: ''
-  },
-  price: {
-    type: DataTypes.FLOAT,
-    defaultValue: 0
-  },
-  userId: { // foreign key to User
-    type: DataTypes.INTEGER,
-    allowNull: false
-  }
+  title: { type: DataTypes.STRING, allowNull: false },
+  description: { type: DataTypes.TEXT },
+  price: { type: DataTypes.FLOAT, defaultValue: 0 },
+  featured: { type: DataTypes.BOOLEAN, defaultValue: false },
+  hidden: { type: DataTypes.BOOLEAN, defaultValue: false }
 }, {
   tableName: 'services',
   timestamps: true

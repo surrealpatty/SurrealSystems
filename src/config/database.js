@@ -1,6 +1,5 @@
 const { Sequelize } = require('sequelize');
 
-// ---------- Initialize Sequelize ----------
 const sequelize = new Sequelize(
   process.env.DB_NAME,
   process.env.DB_USER,
@@ -16,7 +15,6 @@ const sequelize = new Sequelize(
   }
 );
 
-// ---------- Test DB Connection ----------
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
@@ -27,5 +25,4 @@ const testConnection = async () => {
   }
 };
 
-// ---------- Export ----------
 module.exports = { sequelize, testConnection };
