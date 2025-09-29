@@ -3,11 +3,11 @@ const express = require('express');
 const cors = require('cors');
 const { sequelize, testConnection } = require('./models/database');
 const {
-    register,
-    login,
-    getProfile,
-    updateProfile,
-    upgradeToPaid
+  register,
+  login,
+  getProfile,
+  updateProfile,
+  upgradeToPaid
 } = require('./controllers/userController');
 
 const app = express();
@@ -26,14 +26,14 @@ app.post('/upgrade', upgradeToPaid);
 
 // Start server after DB connection
 (async () => {
-    try {
-        await testConnection();   // Test DB connection
-        await sequelize.sync();   // Sync models
-        app.listen(PORT, () => {
-            console.log(`🚀 Server running on http://localhost:${PORT}`);
-        });
-    } catch (err) {
-        console.error('❌ Server failed to start:', err);
-        process.exit(1);
-    }
+  try {
+    await testConnection();
+    await sequelize.sync();
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on http://localhost:${PORT}`);
+    });
+  } catch (err) {
+    console.error('❌ Server failed to start:', err);
+    process.exit(1);
+  }
 })();
