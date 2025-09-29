@@ -2,16 +2,15 @@
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 
-// Create Sequelize instance
 const sequelize = new Sequelize(
-    process.env.DB_NAME,       // database name
-    process.env.DB_USER,       // database user
-    process.env.DB_PASSWORD,   // database password
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
     {
         host: process.env.DB_HOST,
         port: process.env.DB_PORT,
         dialect: 'postgres',
-        logging: false,       // turn off SQL logs
+        logging: false,
         dialectOptions: {
             ssl: {
                 require: true,
@@ -27,13 +26,21 @@ const sequelize = new Sequelize(
     }
 );
 
-// Test DB connection function
-const testConnection = async () => {
-    try {
-        await sequelize.authenticate();
-        console.log('✅ PostgreSQL connected');
-    } catch (err) {
-        console.error('❌ Database connection failed:', err);
+const testConnection = async (retries = 5, delay = 5000) => {
+    for (let i = 0; i < retries; i++) {
+        try {
+            await sequelize.authenticate();
+            console.log('✅ PostgreSQL connected');
+            return;
+        } catch (err) {
+            console.error(`❌ Database connection failed (attempt ${i + 1}):`, err.message);
+            if (i < retries - 1) {
+                console.log(`Retrying in ${delay / 1000} seconds...`);
+                await new Promise(r => setTimeout(r, delay));
+            } else {
+                console.error('❌ Could not connect to database after multiple attempts.');
+            }
+        }
     }
 };
 
