@@ -14,7 +14,8 @@ if (signupForm) {
         const password = document.getElementById('registerPassword').value.trim();
 
         try {
-            const res = await fetch(`${API_URL}/users/register`, {
+            // ✅ Updated route
+            const res = await fetch(`${API_URL}/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, email, password })
@@ -48,7 +49,8 @@ if (loginForm) {
         const password = document.getElementById('loginPassword').value.trim();
 
         try {
-            const res = await fetch(`${API_URL}/users/login`, {
+            // ✅ Updated route
+            const res = await fetch(`${API_URL}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ email, password })
