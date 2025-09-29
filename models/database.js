@@ -1,29 +1,39 @@
 require('dotenv').config();
-const { Sequelize } = require('sequelize');
+const express = require('express');
+const cors = require('cors');
+const { sequelize, testConnection } = require('./src/models/database'); // ✅ matches your database.js path
+const {
+    register,
+    login,
+    getProfile,
+    updateProfile,
+    upgradeToPaid
+} = require('./controllers/userController');
 
-// Postgres connection for Render
-const sequelize = new Sequelize(
-    process.env.DB_NAME,
-    process.env.DB_USER,
-    process.env.DB_PASSWORD,
-    {
-        host: process.env.DB_HOST,
-        port: process.env.DB_PORT || 5432,
-        dialect: 'postgres',                  // ✅ Postgres
-        dialectOptions: { ssl: { rejectUnauthorized: false } }, // ✅ Required for Render
-        logging: false
-    }
-);
+const app = express();
+const PORT = process.env.PORT || 10000;
 
-// Test DB connection
-async function testConnection() {
+// Middleware
+app.use(cors());
+app.use(express.json());
+
+// Routes
+app.post('/register', register);
+app.post('/login', login);
+app.get('/profile/:id?', getProfile);
+app.put('/profile', updateProfile);
+app.post('/upgrade', upgradeToPaid);
+
+// Start server after DB connection
+(async () => {
     try {
-        await sequelize.authenticate();
-        console.log('✅ Postgres connected');
+        await testConnection();   // ✅ Test Postgres connection
+        await sequelize.sync();   // ✅ Sync models
+        app.listen(PORT, () => {
+            console.log(`🚀 Server running on http://localhost:${PORT}`);
+        });
     } catch (err) {
-        console.error('❌ Postgres connection failed:', err);
-        throw err;
+        console.error('❌ Server failed to start:', err);
+        process.exit(1);
     }
-}
-
-module.exports = { sequelize, testConnection };
+})();
