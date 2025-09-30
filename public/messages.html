@@ -7,68 +7,44 @@
 <link rel="stylesheet" href="style.css">
 <style>
 body, html {
-    margin: 0;
-    padding: 0;
+    margin: 0; padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: linear-gradient(135deg, #4e54c8, #00aaff);
-    color: #fff;
-    min-height: 100%;
+    color: #fff; min-height: 100%;
 }
-
-/* Container */
 .container {
     max-width: 900px;
     width: 90%;
     padding: 2.5rem 2rem;
     margin: 50px auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+    display: flex; flex-direction: column; gap: 2rem;
     background: rgba(255,255,255,0.95);
     border-radius: 16px;
     box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    color: #333;
-    text-align: center;
+    color: #333; text-align: center;
 }
-
 h1 { color: #4e54c8; margin-bottom: 1rem; }
-
 button {
-    padding: 12px 25px;
-    font-size: 1rem;
-    color: #fff;
-    background-color: #4e54c8;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 10px;
-    transition: 0.3s;
+    padding: 12px 25px; font-size: 1rem; color: #fff;
+    background-color: #4e54c8; border: none; border-radius: 8px;
+    cursor: pointer; margin-top: 10px; transition: 0.3s;
 }
 button:hover { background-color: #3b40a1; }
-
 #messages-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 20px;
 }
-
 .card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
+    background: #fff; border-radius: 12px; padding: 20px;
     box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    transition: transform 0.2s;
-    color: #333;
-    text-align: left;
+    transition: transform 0.2s; color: #333; text-align: left;
 }
 .card:hover { transform: translateY(-5px); }
 .card h3 { margin-bottom: 5px; color: #4e54c8; }
 .card p { margin: 5px 0; color: #555; }
 .card .timestamp { font-size: 0.8rem; color: #999; }
-
-@media (max-width: 480px) {
-    .container { padding: 2rem 1rem; }
-}
+@media (max-width: 480px) { .container { padding: 2rem 1rem; } }
 </style>
 </head>
 <body>
@@ -80,7 +56,7 @@ button:hover { background-color: #3b40a1; }
 </div>
 
 <script>
-const API_URL = 'https://codecrowds.onrender.com'; // match your working services page
+const API_URL = 'https://codecrowds.onrender.com/api';
 const token = localStorage.getItem('token');
 const userId = localStorage.getItem('userId');
 
@@ -95,14 +71,13 @@ goBackBtn.addEventListener('click', () => {
 
 async function loadMessages() {
     try {
-        const res = await fetch(`${API_URL}/api/messages`, { // make sure /api/messages exists on backend
+        const res = await fetch(`${API_URL}/messages`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        if (!res.ok) throw new Error(`Server error: ${res.status}`);
-        const data = await res.json();
-        const messages = data.messages || data;
 
+        const messages = await res.json();
         messagesList.innerHTML = '';
+
         if (!messages.length) {
             messagesList.innerHTML = '<p>No messages yet.</p>';
             return;
@@ -115,17 +90,56 @@ async function loadMessages() {
                 <h3>From: ${m.sender?.username || 'Unknown'}</h3>
                 <p>${m.content}</p>
                 <p class="timestamp">${new Date(m.createdAt).toLocaleString()}</p>
+                <button class="viewConversationBtn" data-userid="${m.sender?.id}" data-username="${m.sender?.username}">View Conversation</button>
             `;
             messagesList.appendChild(div);
         });
 
-    } catch (err) {
+        document.querySelectorAll('.viewConversationBtn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                loadConversation(btn.dataset.userid, btn.dataset.username);
+            });
+        });
+
+    } catch(err) {
         console.error(err);
         messagesList.innerHTML = `<p class="error">Failed to load messages: ${err.message}</p>`;
     }
 }
 
+async function loadConversation(otherUserId, otherUsername) {
+    try {
+        const res = await fetch(`${API_URL}/messages/conversation/${otherUserId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        const conversation = await res.json();
+        messagesList.innerHTML = `<h2>Conversation with ${otherUsername}</h2>`;
+
+        conversation.forEach(m => {
+            const div = document.createElement('div');
+            div.className = 'card';
+            div.innerHTML = `
+                <h3>${m.sender.username}</h3>
+                <p>${m.content}</p>
+                <p class="timestamp">${new Date(m.createdAt).toLocaleString()}</p>
+            `;
+            messagesList.appendChild(div);
+        });
+
+        const backBtn = document.createElement('button');
+        backBtn.textContent = 'Back to Inbox';
+        backBtn.addEventListener('click', loadMessages);
+        messagesList.appendChild(backBtn);
+
+    } catch(err) {
+        console.error(err);
+        alert('Failed to load conversation.');
+    }
+}
+
 window.addEventListener('load', loadMessages);
 </script>
+
 </body>
 </html>
