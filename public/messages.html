@@ -85,11 +85,13 @@ button:hover { background-color: #3b40a1; }
 </div>
 
 <script>
-const API_URL = 'https://codecrowds.onrender.com';
+const API_URL = 'https://codecrowds.onrender.com/api';
 const token = localStorage.getItem('token');
 const userId = localStorage.getItem('userId');
 
-if (!token || !userId) window.location.href = 'index.html';
+if (!token || !userId) {
+    window.location.href = 'index.html';
+}
 
 const messagesList = document.getElementById('messages-list');
 const goBackBtn = document.getElementById('goBackBtn');
@@ -101,17 +103,20 @@ goBackBtn.addEventListener('click', () => {
 
 // Load inbox (received messages)
 async function loadMessages() {
-    messagesList.innerHTML = '<p>Loading messages...</p>';
     try {
         const res = await fetch(`${API_URL}/messages`, {
             headers: { Authorization: `Bearer ${token}` }
         });
 
-        if (res.status === 401) throw new Error('Unauthorized. Please log in again.');
-
-        const data = await res.json();
-
-        const messages = Array.isArray(data.messages) ? data.messages : (Array.isArray(data) ? data : []);
+        const text = await res.text(); // fallback for non-JSON responses
+        let messages;
+        try {
+            messages = JSON.parse(text);
+        } catch {
+            console.error('Server returned non-JSON:', text);
+            messagesList.innerHTML = '<p class="error">Failed to load messages (server error)</p>';
+            return;
+        }
 
         messagesList.innerHTML = '';
         if (!messages.length) {
@@ -131,15 +136,18 @@ async function loadMessages() {
             messagesList.appendChild(div);
         });
 
+        // Add conversation buttons
         document.querySelectorAll('.viewConversationBtn').forEach(btn => {
             btn.addEventListener('click', () => {
-                loadConversation(btn.dataset.userid, btn.dataset.username);
+                const otherUserId = btn.dataset.userid;
+                const otherUsername = btn.dataset.username;
+                loadConversation(otherUserId, otherUsername);
             });
         });
 
     } catch(err) {
         console.error(err);
-        messagesList.innerHTML = `<p class="error">${err.message || 'Failed to load messages'}</p>`;
+        messagesList.innerHTML = '<p class="error">Failed to load messages</p>';
     }
 }
 
@@ -149,8 +157,16 @@ async function loadConversation(otherUserId, otherUsername) {
         const res = await fetch(`${API_URL}/messages/conversation/${otherUserId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
-        if (!res.ok) throw new Error('Failed to fetch conversation');
-        const conversation = await res.json();
+
+        const text = await res.text();
+        let conversation;
+        try {
+            conversation = JSON.parse(text);
+        } catch {
+            console.error('Server returned non-JSON:', text);
+            alert('Failed to load conversation (server error)');
+            return;
+        }
 
         messagesList.innerHTML = `<h2>Conversation with ${otherUsername}</h2>`;
 
