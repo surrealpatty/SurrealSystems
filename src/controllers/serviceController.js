@@ -1,11 +1,12 @@
+// src/controllers/serviceController.js
 const Service = require('../models/services');
-const { User } = require('../models/user');
+const User = require('../models/user'); // ✅ fixed import
 
 // GET all services
 exports.getAllServices = async (req, res) => {
   try {
     const services = await Service.findAll({
-      include: [{ model: User, attributes: ['id', 'username'] }],
+      include: [{ model: User, as: 'user', attributes: ['id', 'username'] }], // must match association
     });
     res.json({ services });
   } catch (err) {
