@@ -7,17 +7,19 @@ const User = require('../models/User');
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
-// Middleware
+// Middleware to authenticate JWT token
 function authenticateToken(req, res, next) {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.status(401).json({ error: 'No token provided' });
+
     const token = authHeader.split(' ')[1];
     if (!token) return res.status(401).json({ error: 'No token provided' });
 
     try {
         req.user = jwt.verify(token, JWT_SECRET);
         next();
-    } catch {
+    } catch (err) {
+        console.error(err);
         res.status(403).json({ error: 'Invalid or expired token' });
     }
 }
@@ -30,7 +32,7 @@ router.get('/', authenticateToken, async (req, res) => {
             include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }],
             order: [['createdAt', 'DESC']]
         });
-        res.json(messages);
+        res.json(messages); // return JSON directly
     } catch (err) {
         console.error(err);
         res.status(500).json({ error: 'Failed to fetch messages' });
@@ -72,9 +74,11 @@ router.post('/', authenticateToken, async (req, res) => {
             receiverId,
             content
         });
+
         const fullMessage = await Message.findByPk(message.id, {
             include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }]
         });
+
         res.json({ message: 'Message sent!', data: fullMessage });
     } catch (err) {
         console.error(err);
