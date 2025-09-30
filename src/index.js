@@ -4,6 +4,7 @@ const cors = require('cors');
 const path = require('path');
 const { sequelize, testConnection } = require('./config/database');
 const serviceRoutes = require('./routes/service');
+const userRoutes = require('./routes/user'); // make sure this file exists
 require('dotenv').config();
 
 const app = express();
@@ -12,8 +13,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// ----------------- API routes -----------------
+app.use('/api/users', userRoutes);  // Users API
+app.use('/services', serviceRoutes); // Services API
+
 // ----------------- Serve frontend -----------------
-// Make sure your `public` folder is at the root, alongside `src`
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // Root route → serve index.html
@@ -21,10 +25,7 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// ----------------- API routes -----------------
-app.use('/services', serviceRoutes);
-
-// Optional: Catch-all for frontend routes (register.html, profile.html, etc.)
+// Catch-all for frontend routes (profile.html, register.html, etc.)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
@@ -33,9 +34,7 @@ app.get('*', (req, res) => {
 (async () => {
   try {
     await testConnection(); // Tests DB connection
-    // Sync models
-    // { alter: true } updates tables safely, { force: true } clears tables
-    await sequelize.sync({ alter: true });
+    await sequelize.sync({ alter: true }); // Sync models
     console.log('✅ Database synced successfully.');
   } catch (err) {
     console.error('❌ Database sync failed:', err);
