@@ -1,8 +1,8 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
-const Message = require('../models/message');
-const User = require('../models/User');
+const Message = require('../models/Message'); // ✅ matches filename
+const User = require('../models/user');       // ✅ lowercase
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
