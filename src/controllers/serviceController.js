@@ -1,5 +1,5 @@
-const { Service } = require('../models/service'); // lowercase
-const { User } = require('../models/user');       // lowercase
+const Service = require('../models/services'); // ✅ import correctly
+const User = require('../models/user');       // ✅ import correctly
 
 // GET all services
 exports.getAllServices = async (req, res) => {
