@@ -1,7 +1,11 @@
+// public/profile.js (or wherever your frontend JS is)
 const API_URL = 'https://codecrowds.onrender.com';
 const token = localStorage.getItem('token');
+const currentUserId = localStorage.getItem('userId');
+
 if (!token) window.location.href = 'index.html';
 
+// DOM elements
 const profileUsername = document.getElementById('profile-username');
 const profileDescription = document.getElementById('profile-description');
 const profileTier = document.getElementById('profile-tier');
@@ -15,17 +19,16 @@ const newServiceTitle = document.getElementById('newServiceTitle');
 const newServiceDesc = document.getElementById('newServiceDesc');
 const newServicePrice = document.getElementById('newServicePrice');
 
-let currentUserId = localStorage.getItem('userId');
-
 // ---------------- Load Profile ----------------
 async function loadProfile() {
     try {
-        const res = await fetch(`${API_URL}/users/profile`, {
+        const res = await fetch(`${API_URL}/users/${currentUserId}`, {
             headers: { Authorization: `Bearer ${token}` }
         });
         if (!res.ok) throw new Error('Failed to fetch profile');
 
-        const user = await res.json();
+        const data = await res.json();
+        const user = data.user;
 
         profileUsername.textContent = user.username || 'Unknown User';
         profileDescription.textContent = user.description || 'No description yet.';
@@ -57,13 +60,13 @@ editDescBtn.addEventListener('click', async () => {
     if (!editingDesc) {
         const newDesc = profileDescription.textContent.trim();
         try {
-            const res = await fetch(`${API_URL}/users/profile`, {
+            const res = await fetch(`${API_URL}/users/${currentUserId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                 body: JSON.stringify({ description: newDesc })
             });
-            const updatedUser = await res.json();
-            profileDescription.textContent = updatedUser.description || newDesc;
+            const data = await res.json();
+            profileDescription.textContent = data.user.description || newDesc;
         } catch (err) {
             console.error(err);
             alert('Failed to save description.');
@@ -74,8 +77,8 @@ editDescBtn.addEventListener('click', async () => {
 // ---------------- Upgrade Account ----------------
 upgradeBtn.addEventListener('click', async () => {
     try {
-        const res = await fetch(`${API_URL}/users/upgrade`, {
-            method: 'PATCH',
+        const res = await fetch(`${API_URL}/users/${currentUserId}/upgrade`, {
+            method: 'PUT',
             headers: { Authorization: `Bearer ${token}` }
         });
         const data = await res.json();
