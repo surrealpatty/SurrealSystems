@@ -13,7 +13,7 @@ const sequelize = new Sequelize(
     dialect: 'postgres',
     dialectOptions: {
       ssl: {
-        require: true,          // Render requires SSL
+        require: true,
         rejectUnauthorized: false,
       },
     },
@@ -21,7 +21,7 @@ const sequelize = new Sequelize(
   }
 );
 
-// Test DB connection with retry (optional but recommended)
+// Test DB connection with retry
 const testConnection = async (retries = 5, delay = 3000) => {
   for (let i = 0; i < retries; i++) {
     try {
