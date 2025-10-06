@@ -1,6 +1,7 @@
+// src/routes/user.js
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models/user'); // ✅ import correctly
+const User = require('../models/user'); // ✅ fixed import
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authenticateToken = require('../middlewares/authenticateToken');
@@ -34,7 +35,8 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) return res.status(400).json({ error: 'Email and password required' });
+    if (!email || !password)
+      return res.status(400).json({ error: 'Email and password required' });
 
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
@@ -43,6 +45,7 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
     res.json({
       message: 'Login successful',
       token,
