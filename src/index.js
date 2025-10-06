@@ -6,6 +6,7 @@ const { sequelize, testConnection } = require('./config/database');
 const serviceRoutes = require('./routes/service');
 const userRoutes = require('./routes/user');
 const messageRoutes = require('./routes/message'); // ✅ fixed file name
+const ratingRoutes = require('./routes/rating'); // ✅ add rating routes
 require('dotenv').config();
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.json());
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/ratings', ratingRoutes); // ✅ register rating routes
 
 // ----------------- Serve frontend -----------------
 app.use(express.static(path.join(__dirname, '..', 'public')));
