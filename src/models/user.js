@@ -7,13 +7,10 @@ const User = sequelize.define(
     username: { type: DataTypes.STRING, allowNull: false, unique: true },
     email: { type: DataTypes.STRING, allowNull: false, unique: true },
     password: { type: DataTypes.STRING, allowNull: false },
-    description: { type: DataTypes.STRING },
-    tier: { type: DataTypes.STRING, defaultValue: 'free' },
+    description: { type: DataTypes.TEXT, defaultValue: '' },
+    tier: { type: DataTypes.ENUM('free', 'paid'), defaultValue: 'free' },
   },
-  {
-    tableName: 'users',
-    timestamps: true,
-  }
+  { tableName: 'users', timestamps: true }
 );
 
 module.exports = User;
