@@ -28,17 +28,20 @@ app.get(/^\/(?!api).*/, (req, res) => {
   res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
 });
 
-// ----------------- Database connection & sync -----------------
-(async () => {
-  try {
-    await testConnection();           // keeps retrying until it connects
-    await sequelize.sync({ alter: true }); // automatically updates tables
-    console.log('✅ Database synced successfully.');
-  } catch (err) {
-    console.error('❌ Database sync failed:', err);
-  }
-})();
-
-// ----------------- Start server -----------------
+// ----------------- Start server after DB is ready -----------------
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+
+const startServer = async () => {
+  try {
+    await testConnection();               // Wait for DB connection
+    await sequelize.sync({ alter: true }); // Sync tables
+    console.log('✅ Database synced successfully.');
+
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+  } catch (err) {
+    console.error('❌ Server failed to start:', err);
+    process.exit(1); // Stop the app if DB fails
+  }
+};
+
+startServer();
