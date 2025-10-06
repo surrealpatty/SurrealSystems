@@ -4,40 +4,43 @@ require('dotenv').config();
 
 let sequelize;
 
-if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== '') {
+if (process.env.DATABASE_URL) {
+  // Use Render's PostgreSQL URL
   console.log('✅ Using Render DATABASE_URL (PostgreSQL)');
   sequelize = new Sequelize(process.env.DATABASE_URL, {
     dialect: 'postgres',
+    protocol: 'postgres',
     dialectOptions: {
       ssl: {
         require: true,
-        rejectUnauthorized: false,
+        rejectUnauthorized: false, // important for Render
       },
     },
     logging: false,
   });
 } else {
-  console.log('⚙️ Using local .env configuration');
-  const database = process.env.DB_NAME || 'code_crowds';
-  const username = process.env.DB_USER || 'postgres';
-  const password = process.env.DB_PASSWORD || '';
-  const host = process.env.DB_HOST || 'localhost';
-  const port = process.env.DB_PORT || 5432;
-
-  sequelize = new Sequelize(database, username, password, {
-    host,
-    port,
-    dialect: 'postgres',
-    logging: false,
-  });
+  // Local MySQL fallback
+  console.log('✅ Using local MySQL database');
+  sequelize = new Sequelize(
+    process.env.DB_NAME,
+    process.env.DB_USER,
+    process.env.DB_PASSWORD,
+    {
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT) || 3306,
+      dialect: 'mysql',
+      logging: false,
+    }
+  );
 }
 
+// Test the DB connection
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
     console.log('✅ Database connection established successfully.');
-  } catch (error) {
-    console.error('❌ Unable to connect to the database:', error.message);
+  } catch (err) {
+    console.error('❌ Unable to connect to database:', err.message);
   }
 };
 
