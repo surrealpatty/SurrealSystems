@@ -16,7 +16,7 @@ const Service = sequelize.define(
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: { model: 'users', key: 'id' } // explicit foreign key
+      references: { model: 'users', key: 'id' }
     }
   },
   {
