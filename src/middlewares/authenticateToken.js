@@ -26,5 +26,5 @@ const authenticateToken = async (req, res, next) => {
   }
 };
 
-// ✅ Export as object so it can be destructured in routes
-module.exports = { authenticateToken };
+// ✅ Export directly (no braces needed)
+module.exports = authenticateToken;

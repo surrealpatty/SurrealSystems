@@ -3,7 +3,7 @@ const router = express.Router();
 const Rating = require('../models/rating');
 const User = require('../models/user');
 const Service = require('../models/services');
-const { authenticateToken } = require('../middlewares/authenticateToken'); // ✅ now works
+const authenticateToken = require('../middlewares/authenticateToken'); // ✅ direct import, no destructure
 
 // Add a new rating
 router.post('/', authenticateToken, async (req, res) => {

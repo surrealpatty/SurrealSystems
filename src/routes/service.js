@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const serviceController = require('../controllers/serviceController');
-const { authenticateToken } = require('../middlewares/authenticateToken'); // ✅ destructure properly
+const authenticateToken = require('../middlewares/authenticateToken'); // ✅ direct import, no destructure
 
 // ---------------- Public: Get all services ----------------
 router.get('/', serviceController.getAllServices);

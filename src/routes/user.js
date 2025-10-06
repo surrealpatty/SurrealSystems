@@ -1,10 +1,9 @@
-// src/routes/user.js
 const express = require('express');
 const router = express.Router();
-const { User, Service } = require('../models'); // ✅ Import your models
+const { User, Service } = require('../models'); // Import your models
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const authenticateToken = require('../middlewares/authenticateToken');
+const authenticateToken = require('../middlewares/authenticateToken'); // ✅ direct import
 require('dotenv').config();
 
 // ---------------- Register ----------------
