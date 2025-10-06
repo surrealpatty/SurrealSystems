@@ -1,13 +1,20 @@
 const { Sequelize } = require('sequelize');
 require('dotenv').config();
 
-// Connect via DATABASE_URL (Render PostgreSQL)
+const isProduction = process.env.NODE_ENV === 'production';
+
+// Connect via DATABASE_URL
 const sequelize = new Sequelize(process.env.DATABASE_URL, {
   dialect: 'postgres',
   protocol: 'postgres',
-  dialectOptions: {
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-  },
+  dialectOptions: isProduction
+    ? {
+        ssl: {
+          require: true,
+          rejectUnauthorized: false, // Render requires this for PostgreSQL
+        },
+      }
+    : {},
   logging: false,
 });
 
