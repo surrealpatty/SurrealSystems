@@ -7,15 +7,11 @@ const Service = sequelize.define('Service', {
   title: { type: DataTypes.STRING, allowNull: false },
   description: { type: DataTypes.TEXT, allowNull: false },
   price: { type: DataTypes.FLOAT, allowNull: false },
-  userId: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: { model: 'users', key: 'id' }
-  }
+  userId: { type: DataTypes.INTEGER, allowNull: false, references: { model: 'users', key: 'id' } }
 }, { tableName: 'services', timestamps: true });
 
 // Associations
-User.hasMany(Service, { foreignKey: 'userId' });
-Service.belongsTo(User, { foreignKey: 'userId' });
+User.hasMany(Service, { foreignKey: 'userId', as: 'services' });
+Service.belongsTo(User, { foreignKey: 'userId', as: 'user' });
 
 module.exports = Service;

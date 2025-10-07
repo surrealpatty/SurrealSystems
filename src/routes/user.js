@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models/user');
+const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authenticateToken = require('../middlewares/authenticateToken');
@@ -19,10 +19,9 @@ router.post('/register', async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({ username, email, password: hashedPassword });
 
-    res.status(201).json({
-      message: 'User registered',
-      user: { id: newUser.id, username: newUser.username, email: newUser.email },
-    });
+    const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+
+    res.status(201).json({ token, user: { id: newUser.id, username: newUser.username, email: newUser.email } });
   } catch (err) {
     console.error('Register error:', err);
     res.status(500).json({ error: 'Failed to register' });
@@ -42,11 +41,7 @@ router.post('/login', async (req, res) => {
     if (!valid) return res.status(401).json({ error: 'Invalid credentials' });
 
     const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-    res.json({
-      message: 'Login successful',
-      token,
-      user: { id: user.id, username: user.username, email: user.email },
-    });
+    res.json({ token, user: { id: user.id, username: user.username, email: user.email } });
   } catch (err) {
     console.error('Login error:', err);
     res.status(500).json({ error: 'Login failed' });
@@ -62,23 +57,6 @@ router.get('/me', authenticateToken, async (req, res) => {
   } catch (err) {
     console.error('Get user error:', err);
     res.status(500).json({ error: 'Failed to fetch user' });
-  }
-});
-
-// ---------------- Update Profile ----------------
-router.put('/:id', authenticateToken, async (req, res) => {
-  try {
-    const user = await User.findByPk(req.user.id);
-    if (!user) return res.status(404).json({ error: 'User not found' });
-
-    user.username = req.body.username || user.username;
-    user.description = req.body.description || user.description;
-    await user.save();
-
-    res.json({ user });
-  } catch (err) {
-    console.error('Update user error:', err);
-    res.status(500).json({ error: 'Failed to update profile' });
   }
 });
 

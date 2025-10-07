@@ -10,4 +10,4 @@ const User = sequelize.define('User', {
   tier: { type: DataTypes.ENUM('free', 'paid'), defaultValue: 'free' }
 }, { tableName: 'users', timestamps: true });
 
-module.exports = { User };
+module.exports = User;
