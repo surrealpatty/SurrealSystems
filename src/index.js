@@ -1,11 +1,10 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path'); // for serving frontend
+const path = require('path');
 require('dotenv').config();
 
 const { sequelize, testConnection } = require('./config/database');
 const userRoutes = require('./routes/user');
-const serviceRoutes = require('./routes/service');
 
 const app = express();
 
@@ -13,14 +12,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// API Routes
+// Routes
 app.use('/api/users', userRoutes);
-app.use('/api/services', serviceRoutes);
 
-// Serve frontend static files
+// Serve frontend
 app.use(express.static(path.join(__dirname, '../public')));
-
-// Fallback for SPA (single page app)
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
@@ -31,11 +27,9 @@ const startServer = async () => {
     await testConnection(); // test DB connection
 
     const PORT = process.env.PORT || 10000;
-    app.listen(PORT, () => {
-      console.log(`🚀 Server is running on port ${PORT}`);
-    });
+    app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
-    console.error('❌ Server failed to start due to database error.');
+    console.error('❌ Server failed to start due to database error:', err.message);
     process.exit(1);
   }
 };
