@@ -1,30 +1,32 @@
+// src/index.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
 
-const { testConnection } = require('./config/database');
+const { sequelize, testConnection } = require('./config/database');
 const userRoutes = require('./routes/user');
 
 const app = express();
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// API Routes
 app.use('/api/users', userRoutes);
 
-// Serve frontend
 app.use(express.static(path.join(__dirname, '../public')));
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/index.html'));
 });
 
-// Start server
 const startServer = async () => {
   try {
     await testConnection();
+
+    // ✅ Ensure database tables exist
+    await sequelize.sync({ alter: true });
+    console.log('✅ Database synchronized successfully.');
+
     const PORT = process.env.PORT || 10000;
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
