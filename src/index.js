@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // for serving frontend
 require('dotenv').config();
 
 const { sequelize, testConnection } = require('./config/database');
@@ -12,9 +13,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Routes
+// API Routes
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
+
+// Serve frontend static files
+app.use(express.static(path.join(__dirname, '../public')));
+
+// Fallback for SPA (single page app)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
 
 // Start server
 const startServer = async () => {
