@@ -177,7 +177,7 @@ button:hover { transform: translateY(-5px); opacity: 0.9; }
     <button type="button" id="mobileAddServiceBtn">+ Service</button>
 </div>
 
-<script>
+<<script>
 const API_URL = '/api';
 const token = localStorage.getItem('token');
 const loggedInUserId = localStorage.getItem('userId')?.toString();
@@ -207,7 +207,10 @@ async function loadProfile(){
     try {
         const endpoint = profileUserId === loggedInUserId ? `${API_URL}/users/me` : `${API_URL}/users/${profileUserId}`;
         const res = await fetch(endpoint, { headers:{ Authorization:`Bearer ${token}` } });
+        if(!res.ok) throw new Error(`Failed to fetch profile: ${res.status}`);
         const data = await res.json();
+        console.log("Profile data:", data);
+
         const user = data.user || data;
 
         profileUsername.textContent = user.username || 'Unknown User';
@@ -215,7 +218,6 @@ async function loadProfile(){
         profileUsername.classList.add('fade-in');
         profileDescription.classList.add('fade-in');
 
-        // Show edit button only if viewing own profile
         if (user.id?.toString() === loggedInUserId) {
             editDescBtn.classList.remove('hidden');
         }
@@ -242,6 +244,7 @@ editDescBtn.addEventListener('click', async ()=>{
                 body: JSON.stringify({ description:newDesc })
             });
             const updated = await res.json();
+            console.log("Updated user:", updated);
             profileDescription.textContent = updated.user?.description || newDesc;
         } catch(err){ console.error(err); alert('Failed to save description'); }
     }
@@ -252,7 +255,10 @@ async function loadServices(){
     servicesList.innerHTML = '<p><span class="spinner"></span> Loading services...</p>';
     try {
         const res = await fetch(`${API_URL}/services`, { headers:{ Authorization:`Bearer ${token}` } });
+        if(!res.ok) throw new Error(`Failed to fetch services: ${res.status}`);
         const data = await res.json();
+        console.log("Services data:", data);
+
         const services = data.services || data;
         const userServices = services.filter(s => s.user?.id?.toString() === profileUserId);
 
@@ -269,9 +275,9 @@ async function loadServices(){
             const div = document.createElement('div');
             div.className='card fade-in';
             div.innerHTML=`
-                <h3 class="service-title">${s.title}</h3>
-                <p class="service-desc">${s.description}</p>
-                <p><strong>Price:</strong> $<span class="service-price">${s.price}</span></p>
+                <h3 class="service-title">${s.title || 'No title'}</h3>
+                <p class="service-desc">${s.description || 'No description'}</p>
+                <p><strong>Price:</strong> $<span class="service-price">${s.price || 0}</span></p>
                 <div class="service-buttons">
                     <button class="edit-service-btn">Edit</button>
                     <button class="delete-service-btn">Delete</button>
@@ -322,7 +328,8 @@ async function editService(div, service){
 
 async function deleteService(serviceId){
     if(!confirm('Are you sure?')) return;
-    try{ await fetch(`${API_URL}/services/${serviceId}`,{ method:'DELETE', headers:{ Authorization:`Bearer ${token}` } });
+    try{ 
+        await fetch(`${API_URL}/services/${serviceId}`,{ method:'DELETE', headers:{ Authorization:`Bearer ${token}` } });
         await loadServices();
     }catch(err){ console.error(err); alert('Failed to delete service'); }
 }
@@ -365,5 +372,6 @@ logoutBtn.addEventListener('click', ()=>{ localStorage.clear(); window.location.
 loadProfile();
 loadServices();
 </script>
+
 </body>
 </html>
