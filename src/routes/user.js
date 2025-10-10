@@ -8,7 +8,7 @@ const authenticateToken = require('../middlewares/authenticateToken');
 // ---------------- Register ----------------
 router.post('/register', async (req, res) => {
   try {
-    console.log('Received registration body:', req.body); // ✅ debug log
+    console.log('Registration body:', req.body);
 
     const { username, email, password, description } = req.body;
 
@@ -24,12 +24,11 @@ router.post('/register', async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    // ✅ default to empty string if description not sent
     const newUser = await User.create({
       username,
       email,
       password: hashedPassword,
-      description: description || '',
+      description: description || '', // ensures description is never null
     });
 
     const token = jwt.sign({ id: newUser.id }, process.env.JWT_SECRET, { expiresIn: '1h' });

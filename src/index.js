@@ -5,29 +5,24 @@ require('dotenv').config();
 
 const { sequelize, testConnection } = require('./config/database');
 const userRoutes = require('./routes/user');
-const serviceRoutes = require('./routes/service');
 
 const app = express();
 
-// ----------------- Middleware -----------------
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-// ----------------- Serve static frontend -----------------
+// Serve frontend
 app.use(express.static(path.join(__dirname, '../public')));
 
-// ----------------- API routes -----------------
+// API routes
 app.use('/api/users', userRoutes);
-app.use('/api/services', serviceRoutes);
 
-// ----------------- Start server -----------------
+// Start server
 const startServer = async () => {
   try {
     await testConnection();
-
-    // ✅ Ensure database table has all columns
-    await sequelize.sync({ alter: true });
-
+    await sequelize.sync({ alter: true }); // sync DB schema
     const PORT = process.env.PORT || 10000;
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
