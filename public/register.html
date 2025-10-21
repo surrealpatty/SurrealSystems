@@ -1,73 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CodeCrowds - Register</title>
-<style>
-/* Your styles here, same as your current CSS */
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>CodeCrowds - Register</title>
+  <link rel="stylesheet" href="register.css" />
 </head>
 <body>
-<div class="login-container">
-    <h2>Create Account</h2>
-    <form id="registerForm">
-        <input id="registerUsername" type="text" placeholder="Username" required>
-        <input id="registerEmail" type="email" placeholder="Email" required>
-        <input id="registerPassword" type="password" placeholder="Password" required>
-        <textarea id="registerDescription" placeholder="Tell us about yourself..." rows="3"></textarea>
-        <button type="submit" class="btn">Sign Up</button>
-    </form>
-    <p id="registerMessage" class="message"></p>
-    <p>Already have an account? <a href="index.html">Login here</a></p>
-</div>
+  <main class="auth-page">
+    <section class="card" aria-labelledby="registerTitle">
+      <header class="card-header">
+        <h1 id="registerTitle">Create your account</h1>
+        <p class="subtle">Join CodeCrowds and start offering your services.</p>
+      </header>
 
-<script>
-const API_URL = '/api';
-const registerForm = document.getElementById('registerForm');
-const registerMessage = document.getElementById('registerMessage');
+      <form id="registerForm" novalidate>
+        <!-- Username -->
+        <div class="field">
+          <label for="registerUsername">Username</label>
+          <input
+            id="registerUsername"
+            name="username"
+            type="text"
+            placeholder="e.g. dev_ally"
+            autocomplete="username"
+            required
+            minlength="3"
+            maxlength="32"
+          />
+          <small class="hint">3-32 characters, letters/numbers/underscores.</small>
+        </div>
 
-registerForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
+        <!-- Email -->
+        <div class="field">
+          <label for="registerEmail">Email</label>
+          <input
+            id="registerEmail"
+            name="email"
+            type="email"
+            placeholder="you@example.com"
+            autocomplete="email"
+            required
+            inputmode="email"
+          />
+        </div>
 
-    const username = document.getElementById('registerUsername').value.trim();
-    const email = document.getElementById('registerEmail').value.trim();
-    const password = document.getElementById('registerPassword').value.trim();
-    const description = document.getElementById('registerDescription').value.trim();
+        <!-- Password with toggle + strength -->
+        <div class="field">
+          <label for="registerPassword">Password</label>
+          <div class="password-row">
+            <input
+              id="registerPassword"
+              name="password"
+              type="password"
+              placeholder="Create a strong password"
+              autocomplete="new-password"
+              required
+              minlength="8"
+            />
+            <button
+              type="button"
+              class="btn-icon"
+              id="togglePassword"
+              aria-controls="registerPassword"
+              aria-pressed="false"
+              title="Show password"
+            >
+              Show
+            </button>
+          </div>
+          <div class="strength" aria-live="polite" id="passwordStrength" aria-describedby="strengthHelp"></div>
+          <small id="strengthHelp" class="hint">Use at least 8 characters with a mix of letters, numbers, and symbols.</small>
+        </div>
 
-    console.log('Submitting registration:', { username, email, password, description });
+        <!-- Description / Bio -->
+        <div class="field">
+          <label for="registerDescription">Tell us about yourself (optional)</label>
+          <textarea
+            id="registerDescription"
+            name="description"
+            rows="4"
+            placeholder="What do you offer? What are your skills?"
+            maxlength="400"
+          ></textarea>
+          <div class="meta-row">
+            <small class="hint" id="descCounter">0 / 400</small>
+          </div>
+        </div>
 
-    if (!username || !email || !password) {
-        registerMessage.textContent = 'Please fill in all fields.';
-        registerMessage.style.color = 'red';
-        return;
+        <!-- Submit -->
+        <button type="submit" class="btn-primary" id="submitBtn">
+          Create account
+        </button>
+
+        <!-- Live message -->
+        <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
+
+        <p class="switch">
+          Already have an account?
+          <a href="index.html">Log in</a>
+        </p>
+      </form>
+    </section>
+  </main>
+
+  <script>
+    // Config
+    var API_URL = '/api';
+
+    // Elements
+    var form = document.getElementById('registerForm');
+    var msg = document.getElementById('registerMessage');
+    var submitBtn = document.getElementById('submitBtn');
+    var usernameEl = document.getElementById('registerUsername');
+    var emailEl = document.getElementById('registerEmail');
+    var passwordEl = document.getElementById('registerPassword');
+    var descEl = document.getElementById('registerDescription');
+    var descCounter = document.getElementById('descCounter');
+    var togglePasswordBtn = document.getElementById('togglePassword');
+    var strengthEl = document.getElementById('passwordStrength');
+
+    // Helpers
+    function setMsg(text, type) {
+      msg.textContent = text || '';
+      msg.className = 'message ' + (type || 'info');
     }
 
-    try {
-        const res = await fetch(`${API_URL}/users/register`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, email, password, description })
+    function passwordScore(pw) {
+      if (!pw) return 0;
+      var score = 0;
+      if (pw.length >= 8) score++;
+      if (/[A-Z]/.test(pw)) score++;
+      if (/[a-z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw)) score++;
+      if (/[^A-Za-z0-9]/.test(pw)) score++;
+      return Math.min(score, 5);
+    }
+
+    function renderStrength(pw) {
+      var score = passwordScore(pw);
+      var labels = ['Too weak', 'Very weak', 'Weak', 'Okay', 'Strong', 'Very strong'];
+      strengthEl.setAttribute('data-score', String(score));
+      strengthEl.textContent = labels[score] || '';
+    }
+
+    // Events
+    descEl.addEventListener('input', function () {
+      descCounter.textContent = descEl.value.length + ' / 400';
+    });
+
+    togglePasswordBtn.addEventListener('click', function () {
+      var isPwd = passwordEl.type === 'password';
+      passwordEl.type = isPwd ? 'text' : 'password';
+      togglePasswordBtn.setAttribute('aria-pressed', String(isPwd));
+      togglePasswordBtn.title = isPwd ? 'Hide password' : 'Show password';
+      togglePasswordBtn.textContent = isPwd ? 'Hide' : 'Show';
+    });
+
+    passwordEl.addEventListener('input', function (e) {
+      renderStrength(e.target.value);
+    });
+
+    // Client-side validation
+    function validate() {
+      if (usernameEl.value.trim().length < 3) {
+        setMsg('Username must be at least 3 characters.', 'error');
+        usernameEl.focus();
+        return false;
+      }
+      if (!emailEl.validity.valid) {
+        setMsg('Please enter a valid email address.', 'error');
+        emailEl.focus();
+        return false;
+      }
+      if (passwordEl.value.length < 8) {
+        setMsg('Password must be at least 8 characters.', 'error');
+        passwordEl.focus();
+        return false;
+      }
+      return true;
+    }
+
+    // Submit
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      setMsg('');
+
+      if (!validate()) return;
+
+      var payload = {
+        username: usernameEl.value.trim(),
+        email: emailEl.value.trim(),
+        password: passwordEl.value,
+        description: descEl.value.trim()
+      };
+
+      // lock UI
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Creating...';
+
+      fetch(API_URL + '/users/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          return { ok: res.ok, status: res.status, data: data };
         });
-
-        const data = await res.json();
-
-        if (res.ok) {
-            registerMessage.textContent = 'Registration successful! Redirecting...';
-            registerMessage.style.color = 'green';
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('userId', data.user.id);
-            setTimeout(() => window.location.href = 'profile.html', 1500);
+      })
+      .then(function (r) {
+        if (r.ok) {
+          setMsg('Registration successful! Redirecting...', 'success');
+          if (r.data && r.data.token && r.data.user && r.data.user.id != null) {
+            localStorage.setItem('token', r.data.token);
+            localStorage.setItem('userId', r.data.user.id);
+          }
+          setTimeout(function () { window.location.href = 'profile.html'; }, 900);
         } else {
-            registerMessage.textContent = data.error || 'Registration failed';
-            registerMessage.style.color = 'red';
+          setMsg((r.data && r.data.error) || 'Registration failed (HTTP ' + r.status + ')', 'error');
         }
-    } catch (err) {
+      })
+      .catch(function (err) {
         console.error(err);
-        registerMessage.textContent = 'Network error, please try again.';
-        registerMessage.style.color = 'red';
-    }
-});
-</script>
+        setMsg('Network error, please try again.', 'error');
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Create account';
+      });
+    });
+
+    // Initial UI
+    usernameEl.focus();
+    renderStrength(passwordEl.value);
+    descCounter.textContent = (descEl.value.length || 0) + ' / 400';
+  </script>
 </body>
 </html>
