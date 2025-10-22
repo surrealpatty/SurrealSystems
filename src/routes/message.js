@@ -1,4 +1,3 @@
-// src/routes/messages.js
 const express = require('express');
 const router = express.Router();
 const { Op } = require('sequelize');
@@ -16,7 +15,7 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     const msg = await Message.create({
-      senderId: req.user.id, // set by authenticateToken
+      senderId: req.user.id,
       receiverId,
       content: String(content).trim(),
       serviceId: serviceId || null
@@ -29,7 +28,7 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// GET /api/messages — current user's inbox
+// GET /api/messages — inbox
 router.get('/', authenticateToken, async (req, res) => {
   try {
     const messages = await Message.findAll({
