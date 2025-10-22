@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Services - CodeCrowds</title>
 <link rel="stylesheet" href="services.css" />
-<!-- If your server provides a CSRF token, expose it like this: -->
+<!-- (Optional) If your server exposes a CSRF token, add one of these meta tags -->
 <!-- <meta name="csrf-token" content="{{ csrfToken }}"> -->
+<!-- <meta name="x-xsrf-token" content="{{ xsrfToken }}"> -->
 </head>
 <body>
 <div class="container">
@@ -39,6 +40,8 @@
         <textarea id="messageContent" placeholder="Write your message…" maxlength="2000" aria-label="Message body"></textarea>
       </div>
 
+      <p id="sendError" class="error-inline" aria-live="polite" hidden></p>
+
       <div class="modal-meta">
         <span id="charCount" aria-live="polite">0 / 2000</span>
       </div>
@@ -59,11 +62,19 @@
 <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
-// ---- Config ----
-// Prefer window.__API_BASE__ if your app sets it; fallback to relative 'api' to avoid leading-slash gotchas.
-const API_BASE = (window.__API_BASE__ ?? 'api').replace(/\/+$/,''); // no trailing slash
+// ---------- Config ----------
+// Change this if your API is hosted elsewhere. You can also set window.__API_BASE__ before this script.
+const API_BASE_INPUT = (window.__API_BASE__ ?? '/api');
+const API_BASES = Array.from(new Set([API_BASE_INPUT, '/api', 'api', '/']))
+  .map(b => String(b || '/').replace(/\/+$/,'') || '/');
 
-// DOM
+function buildUrl(base, path) {
+  const b = base === '/' ? '' : base;
+  const p = String(path || '').replace(/^\/+/, '');
+  return `${b}/${p}`;
+}
+
+// ---------- DOM ----------
 const servicesList = document.getElementById('services-list');
 const goToProfileBtn = document.getElementById('goToProfileBtn');
 const refreshBtn = document.getElementById('refreshBtn');
@@ -76,6 +87,7 @@ const messageContent = document.getElementById('messageContent');
 const sendMessageBtn = document.getElementById('sendMessageBtn');
 const cancelMessageBtn = document.getElementById('cancelMessageBtn');
 const charCount = document.getElementById('charCount');
+const sendError = document.getElementById('sendError');
 
 let allServices = [];
 let messageState = { toUserId: null, serviceId: null, username: '' };
@@ -83,13 +95,12 @@ let lastFocusedBeforeModal = null;
 
 const MAX_LEN = 2000;
 
-// ---- Utils ----
+// ---------- Utils ----------
 const esc = (s) => String(s ?? '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const fmtPrice = (v) => {
   const n = Number(v);
   return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 2 }) : esc(v);
 };
-
 function toast(msg) {
   const el = document.getElementById('toast');
   if (!el) { alert(msg); return; }
@@ -97,21 +108,24 @@ function toast(msg) {
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2200);
 }
-
-// Read CSRF from <meta name="csrf-token" ...> if present
 function getCsrf() {
-  const m = document.querySelector('meta[name="csrf-token"]');
-  return m?.getAttribute('content') || null;
+  return (
+    document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') ||
+    document.querySelector('meta[name="x-xsrf-token"]')?.getAttribute('content') ||
+    null
+  );
+}
+function showInlineError(msg) {
+  if (!msg) {
+    sendError.hidden = true;
+    sendError.textContent = '';
+  } else {
+    sendError.hidden = false;
+    sendError.textContent = msg;
+  }
 }
 
-// Build absolute-ish url for our API base
-function apiUrl(path) {
-  // path like "messages" or "/messages"
-  const p = String(path || '').replace(/^\/+/,'');
-  return `${API_BASE}/${p}`;
-}
-
-// ---- Render ----
+// ---------- Render ----------
 function render(services) {
   servicesList.innerHTML = '';
   if (!services.length) { servicesList.innerHTML = '<p>No services available.</p>'; return; }
@@ -146,7 +160,7 @@ function render(services) {
   });
 }
 
-// ---- Filters ----
+// ---------- Filters ----------
 function applyFilters() {
   const q = searchInput.value.toLowerCase().trim();
   const filtered = allServices.filter((s) => {
@@ -162,31 +176,34 @@ function applyFilters() {
   render(filtered);
 }
 
-// ---- Data ----
+// ---------- Data ----------
 async function loadServices() {
   servicesList.innerHTML = '<p><span class="spinner"></span> Loading services…</p>';
-  try {
-    const res = await fetch(apiUrl('services'), { credentials: 'include' });
-    // Allow arrays or {services:[]}
-    let data;
-    try { data = await res.json(); } catch { data = []; }
-    if (!res.ok) throw new Error((data && (data.error || data.message)) || `HTTP ${res.status}`);
-    allServices = data.services || data || [];
-    applyFilters();
-  } catch (err) {
-    console.error('[services] load failed:', err);
-    servicesList.innerHTML = '<p class="error">Failed to load services</p>';
+  let lastErr;
+  for (const base of API_BASES) {
+    try {
+      const url = buildUrl(base, 'services');
+      const res = await fetch(url, { credentials: 'include' });
+      let data;
+      try { data = await res.json(); } catch { data = []; }
+      if (!res.ok) throw new Error((data && (data.error || data.message)) || `HTTP ${res.status}`);
+      allServices = data.services || data || [];
+      applyFilters();
+      console.info('[services] loaded from', url);
+      return;
+    } catch (e) { lastErr = e; }
   }
+  console.error('[services] load failed:', lastErr);
+  servicesList.innerHTML = '<p class="error">Failed to load services</p>';
 }
 
-// ---- Modal & a11y ----
+// ---------- A11y / Modal ----------
 function updateCounterAndState() {
   const len = (messageContent.value || '').length;
   if (charCount) charCount.textContent = `${len} / ${MAX_LEN}`;
   const ok = len > 0 && len <= MAX_LEN && !!messageState.toUserId;
   sendMessageBtn.disabled = !ok;
 }
-
 function trapFocusIn(node, e) {
   if (e.key !== 'Tab') return;
   const focusables = node.querySelectorAll(
@@ -201,11 +218,11 @@ function trapFocusIn(node, e) {
     e.preventDefault(); first.focus();
   }
 }
-
 function showModal() {
   lastFocusedBeforeModal = document.activeElement;
   messageModal.style.display = 'flex';
   messageModal.setAttribute('aria-hidden', 'false');
+  showInlineError('');
   updateCounterAndState();
   setTimeout(() => messageContent?.focus(), 0);
   window.addEventListener('keydown', onModalKey);
@@ -214,6 +231,7 @@ function hideModal() {
   messageModal.style.display = 'none';
   messageModal.setAttribute('aria-hidden', 'true');
   if (messageContent) messageContent.value = '';
+  showInlineError('');
   updateCounterAndState();
   messageState = { toUserId: null, serviceId: null, username: '' };
   window.removeEventListener('keydown', onModalKey);
@@ -233,74 +251,81 @@ function onModalKey(e) {
   }
 }
 
-// ---- Send message (hardened) ----
+// ---------- Send (robust) ----------
 async function sendMessage() {
-  const body = (messageContent.value || '').trim();
-  if (!messageState.toUserId) { toast('Missing recipient.'); return; }
-  if (!body) { toast('Please write a message.'); messageContent.focus(); return; }
+  const text = (messageContent.value || '').trim();
+  if (!messageState.toUserId) { showInlineError('Missing recipient.'); return; }
+  if (!text) { showInlineError('Please write a message.'); messageContent.focus(); return; }
+  showInlineError('');
 
-  const payload = {
-    toUserId: messageState.toUserId,
-    serviceId: messageState.serviceId || null,
-    body
-  };
-
-  const headers = { 'Content-Type': 'application/json' };
   const csrf = getCsrf();
-  if (csrf) headers['X-CSRF-Token'] = csrf;
+  const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' };
+  if (csrf) { headers['X-CSRF-Token'] = csrf; headers['X-XSRF-TOKEN'] = csrf; }
 
-  // Add timeout so it doesn't spin forever
+  // Abort after 15s
   const controller = new AbortController();
-  const t = setTimeout(() => controller.abort(), 15000);
+  const timeout = setTimeout(() => controller.abort(), 15000);
+
+  // Try a couple of common payload shapes
+  const payloads = [
+    { toUserId: messageState.toUserId, serviceId: messageState.serviceId || null, body: text },
+    { recipientId: messageState.toUserId, serviceId: messageState.serviceId || null, text },
+    { to: messageState.toUserId, serviceId: messageState.serviceId || null, content: text }
+  ];
+
+  // Try several typical endpoints
+  const endpoints = API_BASES.map(b => buildUrl(b, 'messages'));
 
   try {
     sendMessageBtn.disabled = true;
     sendMessageBtn.textContent = 'Sending…';
 
-    const res = await fetch(apiUrl('messages'), {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(payload),
-      credentials: 'include',        // send cookies/session
-      signal: controller.signal,
-    });
+    let lastErr = null;
 
-    clearTimeout(t);
+    for (const url of endpoints) {
+      for (const payload of payloads) {
+        try {
+          const res = await fetch(url, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify(payload),
+            credentials: 'include',
+            signal: controller.signal,
+          });
 
-    // Some backends return 204 No Content
-    if (res.status === 204) {
-      hideModal();
-      toast('Message sent!');
-      return;
+          if (res.status === 204) { hideModal(); toast('Message sent!'); return; }
+
+          let data = null, t = '';
+          try { data = await res.json(); } catch { t = await res.text().catch(()=> ''); }
+
+          if (res.ok) { hideModal(); toast('Message sent!'); return; }
+
+          const reason = (data && (data.error || data.message)) || t || `HTTP ${res.status}`;
+          lastErr = new Error(reason);
+
+          if (res.status === 401 || res.status === 403) {
+            showInlineError('Not authorized to send messages. Check login/CSRF/cookies.');
+            throw lastErr;
+          }
+          // else try next payload/endpoint
+        } catch (e) {
+          lastErr = e; /* try next combination */
+        }
+      }
     }
 
-    // Try parse JSON; if it fails, fall back to text
-    let data, text;
-    try { data = await res.json(); }
-    catch { text = await res.text().catch(() => ''); }
+    console.error('[messages] all attempts failed:', lastErr);
+    showInlineError(`Failed to send: ${lastErr?.message || 'Unknown error'}. Check Network tab for “messages”.`);
 
-    if (!res.ok) {
-      const reason = (data && (data.error || data.message)) || text || `HTTP ${res.status}`;
-      throw new Error(reason);
-    }
-
-    hideModal();
-    toast('Message sent!');
-    // Optional redirect to a thread if backend returns one:
-    // if (data?.threadId) location.href = `/messages?thread=${encodeURIComponent(data.threadId)}`;
-
-  } catch (err) {
-    console.error('[messages] send failed:', err);
-    toast(`Failed to send: ${err.message}`);
   } finally {
-    clearTimeout(t);
+    clearTimeout(timeout);
     sendMessageBtn.disabled = false;
     sendMessageBtn.textContent = 'Send';
     updateCounterAndState();
   }
 }
 
-// ---- Events ----
+// ---------- Events ----------
 goToProfileBtn.addEventListener('click', () => { window.location.href = 'profile.html'; });
 refreshBtn.addEventListener('click', loadServices);
 searchInput.addEventListener('input', applyFilters);
