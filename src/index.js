@@ -1,4 +1,3 @@
-// server.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -8,34 +7,33 @@ const { sequelize, testConnection } = require('./config/database');
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
 const ratingRoutes = require('./routes/rating');
-const messageRoutes = require('./routes/messages'); // ✅ MOUNT THIS
+const messageRoutes = require('./routes/messages');
 
 const app = express();
 
-// Middleware
 app.use(cors({
-  origin: true, // or ['http://localhost:3000'] if you want to pin it
+  origin: true,
   credentials: true,
-  allowedHeaders: ['Content-Type', 'Authorization'], // ✅ allow JWT header
+  allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS']
 }));
 app.use(express.json());
 
-// Serve frontend
+// Serve static frontend
 app.use(express.static(path.join(__dirname, '../public')));
 
 // API routes
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/ratings', ratingRoutes);
-app.use('/api/messages', messageRoutes); // ✅ NOW ACTIVE
+app.use('/api/messages', messageRoutes);
 
 // 404 for unknown routes
 app.use((req, res) => {
   res.status(404).json({ success: false, error: { message: 'Not found' } });
 });
 
-// Central error handler
+// Error handler
 app.use((err, req, res, next) => {
   console.error('🔥 Uncaught error:', err);
   const status = err.statusCode || 500;
@@ -43,11 +41,10 @@ app.use((err, req, res, next) => {
   res.status(status).json({ success: false, error: { message } });
 });
 
-// Start server
 const startServer = async () => {
   try {
     await testConnection();
-    await sequelize.sync({ alter: true }); // keep schemas in sync
+    await sequelize.sync({ alter: true });
     const PORT = process.env.PORT || 10000;
     app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
   } catch (err) {
@@ -55,5 +52,4 @@ const startServer = async () => {
     process.exit(1);
   }
 };
-
 startServer();
