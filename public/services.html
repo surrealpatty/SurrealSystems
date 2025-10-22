@@ -28,6 +28,18 @@
     <p><span class="spinner"></span> Loading services…</p>
   </div>
 
+  <!-- Compose Message Modal -->
+  <div id="messageModal" role="dialog" aria-modal="true" aria-labelledby="messageTitle" aria-hidden="true">
+    <div class="modal-content" role="document">
+      <h2 id="messageTitle">Message <span id="messageRecipient"></span></h2>
+      <textarea id="messageContent" placeholder="Write your message…" maxlength="2000" aria-label="Message body"></textarea>
+      <div class="modal-actions">
+        <button type="button" id="sendMessageBtn">Send</button>
+        <button type="button" id="cancelMessageBtn" class="button-secondary">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div class="actions-row">
     <button type="button" id="goToProfileBtn" class="button-secondary" aria-label="Back to your profile">Back to Profile</button>
     <button type="button" id="refreshBtn" aria-label="Refresh services list">Refresh</button>
@@ -43,7 +55,15 @@ const refreshBtn = document.getElementById('refreshBtn');
 const searchInput = document.getElementById('search');
 const sortSelect = document.getElementById('sort');
 
+// Messaging elements
+const messageModal = document.getElementById('messageModal');
+const messageRecipient = document.getElementById('messageRecipient');
+const messageContent = document.getElementById('messageContent');
+const sendMessageBtn = document.getElementById('sendMessageBtn');
+const cancelMessageBtn = document.getElementById('cancelMessageBtn');
+
 let allServices = [];
+let messageState = { toUserId: null, serviceId: null, username: '' };
 
 const esc = (s) => String(s ?? '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const fmtPrice = (v) => {
@@ -66,6 +86,20 @@ function render(services) {
         Posted by:
         ${s.user ? `<a href="profile.html?userId=${s.user.id}">${esc(s.user.username)}</a>` : 'Unknown'}
       </p>
+      <div class="card-actions">
+        <button
+          type="button"
+          class="message-btn"
+          data-user-id="${s.user?.id ?? ''}"
+          data-username="${esc(s.user?.username ?? '')}"
+          data-service-id="${s.id ?? ''}"
+          ${s.user ? '' : 'disabled'}
+          aria-label="Message ${esc(s.user?.username ?? 'seller')}"
+          title="${s.user ? 'Send a message to the seller' : 'No seller attached'}"
+        >
+          Message
+        </button>
+      </div>
     `;
     servicesList.appendChild(div);
   });
@@ -100,10 +134,97 @@ async function loadServices() {
   }
 }
 
+// ----- Messaging helpers -----
+function showModal() {
+  messageModal.style.display = 'flex';
+  messageModal.setAttribute('aria-hidden', 'false');
+  // slight delay to ensure focus in some browsers
+  setTimeout(() => messageContent?.focus(), 0);
+}
+function hideModal() {
+  messageModal.style.display = 'none';
+  messageModal.setAttribute('aria-hidden', 'true');
+  if (messageContent) messageContent.value = '';
+  messageState = { toUserId: null, serviceId: null, username: '' };
+}
+
+function openMessageModal({ toUserId, serviceId, username }) {
+  messageState = { toUserId, serviceId, username };
+  messageRecipient.textContent = username || 'seller';
+  showModal();
+}
+
+async function sendMessage() {
+  const body = (messageContent.value || '').trim();
+  if (!messageState.toUserId) {
+    alert('Missing recipient.');
+    return;
+  }
+  if (!body) {
+    alert('Please write a message.');
+    messageContent.focus();
+    return;
+  }
+  try {
+    sendMessageBtn.disabled = true;
+    sendMessageBtn.textContent = 'Sending…';
+
+    const res = await fetch(`${API_BASE}/messages`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        toUserId: messageState.toUserId,
+        serviceId: messageState.serviceId || null,
+        body
+      })
+    });
+
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+
+    hideModal();
+    alert('Message sent!');
+    // If you have a messages page/thread, you can redirect:
+    // window.location.href = `/messages?with=${encodeURIComponent(messageState.toUserId)}`;
+  } catch (err) {
+    console.error(err);
+    alert(`Failed to send message: ${err.message}`);
+  } finally {
+    sendMessageBtn.disabled = false;
+    sendMessageBtn.textContent = 'Send';
+  }
+}
+
+// ----- Events -----
 goToProfileBtn.addEventListener('click', () => { window.location.href = 'profile.html'; });
 refreshBtn.addEventListener('click', loadServices);
 searchInput.addEventListener('input', applyFilters);
 sortSelect.addEventListener('change', applyFilters);
+
+// Delegate clicks for dynamically rendered cards
+servicesList.addEventListener('click', (e) => {
+  const btn = e.target.closest('.message-btn');
+  if (!btn) return;
+  const toUserId = btn.getAttribute('data-user-id');
+  const username = btn.getAttribute('data-username') || 'seller';
+  const serviceId = btn.getAttribute('data-service-id');
+  if (!toUserId) {
+    alert('This service has no associated user.');
+    return;
+  }
+  openMessageModal({ toUserId, serviceId, username });
+});
+
+cancelMessageBtn.addEventListener('click', hideModal);
+sendMessageBtn.addEventListener('click', sendMessage);
+
+// Close modal on ESC or click backdrop
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape' && messageModal.style.display === 'flex') hideModal();
+});
+messageModal.addEventListener('click', (e) => {
+  if (e.target === messageModal) hideModal();
+});
 
 window.addEventListener('load', loadServices);
 </script>
