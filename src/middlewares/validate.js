@@ -6,11 +6,14 @@ module.exports = function validate(req, res, next) {
   if (result.isEmpty()) return next();
 
   return res.status(400).json({
-    error: "Validation failed",
-    errors: result.array().map(e => ({
-      field: e.path,
-      message: e.msg,
-      location: e.location,
-    })),
+    success: false,
+    error: {
+      message: "Validation failed",
+      details: result.array().map(e => ({
+        field: e.path,
+        message: e.msg,
+        location: e.location,
+      })),
+    },
   });
 };
