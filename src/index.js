@@ -19,10 +19,18 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// 🔒 Optional hard guard for direct hits to /services.html (best-effort, statics are public)
+app.get('/services.html', (req, res, next) => {
+  // If you later add server sessions, check them here.
+  const auth = req.header('Authorization') || req.header('Cookie');
+  if (!auth) return res.redirect('/');
+  next();
+});
+
 // Serve static frontend
 app.use(express.static(path.join(__dirname, '../public')));
 
-// API routes
+// API routes (mounted at /api/*)
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/ratings', ratingRoutes);
