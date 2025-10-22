@@ -89,7 +89,7 @@ h1 { color: #4e54c8; margin: 0 0 0.25rem; }
   text-align: left;
 }
 .service-card:hover { transform: translateY(-5px); }
-service-card h3 { margin: 0 0 8px; color: #4e54c8; }
+.service-card h3 { margin: 0 0 8px; color: #4e54c8; } /* fixed selector */
 .service-card p { margin: 6px 0; color: #555; }
 .service-card .username { font-style: italic; color: #888; }
 
@@ -147,7 +147,7 @@ button[disabled] { opacity: 0.6; cursor: not-allowed; }
   display: flex;
   flex-direction: column;
   gap: 10px;
-  overflow: hidden;            /* <- clips Grammarly/extension badges */
+  overflow: hidden;            /* clips Grammarly/extension badges */
   box-shadow: 0 12px 30px rgba(0,0,0,0.25);
 }
 
@@ -169,7 +169,7 @@ button[disabled] { opacity: 0.6; cursor: not-allowed; }
   width: 100%;
 }
 
-/* The crucial bits: no overflow beyond modal */
+/* The crucial bits: keep textarea inside the modal */
 #messageContent {
   display: block;
   width: 100%;
@@ -181,7 +181,14 @@ button[disabled] { opacity: 0.6; cursor: not-allowed; }
   resize: vertical;
   min-height: 120px;
   font-size: 1rem;
-  box-sizing: border-box;    /* <- prevents overflow */
+  box-sizing: border-box;
+}
+
+/* Inline error beneath the textarea */
+.error-inline {
+  margin: 4px 2px 0;
+  color: #b00020;
+  font-size: 0.9rem;
 }
 
 /* ---------- Toast ---------- */
