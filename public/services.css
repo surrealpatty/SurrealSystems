@@ -1,4 +1,8 @@
 /* ---------- Global ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }  /* critical to prevent overflow */
+
 html, body {
   margin: 0;
   padding: 0;
@@ -85,7 +89,7 @@ h1 { color: #4e54c8; margin: 0 0 0.25rem; }
   text-align: left;
 }
 .service-card:hover { transform: translateY(-5px); }
-.service-card h3 { margin: 0 0 8px; color: #4e54c8; }
+service-card h3 { margin: 0 0 8px; color: #4e54c8; }
 .service-card p { margin: 6px 0; color: #555; }
 .service-card .username { font-style: italic; color: #888; }
 
@@ -131,17 +135,22 @@ button[disabled] { opacity: 0.6; cursor: not-allowed; }
   align-items: center;
   z-index: 9999;
 }
+
+/* Clamp width, round corners, and clip any overflow from extensions */
 .modal-content {
   background: #fff;
   color: #333;
   padding: 20px;
-  border-radius: 12px;
-  max-width: 420px;
-  width: 90%;
+  border-radius: 16px;
+  width: min(90vw, 520px);
+  max-width: 520px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow: hidden;            /* <- clips Grammarly/extension badges */
+  box-shadow: 0 12px 30px rgba(0,0,0,0.25);
 }
+
 .modal-actions {
   display: flex;
   gap: 8px;
@@ -153,15 +162,26 @@ button[disabled] { opacity: 0.6; cursor: not-allowed; }
   font-size: .9rem;
   color: #666;
 }
-#messageContent {
+
+/* Wrap to keep injected siblings contained (defensive) */
+.field-wrap {
+  position: relative;
   width: 100%;
+}
+
+/* The crucial bits: no overflow beyond modal */
+#messageContent {
+  display: block;
+  width: 100%;
+  max-width: 100%;
   padding: 10px;
-  padding-right: 44px; /* space for extension badges */
-  border-radius: 8px;
+  padding-right: 56px;       /* space for extension badges */
+  border-radius: 12px;
   border: 1px solid #ccc;
   resize: vertical;
-  min-height: 100px;
+  min-height: 120px;
   font-size: 1rem;
+  box-sizing: border-box;    /* <- prevents overflow */
 }
 
 /* ---------- Toast ---------- */

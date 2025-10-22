@@ -32,7 +32,12 @@
   <div id="messageModal" role="dialog" aria-modal="true" aria-labelledby="messageTitle" aria-hidden="true">
     <div class="modal-content" role="document">
       <h2 id="messageTitle">Message <span id="messageRecipient"></span></h2>
-      <textarea id="messageContent" placeholder="Write your message…" maxlength="2000" aria-label="Message body"></textarea>
+
+      <!-- Wrap the textarea so extensions can't push siblings outside -->
+      <div class="field-wrap">
+        <textarea id="messageContent" placeholder="Write your message…" maxlength="2000" aria-label="Message body"></textarea>
+      </div>
+
       <div class="modal-meta">
         <span id="charCount" aria-live="polite">0 / 2000</span>
       </div>
