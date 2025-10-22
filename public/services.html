@@ -5,17 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Services - CodeCrowds</title>
 <link rel="stylesheet" href="services.css" />
+
+<!-- EARLY GUARD: never show this page to unauthorized users -->
+<script>
+  (function guard(){
+    const token = localStorage.getItem('token');
+    const userId = localStorage.getItem('userId');
+    if (!token || !userId) {
+      const here = location.pathname + location.search;
+      location.replace(`/?from=${encodeURIComponent(here)}`);
+    }
+  })();
+</script>
+
 <script>window.API_BASE = '/api'; window.API_URL='/api';</script>
 <script src="script.js"></script>
-<script>
-// guard to root (index) if not logged in; preserve return url
-(function guard(){
-  if (!isLoggedIn()) {
-    const here = location.pathname + location.search;
-    location.replace(`/?from=${encodeURIComponent(here)}`);
-  }
-})();
-</script>
+<style>
+  .error{color:#c0392b}
+  .service-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 8px 20px rgba(0,0,0,.06);margin-bottom:12px}
+  .controls{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+  .card-actions{margin-top:8px}
+  #toast{position:fixed;right:12px;bottom:12px;background:#333;color:#fff;padding:10px 12px;border-radius:8px;opacity:0;transition:.2s}
+  #toast.show{opacity:1}
+  #messageModal{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,.4)}
+  #messageModal .modal-content{background:#fff;border-radius:12px;max-width:520px;width:92%;padding:16px}
+  .button-secondary{background:#f0f0f0}
+</style>
 </head>
 <body>
 <div class="container">
@@ -48,7 +63,7 @@
         <textarea id="messageContent" placeholder="Write your message…" maxlength="2000" aria-label="Message body"></textarea>
       </div>
 
-      <p id="sendError" class="error-inline" aria-live="polite" hidden></p>
+      <p id="sendError" class="error" aria-live="polite" hidden></p>
 
       <div class="modal-meta">
         <span id="charCount" aria-live="polite">0 / 2000</span>
@@ -211,6 +226,7 @@ function onModalKey(e){
 }
 
 // ===================== Send Message =====================
+function getToken(){ return localStorage.getItem('token') || ''; }
 async function sendMessage(){
   const token = getToken();
   if (!token){ showInlineError('Please log in to send messages.'); return; }
