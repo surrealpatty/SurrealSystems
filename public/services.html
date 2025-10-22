@@ -33,6 +33,9 @@
     <div class="modal-content" role="document">
       <h2 id="messageTitle">Message <span id="messageRecipient"></span></h2>
       <textarea id="messageContent" placeholder="Write your message…" maxlength="2000" aria-label="Message body"></textarea>
+      <div class="modal-meta">
+        <span id="charCount" aria-live="polite">0 / 2000</span>
+      </div>
       <div class="modal-actions">
         <button type="button" id="sendMessageBtn">Send</button>
         <button type="button" id="cancelMessageBtn" class="button-secondary">Cancel</button>
@@ -45,6 +48,9 @@
     <button type="button" id="refreshBtn" aria-label="Refresh services list">Refresh</button>
   </div>
 </div>
+
+<!-- Toast -->
+<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 
 <script>
 const API_BASE = '/api';
@@ -61,9 +67,13 @@ const messageRecipient = document.getElementById('messageRecipient');
 const messageContent = document.getElementById('messageContent');
 const sendMessageBtn = document.getElementById('sendMessageBtn');
 const cancelMessageBtn = document.getElementById('cancelMessageBtn');
+const charCount = document.getElementById('charCount');
 
 let allServices = [];
 let messageState = { toUserId: null, serviceId: null, username: '' };
+let lastFocusedBeforeModal = null;
+
+const MAX_LEN = 2000;
 
 const esc = (s) => String(s ?? '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 const fmtPrice = (v) => {
@@ -71,6 +81,7 @@ const fmtPrice = (v) => {
   return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 2 }) : esc(v);
 };
 
+// ---------- Render ----------
 function render(services) {
   servicesList.innerHTML = '';
   if (!services.length) { servicesList.innerHTML = '<p>No services available.</p>'; return; }
@@ -105,6 +116,7 @@ function render(services) {
   });
 }
 
+// ---------- Filters ----------
 function applyFilters() {
   const q = searchInput.value.toLowerCase().trim();
   const filtered = allServices.filter((s) => {
@@ -120,6 +132,7 @@ function applyFilters() {
   render(filtered);
 }
 
+// ---------- Data ----------
 async function loadServices() {
   servicesList.innerHTML = '<p><span class="spinner"></span> Loading services…</p>';
   try {
@@ -134,37 +147,75 @@ async function loadServices() {
   }
 }
 
-// ----- Messaging helpers -----
+// ---------- UI helpers ----------
+function toast(msg) {
+  const el = document.getElementById('toast');
+  if (!el) { alert(msg); return; }
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function updateCounterAndState() {
+  const len = (messageContent.value || '').length;
+  if (charCount) charCount.textContent = `${len} / ${MAX_LEN}`;
+  const ok = len > 0 && len <= MAX_LEN && !!messageState.toUserId;
+  sendMessageBtn.disabled = !ok;
+}
+
+function trapFocusIn(node, e) {
+  if (e.key !== 'Tab') return;
+  const focusables = node.querySelectorAll(
+    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+  );
+  const a = Array.from(focusables).filter(x => !x.disabled && x.offsetParent !== null);
+  if (!a.length) return;
+  const first = a[0], last = a[a.length - 1];
+  if (e.shiftKey && document.activeElement === first) {
+    e.preventDefault(); last.focus();
+  } else if (!e.shiftKey && document.activeElement === last) {
+    e.preventDefault(); first.focus();
+  }
+}
+
+// ---------- Modal controls ----------
 function showModal() {
+  lastFocusedBeforeModal = document.activeElement;
   messageModal.style.display = 'flex';
   messageModal.setAttribute('aria-hidden', 'false');
-  // slight delay to ensure focus in some browsers
+  updateCounterAndState();
   setTimeout(() => messageContent?.focus(), 0);
+  window.addEventListener('keydown', onModalKey);
 }
 function hideModal() {
   messageModal.style.display = 'none';
   messageModal.setAttribute('aria-hidden', 'true');
   if (messageContent) messageContent.value = '';
+  updateCounterAndState();
   messageState = { toUserId: null, serviceId: null, username: '' };
+  window.removeEventListener('keydown', onModalKey);
+  if (lastFocusedBeforeModal && lastFocusedBeforeModal.focus) lastFocusedBeforeModal.focus();
 }
-
 function openMessageModal({ toUserId, serviceId, username }) {
   messageState = { toUserId, serviceId, username };
   messageRecipient.textContent = username || 'seller';
   showModal();
 }
+function onModalKey(e) {
+  if (messageModal.style.display !== 'flex') return;
+  if (e.key === 'Tab') trapFocusIn(messageModal, e);
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    if (!sendMessageBtn.disabled) sendMessage();
+  }
+}
 
+// ---------- Send message ----------
 async function sendMessage() {
   const body = (messageContent.value || '').trim();
-  if (!messageState.toUserId) {
-    alert('Missing recipient.');
-    return;
-  }
-  if (!body) {
-    alert('Please write a message.');
-    messageContent.focus();
-    return;
-  }
+  if (!messageState.toUserId) { toast('Missing recipient.'); return; }
+  if (!body) { toast('Please write a message.'); messageContent.focus(); return; }
+
   try {
     sendMessageBtn.disabled = true;
     sendMessageBtn.textContent = 'Sending…';
@@ -183,35 +234,32 @@ async function sendMessage() {
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
 
     hideModal();
-    alert('Message sent!');
-    // If you have a messages page/thread, you can redirect:
+    toast('Message sent!');
+    // Optional redirect:
     // window.location.href = `/messages?with=${encodeURIComponent(messageState.toUserId)}`;
   } catch (err) {
     console.error(err);
-    alert(`Failed to send message: ${err.message}`);
+    toast(`Failed to send: ${err.message}`);
   } finally {
     sendMessageBtn.disabled = false;
     sendMessageBtn.textContent = 'Send';
+    updateCounterAndState();
   }
 }
 
-// ----- Events -----
+// ---------- Events ----------
 goToProfileBtn.addEventListener('click', () => { window.location.href = 'profile.html'; });
 refreshBtn.addEventListener('click', loadServices);
 searchInput.addEventListener('input', applyFilters);
 sortSelect.addEventListener('change', applyFilters);
 
-// Delegate clicks for dynamically rendered cards
 servicesList.addEventListener('click', (e) => {
   const btn = e.target.closest('.message-btn');
   if (!btn) return;
   const toUserId = btn.getAttribute('data-user-id');
   const username = btn.getAttribute('data-username') || 'seller';
   const serviceId = btn.getAttribute('data-service-id');
-  if (!toUserId) {
-    alert('This service has no associated user.');
-    return;
-  }
+  if (!toUserId) { toast('This service has no associated user.'); return; }
   openMessageModal({ toUserId, serviceId, username });
 });
 
@@ -226,7 +274,13 @@ messageModal.addEventListener('click', (e) => {
   if (e.target === messageModal) hideModal();
 });
 
-window.addEventListener('load', loadServices);
+// Counter while typing
+messageContent.addEventListener('input', updateCounterAndState);
+
+window.addEventListener('load', () => {
+  updateCounterAndState();
+  loadServices();
+});
 </script>
 </body>
 </html>
