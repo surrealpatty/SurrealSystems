@@ -89,6 +89,9 @@ h1 { color: #4e54c8; margin: 0 0 0.25rem; }
 .service-card p { margin: 6px 0; color: #555; }
 .service-card .username { font-style: italic; color: #888; }
 
+/* Small layout tune for the message button */
+.card-actions { margin-top: 10px; }
+
 /* ---------- Buttons ---------- */
 button {
   padding: 12px 25px;
@@ -104,6 +107,7 @@ button {
 button:hover { background-color: #3b40a1; }
 .button-secondary { background-color: #17a2b8; }
 .button-secondary:hover { background-color: #137e8c; }
+button[disabled] { opacity: 0.6; cursor: not-allowed; }
 
 /* ---------- Spinner ---------- */
 .spinner {
