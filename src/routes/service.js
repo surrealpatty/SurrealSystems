@@ -4,17 +4,8 @@ const router = express.Router();
 const { Service, User } = require('../models');
 const authenticateToken = require('../middlewares/authenticateToken');
 
-/**
- * GET /api/services
- * Optional query params:
- *   userId: number  -> filter by owner
- *   page:   number  -> 1-based page (default 1)
- *   limit:  number  -> page size (default 12, max 50)
- *
- * Examples:
- *   /api/services?userId=123
- *   /api/services?userId=123&page=2&limit=12
- */
+// GET /api/services
+// ?userId=123&page=1&limit=12
 router.get('/', async (req, res) => {
   try {
     const userId = req.query.userId ? parseInt(req.query.userId, 10) : null;
@@ -36,7 +27,6 @@ router.get('/', async (req, res) => {
     ]);
 
     const hasMore = page * limit < total;
-    // Small private cache to protect your API and avoid thrash
     res.set('Cache-Control', 'private, max-age=15');
     res.json({ services, page, limit, total, hasMore });
   } catch (err) {
@@ -45,7 +35,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// CREATE a service (auth required)
+// POST /api/services (create; auth required)
 router.post('/', authenticateToken, async (req, res) => {
   try {
     const { title, description, price } = req.body;
@@ -59,10 +49,10 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 
     const newService = await Service.create({
-      title,
-      description,
+      title: String(title).trim(),
+      description: String(description).trim(),
       price: priceNum,
-      userId: req.user.id
+      userId: req.user.id,
     });
 
     res.status(201).json({ service: newService });
@@ -75,17 +65,27 @@ router.post('/', authenticateToken, async (req, res) => {
   }
 });
 
-// UPDATE a service (auth required, owner only)
+// PUT /api/services/:id (update; owner only)
 router.put('/:id', authenticateToken, async (req, res) => {
   try {
-    const service = await Service.findByPk(req.params.id);
+    const idNum = Number(req.params.id);
+    if (!Number.isInteger(idNum) || idNum <= 0) {
+      return res.status(400).json({ error: 'Invalid service id' });
+    }
+
+    const service = await Service.findByPk(idNum);
     if (!service) return res.status(404).json({ error: 'Service not found' });
-    if (service.userId !== req.user.id) return res.status(403).json({ error: 'Unauthorized' });
+    if (String(service.userId) !== String(req.user.id)) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
 
     const updates = {};
-    if (typeof req.body.title === 'string' && req.body.title.trim()) updates.title = req.body.title.trim();
-    if (typeof req.body.description === 'string' && req.body.description.trim()) updates.description = req.body.description.trim();
-
+    if (typeof req.body.title === 'string' && req.body.title.trim()) {
+      updates.title = req.body.title.trim();
+    }
+    if (typeof req.body.description === 'string' && req.body.description.trim()) {
+      updates.description = req.body.description.trim();
+    }
     if (req.body.price !== undefined) {
       const priceNum = Number(req.body.price);
       if (Number.isNaN(priceNum) || priceNum < 0) {
@@ -105,12 +105,19 @@ router.put('/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// DELETE a service (auth required, owner only)
+// DELETE /api/services/:id (owner only)
 router.delete('/:id', authenticateToken, async (req, res) => {
   try {
-    const service = await Service.findByPk(req.params.id);
+    const idNum = Number(req.params.id);
+    if (!Number.isInteger(idNum) || idNum <= 0) {
+      return res.status(400).json({ error: 'Invalid service id' });
+    }
+
+    const service = await Service.findByPk(idNum);
     if (!service) return res.status(404).json({ error: 'Service not found' });
-    if (service.userId !== req.user.id) return res.status(403).json({ error: 'Unauthorized' });
+    if (String(service.userId) !== String(req.user.id)) {
+      return res.status(403).json({ error: 'Unauthorized' });
+    }
 
     await service.destroy();
     res.json({ message: 'Service deleted' });
