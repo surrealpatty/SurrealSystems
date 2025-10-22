@@ -5,12 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Services - CodeCrowds</title>
 <link rel="stylesheet" href="services.css" />
-
-<!-- Auth + guard + API base -->
-<script src="auth.js"></script>
+<script>window.API_BASE = '/api'; window.API_URL='/api';</script>
+<script src="script.js"></script>
 <script>
-  requireAuth('login.html');
-  window.API_BASE = getApiBase(); // e.g., '/api' locally or your Render API
+// guard to root (index) if not logged in; preserve return url
+(function guard(){
+  if (!isLoggedIn()) {
+    const here = location.pathname + location.search;
+    location.replace(`/?from=${encodeURIComponent(here)}`);
+  }
+})();
 </script>
 </head>
 <body>
@@ -67,7 +71,7 @@
 
 <script>
 // ===================== Config =====================
-const API_BASE = window.API_BASE || '/api';
+const API_BASE = '/api';
 const MESSAGES_URL = `${API_BASE}/messages`;
 const MAX_LEN = 2000;
 
@@ -91,45 +95,28 @@ let messageState = { toUserId: null, serviceId: null, username: '' };
 let lastFocusedBeforeModal = null;
 
 // ===================== Utils =====================
-const esc = (s) => String(s ?? '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const fmtPrice = (v) => {
+const esc = (s)=> String(s ?? '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmtPrice = (v)=> {
   const n = Number(v);
-  return Number.isFinite(n) ? n.toLocaleString(undefined, { maximumFractionDigits: 2 }) : esc(v);
+  return Number.isFinite(n) ? n.toLocaleString(undefined,{ maximumFractionDigits:2 }) : esc(v);
 };
-function toast(msg) {
-  const el = document.getElementById('toast');
-  if (!el) { alert(msg); return; }
-  el.textContent = msg;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2200);
-}
-function showInlineError(msg) {
-  sendError.textContent = msg;
-  sendError.hidden = !msg;
-}
-function stringifyAny(v) {
-  if (v == null) return '';
-  if (typeof v === 'string') return v;
-  try { return JSON.stringify(v); } catch { return String(v); }
-}
-async function readError(res) {
-  let data = null, text = '';
-  try { data = await res.json(); } catch { text = await res.text().catch(()=>''); }
-  const nested = data && typeof data === 'object'
-    ? (data.error?.message || data.error || data.message || data?.errors || data)
-    : text || `HTTP ${res.status}`;
-  return `[${res.status}] ${typeof nested === 'string' ? nested : stringifyAny(nested)}`;
+function toast(msg){ const el=document.getElementById('toast'); if(!el){alert(msg);return;} el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2200); }
+function showInlineError(msg){ sendError.textContent=msg; sendError.hidden=!msg; }
+function stringifyAny(v){ if(v==null) return ''; if(typeof v==='string') return v; try{return JSON.stringify(v);}catch{return String(v);} }
+async function readError(res){
+  let data=null, text=''; try{ data=await res.json(); }catch{ text=await res.text().catch(()=> ''); }
+  const nested = data && typeof data==='object' ? (data.error?.message || data.error || data.message || data?.errors || data) : text || `HTTP ${res.status}`;
+  return `[${res.status}] ${typeof nested==='string' ? nested : stringifyAny(nested)}`;
 }
 
 // ===================== Render =====================
-function render(services) {
-  servicesList.innerHTML = '';
-  if (!services.length) { servicesList.innerHTML = '<p>No services available.</p>'; return; }
-
-  services.forEach((s) => {
-    const div = document.createElement('div');
-    div.className = 'service-card';
-    div.innerHTML = `
+function render(services){
+  servicesList.innerHTML='';
+  if(!services.length){ servicesList.innerHTML='<p>No services available.</p>'; return; }
+  services.forEach(s=>{
+    const div=document.createElement('div');
+    div.className='service-card';
+    div.innerHTML=`
       <h3>${esc(s.title)}</h3>
       <p>${esc(s.description)}</p>
       <p><strong>Price:</strong> $${fmtPrice(s.price)}</p>
@@ -138,198 +125,141 @@ function render(services) {
         ${s.user ? `<a href="profile.html?userId=${s.user.id}">${esc(s.user.username)}</a>` : 'Unknown'}
       </p>
       <div class="card-actions">
-        <button
-          type="button"
-          class="message-btn"
+        <button type="button" class="message-btn"
           data-user-id="${s.user?.id ?? ''}"
           data-username="${esc(s.user?.username ?? '')}"
           data-service-id="${s.id ?? ''}"
           ${s.user ? '' : 'disabled'}
           aria-label="Message ${esc(s.user?.username ?? 'seller')}"
-          title="${s.user ? 'Send a message to the seller' : 'No seller attached'}"
-        >
+          title="${s.user ? 'Send a message to the seller' : 'No seller attached'}">
           Message
         </button>
-      </div>
-    `;
+      </div>`;
     servicesList.appendChild(div);
   });
 }
 
 // ===================== Filters =====================
-function applyFilters() {
+function applyFilters(){
   const q = searchInput.value.toLowerCase().trim();
-  const filtered = allServices.filter((s) => {
+  const filtered = allServices.filter(s=>{
     const hay = `${s.title||''} ${s.description||''} ${s.user?.username||''}`.toLowerCase();
     return hay.includes(q);
   });
-
-  switch (sortSelect.value) {
-    case 'priceLow': filtered.sort((a,b)=>Number(a.price)-Number(b.price)); break;
-    case 'priceHigh': filtered.sort((a,b)=>Number(b.price)-Number(a.price)); break;
-    default: filtered.sort((a,b)=> new Date(b.createdAt||0)-new Date(a.createdAt||0));
+  switch (sortSelect.value){
+    case 'priceLow':  filtered.sort((a,b)=> Number(a.price)-Number(b.price)); break;
+    case 'priceHigh': filtered.sort((a,b)=> Number(b.price)-Number(a.price)); break;
+    default:          filtered.sort((a,b)=> new Date(b.createdAt||0)-new Date(a.createdAt||0));
   }
   render(filtered);
 }
 
 // ===================== Data =====================
-async function loadServices() {
-  servicesList.innerHTML = '<p><span class="spinner"></span> Loading services…</p>';
-  try {
-    // If you protected /api/services, send Authorization header
-    const headers = { 'Accept': 'application/json' };
-    const token = getToken();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-
+async function loadServices(){
+  servicesList.innerHTML='<p><span class="spinner"></span> Loading services…</p>';
+  try{
+    const headers = { 'Accept':'application/json' };
+    const tok = getToken(); if (tok) headers['Authorization'] = `Bearer ${tok}`;
     const res = await fetch(`${API_BASE}/services`, { headers });
     const data = await res.json().catch(()=> ([]));
     if (!res.ok) throw new Error((data && (data.error || data.message)) || `HTTP ${res.status}`);
     allServices = data.services || data || [];
     applyFilters();
-  } catch (e) {
+  }catch(e){
     console.error('[services] load failed:', e);
     servicesList.innerHTML = '<p class="error">Failed to load services</p>';
   }
 }
 
 // ===================== Modal / a11y =====================
-function updateCounterAndState() {
+function updateCounterAndState(){
   const len = (messageContent.value || '').length;
-  if (charCount) charCount.textContent = `${len} / ${MAX_LEN}`;
-  const ok = len > 0 && len <= MAX_LEN && !!messageState.toUserId;
+  if (charCount) charCount.textContent = `${len} / 2000`;
+  const ok = len > 0 && len <= 2000 && !!messageState.toUserId;
   sendMessageBtn.disabled = !ok;
 }
-function trapFocusIn(node, e) {
-  if (e.key !== 'Tab') return;
-  const focusables = node.querySelectorAll(
-    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-  );
-  const a = Array.from(focusables).filter(x => !x.disabled && x.offsetParent !== null);
-  if (!a.length) return;
-  const first = a[0], last = a[a.length - 1];
-  if (e.shiftKey && document.activeElement === first) {
-    e.preventDefault(); last.focus();
-  } else if (!e.shiftKey && document.activeElement === last) {
-    e.preventDefault(); first.focus();
-  }
+function trapFocusIn(node, e){
+  if (e.key!=='Tab') return;
+  const focusables = node.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
+  const a = Array.from(focusables).filter(x=>!x.disabled && x.offsetParent!==null);
+  if(!a.length) return;
+  const first=a[0], last=a[a.length-1];
+  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
+  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
 }
-function showModal() {
+function showModal(){
   lastFocusedBeforeModal = document.activeElement;
-  messageModal.style.display = 'flex';
-  messageModal.setAttribute('aria-hidden', 'false');
-  showInlineError('');
-  updateCounterAndState();
-  setTimeout(() => messageContent?.focus(), 0);
+  messageModal.style.display='flex';
+  messageModal.setAttribute('aria-hidden','false');
+  showInlineError(''); updateCounterAndState();
+  setTimeout(()=> messageContent?.focus(),0);
   window.addEventListener('keydown', onModalKey);
 }
-function hideModal() {
-  messageModal.style.display = 'none';
-  messageModal.setAttribute('aria-hidden', 'true');
-  if (messageContent) messageContent.value = '';
-  showInlineError('');
-  updateCounterAndState();
-  messageState = { toUserId: null, serviceId: null, username: '' };
+function hideModal(){
+  messageModal.style.display='none';
+  messageModal.setAttribute('aria-hidden','true');
+  if (messageContent) messageContent.value='';
+  showInlineError(''); updateCounterAndState();
+  messageState = { toUserId:null, serviceId:null, username:'' };
   window.removeEventListener('keydown', onModalKey);
-  if (lastFocusedBeforeModal && lastFocusedBeforeModal.focus) lastFocusedBeforeModal.focus();
+  if (lastFocusedBeforeModal?.focus) lastFocusedBeforeModal.focus();
 }
-function onModalKey(e) {
-  if (messageModal.style.display !== 'flex') return;
-  if (e.key === 'Tab') trapFocusIn(messageModal, e);
-  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-    e.preventDefault();
-    if (!sendMessageBtn.disabled) sendMessage();
-  }
+function onModalKey(e){
+  if (messageModal.style.display!=='flex') return;
+  if (e.key==='Tab') trapFocusIn(messageModal,e);
+  if ((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); if(!sendMessageBtn.disabled) sendMessage(); }
 }
 
-// ===================== Send (POST /api/messages) =====================
-async function sendMessage() {
+// ===================== Send Message =====================
+async function sendMessage(){
   const token = getToken();
-  if (!token) { showInlineError('Please log in to send messages.'); return; }
-
-  const text = (messageContent.value || '').trim();
-  if (!messageState.toUserId) { showInlineError('Missing recipient.'); return; }
-  if (!text) { showInlineError('Please write a message.'); messageContent.focus(); return; }
+  if (!token){ showInlineError('Please log in to send messages.'); return; }
+  const text = (messageContent.value||'').trim();
+  if (!messageState.toUserId){ showInlineError('Missing recipient.'); return; }
+  if (!text){ showInlineError('Please write a message.'); messageContent.focus(); return; }
   showInlineError('');
-
-  try {
-    sendMessageBtn.disabled = true;
-    sendMessageBtn.textContent = 'Sending…';
-
+  try{
+    sendMessageBtn.disabled=true; sendMessageBtn.textContent='Sending…';
     const res = await fetch(MESSAGES_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        receiverId: messageState.toUserId,
-        content: text,
-        serviceId: messageState.serviceId || null
-      })
+      method:'POST',
+      headers:{ 'Content-Type':'application/json','Accept':'application/json','Authorization':`Bearer ${token}` },
+      body: JSON.stringify({ receiverId: messageState.toUserId, content:text, serviceId: messageState.serviceId || null })
     });
-
-    if (res.status === 204) { hideModal(); toast('Message sent!'); return; }
-    if (!res.ok) {
-      const msg = await readError(res);
-      if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem('token');
-        showInlineError(`${msg}. Please log in again.`);
-      } else {
-        showInlineError(`Failed to send: ${msg}`);
-      }
+    if (res.status===204){ hideModal(); toast('Message sent!'); return; }
+    if (!res.ok){ const msg = await readError(res);
+      if (res.status===401||res.status===403){ localStorage.removeItem('token'); showInlineError(`${msg}. Please log in again.`); }
+      else { showInlineError(`Failed to send: ${msg}`); }
       return;
     }
-
-    hideModal();
-    toast('Message sent!');
-  } catch (err) {
-    console.error('[messages] network error:', err);
-    showInlineError('Network error. Please try again.');
-  } finally {
-    sendMessageBtn.disabled = false;
-    sendMessageBtn.textContent = 'Send';
-    updateCounterAndState();
-  }
+    hideModal(); toast('Message sent!');
+  }catch(err){ console.error('[messages] network error:', err); showInlineError('Network error. Please try again.'); }
+  finally{ sendMessageBtn.disabled=false; sendMessageBtn.textContent='Send'; updateCounterAndState(); }
 }
 
 // ===================== Events =====================
-goToProfileBtn.addEventListener('click', () => { location.href = 'profile.html'; });
+document.getElementById('goToProfileBtn').addEventListener('click', ()=> { location.href='profile.html'; });
 refreshBtn.addEventListener('click', loadServices);
 searchInput.addEventListener('input', applyFilters);
 sortSelect.addEventListener('change', applyFilters);
 
-servicesList.addEventListener('click', (e) => {
-  const btn = e.target.closest('.message-btn');
-  if (!btn) return;
+servicesList.addEventListener('click', (e)=>{
+  const btn = e.target.closest('.message-btn'); if (!btn) return;
   const toUserId = btn.getAttribute('data-user-id');
   const username = btn.getAttribute('data-username') || 'seller';
   const serviceId = btn.getAttribute('data-service-id');
-  if (!toUserId) { toast('This service has no associated user.'); return; }
+  if (!toUserId){ toast('This service has no associated user.'); return; }
   messageState = { toUserId, serviceId, username };
   messageRecipient.textContent = username || 'seller';
   showModal();
 });
-
 cancelMessageBtn.addEventListener('click', hideModal);
 sendMessageBtn.addEventListener('click', sendMessage);
-
-// ESC and backdrop close
-window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && messageModal.style.display === 'flex') hideModal();
-});
-messageModal.addEventListener('click', (e) => {
-  if (e.target === messageModal) hideModal();
-});
-
-// Counter while typing
+window.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && messageModal.style.display==='flex') hideModal(); });
+messageModal.addEventListener('click', (e)=>{ if (e.target===messageModal) hideModal(); });
 messageContent.addEventListener('input', updateCounterAndState);
 
 // Initial load
-window.addEventListener('load', () => {
-  updateCounterAndState();
-  loadServices();
-});
+window.addEventListener('load', ()=>{ updateCounterAndState(); loadServices(); });
 </script>
 </body>
 </html>
