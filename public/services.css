@@ -147,14 +147,44 @@ button[disabled] { opacity: 0.6; cursor: not-allowed; }
   gap: 8px;
   justify-content: flex-end;
 }
+.modal-meta {
+  display: flex;
+  justify-content: flex-end;
+  font-size: .9rem;
+  color: #666;
+}
 #messageContent {
   width: 100%;
   padding: 10px;
+  padding-right: 44px; /* space for extension badges */
   border-radius: 8px;
   border: 1px solid #ccc;
   resize: vertical;
   min-height: 100px;
   font-size: 1rem;
+}
+
+/* ---------- Toast ---------- */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  background: rgba(51,51,51,.95);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  box-shadow: 0 6px 20px rgba(0,0,0,.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .25s, transform .25s;
+  z-index: 10000;
+  max-width: 80vw;
+  font-size: 0.95rem;
+}
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(-6px);
 }
 
 /* ---------- Responsive ---------- */
