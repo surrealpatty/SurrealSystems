@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>Profile - CodeCrowds</title>
 <link rel="stylesheet" href="profile.css" />
+
+<!-- Keep order; use defer so HTML paints first -->
 <script>window.API_URL = '/api';</script>
 <script src="script.js" defer></script>
 <script defer>
@@ -16,6 +18,8 @@
     }
   })();
 </script>
+
+<!-- Tiny inline style for basic layout; main styles live in profile.css -->
 <style>
   .hidden{display:none}
   .spinner{display:inline-block}
@@ -104,12 +108,40 @@
     <button type="button" id="mobileBackBtn" class="hidden">My Profile</button>
   </nav>
 
+<!-- Main script: perf + UX optimizations -->
 <script defer>
-// ===== pull helpers from script.js
+/* =================== PERF HELPERS: SWR cache + timeout =================== */
+const SWR_TTL_MS = 60_000; // 60s
+function lsGet(key){ try { return JSON.parse(localStorage.getItem(key) || 'null'); } catch { return null; } }
+function lsSet(key, val){ try { localStorage.setItem(key, JSON.stringify(val)); } catch {} }
+function isFresh(ts){ return (Date.now() - (ts||0)) < SWR_TTL_MS; }
+
+/** fetch wrapper that applies a timeout and forwards AbortSignal to apiFetch */
+async function fetchWithTimeout(url, opts={}, ms=8000){
+  const timeoutCtrl = new AbortController();
+  const timer = setTimeout(() => timeoutCtrl.abort(), ms);
+
+  // If caller provided a signal, chain it so either can abort
+  const externalSignal = opts.signal;
+  const chainedCtrl = externalSignal ? new AbortController() : timeoutCtrl;
+  if (externalSignal) {
+    const onAbort = () => chainedCtrl.abort();
+    externalSignal.addEventListener('abort', onAbort, { once: true });
+  }
+
+  try {
+    // IMPORTANT: apiFetch must pass signal through to window.fetch
+    return await apiFetch(url, { ...opts, signal: chainedCtrl.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/* ======================= pull helpers from script.js ====================== */
 const API_URL = '/api';
 const token = getToken();
 
-// 1) Read cached user immediately to avoid "Unknown User" flash
+/* ====== Instant paint: read cached user (avoid "Unknown User" flash) ===== */
 try {
   const cached = JSON.parse(localStorage.getItem('cc_me') || 'null');
   if (cached) {
@@ -124,7 +156,7 @@ try {
   }
 } catch {}
 
-// ---- DOM
+/* =============================== DOM refs ================================ */
 const profileUsername = document.getElementById('profile-username');
 const profileDescription = document.getElementById('profile-description');
 const descControls = document.getElementById('descControls');
@@ -163,13 +195,16 @@ const upgradeBtn = document.getElementById('upgradeBtn');
 const backToMyProfileBtn = document.getElementById('backToMyProfileBtn');
 const loadMoreBtn = document.getElementById('loadMoreServicesBtn');
 
+/* ================================ State ================================= */
 let currentUserTier = 'free';
 let svcPage = 1, svcLoading = false;
 let svcAborter = null;
+let ratingsAborter = null;
 
+/* ============================== Utilities =============================== */
 function esc(s){ return String(s ?? '').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// Only toggle owner UI controls (not the newServiceSection; that opens on click)
+/* Only toggle owner UI controls (not the newServiceSection; that opens on click) */
 function showOwnerUI(isOwner){
   [goToServicesBtn,goToMessagesBtn,addNewServiceBtn,editDescBtnFloat,mobileRow,descControls]
     .forEach(el=>el.classList.toggle('hidden',!isOwner));
@@ -183,7 +218,7 @@ function showOwnerUI(isOwner){
   }
 }
 
-// 2) Fetch /users/me (unwrapped), set userId if missing, and render
+/* ============================= Data loading ============================= */
 async function fetchMe() {
   const me = await apiFetch('users/me'); // -> { user }
   const u = me?.user || {};
@@ -235,7 +270,7 @@ async function loadProfile() {
       upgradeBtn.classList.add('hidden');
     }
 
-    // Load lists (faster perceived load: services first; ratings lazily)
+    // Load lists (services first for instant feel; ratings lazily)
     await loadServices({ reset: true, userId: profileUserId });
     const lazy = (cb)=> (window.requestIdleCallback ? requestIdleCallback(cb, { timeout: 1500 }) : setTimeout(cb, 0));
     lazy(()=> loadRatings(profileUserId));
@@ -248,7 +283,7 @@ async function loadProfile() {
   }
 }
 
-// Services list (simple paging)
+/* ============================ Services (SWR) ============================ */
 function serviceCardHTML(s,isOwner){
   return `<div class="card">
     <h3>${esc(s.title)}</h3>
@@ -261,51 +296,70 @@ function serviceCardHTML(s,isOwner){
   </div>`;
 }
 
+function renderServicesHTML(list, loggedInUserId){
+  if (!list?.length) return '';
+  let out = '';
+  for (const s of list){
+    const isOwner = loggedInUserId === (s.user?.id?.toString() || s.userId?.toString() || '');
+    out += serviceCardHTML(s, isOwner);
+  }
+  return out;
+}
+
 async function loadServices({reset=false, userId} = {}) {
   if (svcLoading) return; svcLoading = true;
   try{
     const loggedInUserId = getUserId();
+    const cacheKey = `cc_services_${userId || 'me'}_p${svcPage}`;
 
     if (reset){
       svcPage=1;
-      // lightweight skeletons for instant paint
-      servicesList.innerHTML = Array.from({length:3}).map(()=>`
-        <div class="card fade-in">
-          <h3 style="background:#eee;height:18px;width:60%;border-radius:6px;"></h3>
-          <p style="background:#f2f2f2;height:14px;width:100%;border-radius:6px;"></p>
-          <p style="background:#f2f2f2;height:14px;width:80%;border-radius:6px;"></p>
-        </div>
-      `).join('');
-      loadMoreBtn.classList.add('hidden');
+      // 1) Try cache for instant paint
+      const cached = lsGet(cacheKey);
+      if (cached && isFresh(cached.ts) && Array.isArray(cached.items) && cached.items.length){
+        servicesList.innerHTML = renderServicesHTML(cached.items, loggedInUserId);
+        loadMoreBtn.classList.toggle('hidden', !cached.hasMore);
+      } else {
+        // pretty skeleton if no cache
+        servicesList.innerHTML = Array.from({length:3}).map(()=>`
+          <div class="card fade-in">
+            <h3 style="background:#eee;height:18px;width:60%;border-radius:6px;"></h3>
+            <p style="background:#f2f2f2;height:14px;width:100%;border-radius:6px;"></p>
+            <p style="background:#f2f2f2;height:14px;width:80%;border-radius:6px;"></p>
+          </div>
+        `).join('');
+        loadMoreBtn.classList.add('hidden');
+      }
     }
 
     const url = new URL(`${API_URL}/services`, location.origin);
     if (userId) url.searchParams.set('userId', userId);
-    url.searchParams.set('limit', svcPage === 1 ? '6' : '12'); // smaller first page for speed
+    url.searchParams.set('limit', svcPage === 1 ? '6' : '12'); // smaller first page
     url.searchParams.set('page', String(svcPage));
 
     if (svcAborter) { try { svcAborter.abort(); } catch {} }
     svcAborter = new AbortController();
 
-    const data = await apiFetch(url.pathname + url.search, { signal: svcAborter.signal }); // "signal" should be forwarded by apiFetch
+    // 2) Revalidate in background with timeout
+    const data = await fetchWithTimeout(url.pathname + url.search, { signal: svcAborter.signal }, 8000);
     const list = data.services || [];
     const hasMore = !!data.hasMore;
 
-    if (reset) servicesList.innerHTML='';
-    if (!list.length && svcPage===1){
+    // cache latest
+    lsSet(cacheKey, { ts: Date.now(), items: list, hasMore });
+
+    // 3) Render once (fast string -> innerHTML)
+    const html = renderServicesHTML(list, loggedInUserId);
+    if (reset) servicesList.innerHTML = html;
+    else servicesList.insertAdjacentHTML('beforeend', html);
+
+    loadMoreBtn.classList.toggle('hidden', !hasMore);
+    if (hasMore) svcPage += 1;
+
+    if (!list.length && svcPage===2 && reset){
       servicesList.innerHTML = '<div class="card"><h3>No Services Yet</h3><p class="muted">Nothing posted yet.</p></div>';
-      loadMoreBtn.classList.add('hidden'); return;
+      loadMoreBtn.classList.add('hidden');
     }
-
-    const frag = document.createDocumentFragment();
-    list.forEach(s=>{
-      const isOwner = loggedInUserId === (s.user?.id?.toString() || s.userId?.toString() || '');
-      const wrap = document.createElement('div'); wrap.innerHTML = serviceCardHTML(s,isOwner);
-      frag.appendChild(wrap.firstElementChild);
-    });
-    servicesList.appendChild(frag);
-
-    if (hasMore){ loadMoreBtn.classList.remove('hidden'); svcPage+=1; } else { loadMoreBtn.classList.add('hidden'); }
   }catch(err){
     if (err?.name !== 'AbortError') {
       console.error(err);
@@ -315,35 +369,62 @@ async function loadServices({reset=false, userId} = {}) {
 }
 loadMoreBtn.addEventListener('click', ()=> loadServices({ reset:false }));
 
-// Ratings
+/* ============================ Ratings (SWR) ============================= */
 function renderStars(n){ const r=Math.round(n); return '★'.repeat(r)+'☆'.repeat(5-r); }
+
 async function loadRatings(userId){
-  ratingsList.innerHTML='<p><span class="spinner"></span> Loading ratings...</p>';
+  const cacheKey = `cc_ratings_${userId}`;
+  const cached = lsGet(cacheKey);
+  // instant paint from cache
+  if (cached && isFresh(cached.ts) && Array.isArray(cached.ratings)){
+    paintRatings(cached.summary || { average: 0, count: 0 }, cached.ratings);
+  } else {
+    ratingsList.innerHTML='<p><span class="spinner"></span> Loading ratings...</p>';
+  }
+
+  // revalidate with timeout + abort
+  if (ratingsAborter) { try { ratingsAborter.abort(); } catch {} }
+  ratingsAborter = new AbortController();
   try{
-    const data = await apiFetch(`ratings/user/${userId}`); // unwrapped
-    const avg = data.summary?.average ?? 0, count = data.summary?.count ?? 0;
-    avgStarsEl.textContent = Number(avg).toFixed(1);
-    ratingsCountEl.textContent = count;
+    const data = await fetchWithTimeout(`ratings/user/${userId}`, { signal: ratingsAborter.signal }, 8000);
+    const summary = {
+      average: data.summary?.average ?? 0,
+      count: data.summary?.count ?? 0
+    };
     const ratings = data.ratings || [];
-    if (!ratings.length){ ratingsList.innerHTML = '<p class="muted">No ratings yet.</p>'; return; }
-    ratingsList.innerHTML = ratings.map(r=>{
-      return `<div class="review">
-        <div class="meta-row">
-          <strong>${esc(r.rater?.username || ('User '+r.raterId))}</strong>
-          <span class="stars">${renderStars(r.stars)}</span>
-          <span class="badge">${Number(r.stars).toFixed(1)}</span>
-          <span class="muted">${new Date(r.createdAt).toLocaleString()}</span>
-        </div>
-        ${r.comment ? `<p>${esc(r.comment)}</p>` : '<p class="muted">No comment</p>'}
-      </div>`;
-    }).join('');
+    lsSet(cacheKey, { ts: Date.now(), summary, ratings });
+    paintRatings(summary, ratings);
   }catch(err){
-    console.error(err);
-    ratingsList.innerHTML = '<p class="muted">Failed to load ratings.</p>';
+    if (err?.name !== 'AbortError') {
+      console.error(err);
+      if (!cached) ratingsList.innerHTML = '<p class="muted">Failed to load ratings.</p>';
+    }
   }
 }
 
-// Edit / Save description
+function paintRatings(summary, ratings){
+  avgStarsEl.textContent = Number(summary.average || 0).toFixed(1);
+  ratingsCountEl.textContent = summary.count || 0;
+  if (!ratings?.length){
+    ratingsList.innerHTML = '<p class="muted">No ratings yet.</p>';
+    return;
+  }
+  let html = '';
+  for (const r of ratings){
+    html += `<div class="review">
+      <div class="meta-row">
+        <strong>${esc(r.rater?.username || ('User '+r.raterId))}</strong>
+        <span class="stars">${renderStars(r.stars)}</span>
+        <span class="badge">${Number(r.stars).toFixed(1)}</span>
+        <span class="muted">${new Date(r.createdAt).toLocaleString()}</span>
+      </div>
+      ${r.comment ? `<p>${esc(r.comment)}</p>` : '<p class="muted">No comment</p>'}
+    </div>`;
+  }
+  ratingsList.innerHTML = html;
+}
+
+/* ============================ Edit Description =========================== */
 let editingDesc=false;
 function toggleDescEdit(force){
   editingDesc = typeof force==='boolean' ? force : !editingDesc;
@@ -354,10 +435,7 @@ function toggleDescEdit(force){
 async function saveDescription(){
   const newDesc = profileDescription.textContent.trim();
   try{
-    const out = await apiFetch('users/me/description', {
-      method:'PUT',
-      body: { description: newDesc }
-    });
+    const out = await apiFetch('users/me/description', { method:'PUT', body: { description: newDesc } });
     const saved = out?.user || {};
     profileDescription.textContent = getDescription(saved) || newDesc;
   }catch(err){ alert('Failed to save description'); console.error(err); }
@@ -366,7 +444,7 @@ async function saveDescription(){
 editDescBtn.addEventListener('click', ()=> !editingDesc ? toggleDescEdit(true) : saveDescription());
 document.getElementById('editDescBtnFloat').addEventListener('click', ()=> !editingDesc ? toggleDescEdit(true) : saveDescription());
 
-// nav + logout + upgrade
+/* ============================== Nav / Auth =============================== */
 document.getElementById('goToServicesBtn').addEventListener('click', ()=> location.href='services.html');
 document.getElementById('goToMessagesBtn').addEventListener('click', ()=> location.href='messages.html');
 document.getElementById('mobileServicesBtn').addEventListener('click', ()=> location.href='services.html');
@@ -386,9 +464,8 @@ document.getElementById('upgradeBtn').addEventListener('click', async ()=>{
   }catch(err){ alert(err.message || 'Upgrade failed'); }
 });
 
-/* ===== + Service button behavior ===== */
+/* =================== + Service open + Create Service ===================== */
 function openNewService() {
-  // ensure visible & flex layout
   newServiceSection.classList.remove('hidden');
   newServiceSection.classList.add('show-flex');
   newServiceTitle.focus();
@@ -397,7 +474,6 @@ function openNewService() {
 addNewServiceBtn.addEventListener('click', openNewService);
 mobileAddServiceBtn.addEventListener('click', openNewService);
 
-/* ===== Create Service handler ===== */
 async function createService() {
   const title = newServiceTitle.value.trim();
   const description = newServiceDesc.value.trim();
@@ -407,17 +483,12 @@ async function createService() {
   if (Number.isNaN(price) || price < 0) { alert('Enter a valid price'); return; }
 
   try {
-    await apiFetch('services', {
-      method: 'POST',
-      body: { title, description, price }
-    });
-
+    await apiFetch('services', { method: 'POST', body: { title, description, price } });
     // Clear form
     newServiceTitle.value = '';
     newServiceDesc.value = '';
     newServicePrice.value = '';
-
-    // Refresh list for the current user
+    // Refresh list for the current user (reset to page 1)
     await loadServices({ reset: true, userId: getUserId() });
   } catch (err) {
     console.error(err);
@@ -426,7 +497,7 @@ async function createService() {
 }
 createServiceBtn.addEventListener('click', createService);
 
-// init
+/* ================================= Init ================================= */
 loadProfile();
 </script>
 </body>
