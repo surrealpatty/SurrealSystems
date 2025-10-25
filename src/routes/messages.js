@@ -1,67 +1,183 @@
+// src/routes/messages.js
 const express = require('express');
 const router = express.Router();
-const { Op } = require('sequelize');
-
-const Message = require('../models/message');
-const User = require('../models/user');
+const { Message, User } = require('../models'); // assumes models/index.js exports Message & User
 const authenticateToken = require('../middlewares/authenticateToken');
+const { body, query, param } = require('express-validator');
+const validate = require('../middlewares/validate');
 
-// POST /api/messages — send a message
-router.post('/', authenticateToken, async (req, res) => {
-  try {
-    const { receiverId, content, serviceId } = req.body || {};
-    if (!receiverId || !content || !String(content).trim()) {
-      return res.status(400).json({ error: 'Receiver and content required' });
+/* helpers */
+function ok(res, payload, status = 200) {
+  // compat: top-level fields AND { success, data }
+  return res.status(status).json({ success: true, ...payload, data: payload });
+}
+function err(res, message = 'Something went wrong', status = 500, details) {
+  const out = { success: false, error: { message } };
+  if (details) out.error.details = details;
+  return res.status(status).json(out);
+}
+
+/**
+ * GET /api/messages/inbox
+ * Recent messages RECEIVED by the current user
+ * ?limit=20&offset=0
+ */
+router.get(
+  '/inbox',
+  authenticateToken,
+  [query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+   query('offset').optional().isInt({ min: 0 }).toInt()],
+  validate,
+  async (req, res) => {
+    try {
+      const limit = req.query.limit ?? 20;
+      const offset = req.query.offset ?? 0;
+      const rows = await Message.findAll({
+        where: { receiverId: req.user.id },
+        attributes: ['id','senderId','receiverId','body','createdAt','updatedAt'],
+        order: [['createdAt','DESC']],
+        limit, offset
+      });
+      res.set('Cache-Control', 'private, max-age=10');
+      return ok(res, { messages: rows, nextOffset: offset + rows.length });
+    } catch (e) {
+      console.error('GET /messages/inbox error:', e);
+      return err(res, 'Failed to load inbox', 500);
     }
-
-    const msg = await Message.create({
-      senderId: req.user.id,
-      receiverId,
-      content: String(content).trim(),
-      serviceId: serviceId || null
-    });
-
-    return res.status(201).json({ message: 'Message sent', data: msg });
-  } catch (err) {
-    console.error('POST /api/messages error:', err);
-    return res.status(500).json({ error: 'Failed to send message' });
   }
-});
+);
 
-// GET /api/messages — inbox
-router.get('/', authenticateToken, async (req, res) => {
-  try {
-    const messages = await Message.findAll({
-      where: { receiverId: req.user.id },
-      include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }],
-      order: [['createdAt', 'DESC']]
-    });
-    return res.json(messages);
-  } catch (err) {
-    console.error('GET /api/messages error:', err);
-    return res.status(500).json({ error: 'Failed to fetch messages' });
+/**
+ * GET /api/messages/outbox
+ * Recent messages SENT by the current user
+ */
+router.get(
+  '/outbox',
+  authenticateToken,
+  [query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+   query('offset').optional().isInt({ min: 0 }).toInt()],
+  validate,
+  async (req, res) => {
+    try {
+      const limit = req.query.limit ?? 20;
+      const offset = req.query.offset ?? 0;
+      const rows = await Message.findAll({
+        where: { senderId: req.user.id },
+        attributes: ['id','senderId','receiverId','body','createdAt','updatedAt'],
+        order: [['createdAt','DESC']],
+        limit, offset
+      });
+      res.set('Cache-Control', 'private, max-age=10');
+      return ok(res, { messages: rows, nextOffset: offset + rows.length });
+    } catch (e) {
+      console.error('GET /messages/outbox error:', e);
+      return err(res, 'Failed to load outbox', 500);
+    }
   }
-});
+);
 
-// GET /api/messages/conversation/:otherUserId — DM thread
-router.get('/conversation/:otherUserId', authenticateToken, async (req, res) => {
-  try {
-    const otherUserId = req.params.otherUserId;
-    const messages = await Message.findAll({
-      where: {
-        [Op.or]: [
-          { senderId: req.user.id, receiverId: otherUserId },
-          { senderId: otherUserId, receiverId: req.user.id }
-        ]
-      },
-      include: [{ model: User, as: 'sender', attributes: ['id', 'username'] }],
-      order: [['createdAt', 'ASC']]
-    });
-    return res.json(messages);
-  } catch (err) {
-    console.error('GET /api/messages/conversation/:otherUserId error:', err);
-    return res.status(500).json({ error: 'Failed to fetch conversation' });
+/**
+ * GET /api/messages/thread/:userId
+ * Conversation between ME and :userId (both directions)
+ * ?limit=50&offset=0
+ */
+router.get(
+  '/thread/:userId',
+  authenticateToken,
+  [param('userId').isInt({ min: 1 }).toInt(),
+   query('limit').optional().isInt({ min: 1, max: 200 }).toInt(),
+   query('offset').optional().isInt({ min: 0 }).toInt()],
+  validate,
+  async (req, res) => {
+    try {
+      const otherId = req.params.userId;
+      const limit = req.query.limit ?? 50;
+      const offset = req.query.offset ?? 0;
+      const { Op } = require('sequelize');
+
+      const rows = await Message.findAll({
+        where: {
+          [Op.or]: [
+            { senderId: req.user.id, receiverId: otherId },
+            { senderId: otherId,   receiverId: req.user.id }
+          ]
+        },
+        attributes: ['id','senderId','receiverId','body','createdAt','updatedAt'],
+        order: [['createdAt','DESC']], // newest first; reverse on client if needed
+        limit, offset
+      });
+
+      res.set('Cache-Control', 'private, max-age=5');
+      return ok(res, { messages: rows, nextOffset: offset + rows.length, withUserId: Number(otherId) });
+    } catch (e) {
+      console.error('GET /messages/thread/:userId error:', e);
+      return err(res, 'Failed to load thread', 500);
+    }
   }
-});
+);
+
+/**
+ * GET /api/users/me/messages
+ * Alias some frontends expect for "recent received"
+ */
+router.get(
+  '/users/me/messages',
+  authenticateToken,
+  [query('limit').optional().isInt({ min: 1, max: 100 }).toInt()],
+  validate,
+  async (req, res) => {
+    try {
+      const limit = req.query.limit ?? 20;
+      const rows = await Message.findAll({
+        where: { receiverId: req.user.id },
+        attributes: ['id','senderId','receiverId','body','createdAt','updatedAt'],
+        order: [['createdAt','DESC']],
+        limit
+      });
+      res.set('Cache-Control', 'private, max-age=10');
+      return ok(res, { messages: rows });
+    } catch (e) {
+      console.error('GET /users/me/messages error:', e);
+      return err(res, 'Failed to load messages', 500);
+    }
+  }
+);
+
+/**
+ * POST /api/messages
+ * Send a message: { to, body }
+ */
+router.post(
+  '/',
+  authenticateToken,
+  [body('to').isInt({ min: 1 }).withMessage('Recipient id required'),
+   body('body').isString().isLength({ min: 1, max: 5000 }).trim()],
+  validate,
+  async (req, res) => {
+    try {
+      const { to, body: text } = req.body;
+
+      // Optional: reject sending to self
+      if (Number(to) === Number(req.user.id)) {
+        return err(res, 'Cannot message yourself', 400);
+      }
+
+      // Ensure recipient exists (avoid orphan messages)
+      const recipient = await User.findByPk(to, { attributes: ['id'] });
+      if (!recipient) return err(res, 'Recipient not found', 404);
+
+      const msg = await Message.create({
+        senderId: req.user.id,
+        receiverId: to,
+        body: text
+      });
+
+      return ok(res, { message: msg }, 201);
+    } catch (e) {
+      console.error('POST /messages error:', e);
+      return err(res, 'Failed to send message', 500);
+    }
+  }
+);
 
 module.exports = router;
