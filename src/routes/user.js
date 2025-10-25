@@ -1,7 +1,7 @@
 // src/routes/user.js
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models');
+const { User, Service } = require('../models'); // Service is exported from models/index.js
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const authenticateToken = require('../middlewares/authenticateToken');
@@ -9,21 +9,13 @@ const { body, param, oneOf } = require('express-validator');
 const validate = require('../middlewares/validate');
 
 /* helpers */
-function sendSuccess(res, data = {}, status = 200) {
-  return res.status(status).json({ success: true, data });
-}
-function sendError(res, message = 'Something went wrong', status = 500, details) {
-  const payload = { success: false, error: { message } };
-  if (details) payload.error.details = details;
-  return res.status(status).json(payload);
-}
 function toSafeUser(user) {
   if (!user) return user;
   const raw = user.toJSON ? user.toJSON() : user;
   const { password, ...safe } = raw;
   return safe;
 }
-function withNormalizedUsername(u) {
+function normalizeUsername(u) {
   if (!u) return u;
   const out = { ...u };
   if (!out.username || String(out.username).trim() === '') {
@@ -31,6 +23,17 @@ function withNormalizedUsername(u) {
     out.username = out.name || out.displayName || fromEmail || 'User';
   }
   return out;
+}
+// Respond in both formats so old frontend code still works:
+// - legacy top-level: { user, token? }
+// - new wrapper: { success:true, data:{ user, token? } }
+function respondCompat(res, payload, status = 200) {
+  return res.status(status).json({ success: true, ...payload, data: payload });
+}
+function sendError(res, message = 'Something went wrong', status = 500, details) {
+  const payload = { success: false, error: { message } };
+  if (details) payload.error.details = details;
+  return res.status(status).json(payload);
 }
 
 /* Register */
@@ -65,7 +68,8 @@ router.post(
       if (!process.env.JWT_SECRET) return sendError(res, 'Server misconfigured', 500);
       const token = jwt.sign({ id: newUser.id, email: newUser.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-      return sendSuccess(res, { token, user: withNormalizedUsername(toSafeUser(newUser)) }, 201);
+      const user = normalizeUsername(toSafeUser(newUser));
+      return respondCompat(res, { token, user }, 201);
     } catch (err) {
       console.error('Register error:', err);
       return sendError(res, 'Registration failed', 500);
@@ -87,16 +91,17 @@ router.post(
   async (req, res) => {
     try {
       const { email, username, password } = req.body;
-      const user = await User.findOne({ where: email ? { email } : { username } });
-      if (!user) return sendError(res, 'Invalid credentials', 401);
+      const userRec = await User.findOne({ where: email ? { email } : { username } });
+      if (!userRec) return sendError(res, 'Invalid credentials', 401);
 
-      const valid = await bcrypt.compare(password, user.password);
+      const valid = await bcrypt.compare(password, userRec.password);
       if (!valid) return sendError(res, 'Invalid credentials', 401);
 
       if (!process.env.JWT_SECRET) return sendError(res, 'Server misconfigured', 500);
-      const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
+      const token = jwt.sign({ id: userRec.id, email: userRec.email }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-      return sendSuccess(res, { token, user: withNormalizedUsername(toSafeUser(user)) });
+      const user = normalizeUsername(toSafeUser(userRec));
+      return respondCompat(res, { token, user });
     } catch (err) {
       console.error('Login error:', err);
       return sendError(res, 'Login failed', 500);
@@ -104,31 +109,56 @@ router.post(
   }
 );
 
-/* Me (lightweight & brief cache) */
+/* Me (lightweight; includes description & tier) */
 router.get('/me', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id, {
+    const me = await User.findByPk(req.user.id, {
       attributes: ['id', 'username', 'email', 'description', 'tier', 'createdAt', 'updatedAt']
     });
-    if (!user) return sendError(res, 'User not found', 404);
+    if (!me) return sendError(res, 'User not found', 404);
+    const user = normalizeUsername(toSafeUser(me));
 
+    // brief private cache for snappy reloads
     res.set('Cache-Control', 'private, max-age=15');
-    return sendSuccess(res, { user });
+    return respondCompat(res, { user });
   } catch (err) {
     console.error('Get /me error:', err);
     return sendError(res, 'Failed to fetch user', 500);
   }
 });
 
+/* My services (for profile page) */
+router.get('/me/services', authenticateToken, async (req, res) => {
+  try {
+    const limit = Math.min(Number(req.query.limit) || 20, 50);
+    const offset = Number(req.query.offset) || 0;
+    const rows = await Service.findAll({
+      where: { userId: req.user.id },
+      attributes: ['id', 'title', 'price', 'createdAt', 'updatedAt'],
+      order: [['createdAt', 'DESC']],
+      limit,
+      offset
+    });
+    const payload = { services: rows, nextOffset: offset + rows.length };
+    res.set('Cache-Control', 'private, max-age=15');
+    return respondCompat(res, payload);
+  } catch (err) {
+    console.error('Get /me/services error:', err);
+    return sendError(res, 'Failed to fetch services', 500);
+  }
+});
+
 /* Public profile by id */
 router.get('/:id',
-  [param('id').isInt({ min: 1 })],
+  [param('id').isInt({ min: 1 }).withMessage('Invalid user id')],
   validate,
   async (req, res) => {
     try {
-      const user = await User.findByPk(Number(req.params.id), { attributes: { exclude: ['password'] } });
-      if (!user) return sendError(res, 'User not found', 404);
-      return sendSuccess(res, { user: withNormalizedUsername(toSafeUser(user)) });
+      const id = Number(req.params.id);
+      const userRec = await User.findByPk(id, { attributes: { exclude: ['password'] } });
+      if (!userRec) return sendError(res, 'User not found', 404);
+      const user = normalizeUsername(toSafeUser(userRec));
+      return respondCompat(res, { user });
     } catch (err) {
       console.error('Get user by id error:', err);
       return sendError(res, 'Failed to fetch user', 500);
@@ -143,11 +173,12 @@ router.put('/me/description',
   validate,
   async (req, res) => {
     try {
-      const user = await User.findByPk(req.user.id);
-      if (!user) return sendError(res, 'User not found', 404);
-      user.description = req.body.description.trim();
-      await user.save();
-      return sendSuccess(res, { message: 'Description updated successfully', user: withNormalizedUsername(toSafeUser(user)) });
+      const userRec = await User.findByPk(req.user.id);
+      if (!userRec) return sendError(res, 'User not found', 404);
+      userRec.description = req.body.description.trim();
+      await userRec.save();
+      const user = normalizeUsername(toSafeUser(userRec));
+      return respondCompat(res, { message: 'Description updated successfully', user });
     } catch (err) {
       console.error('Update description error:', err);
       return sendError(res, 'Failed to save description', 500);
@@ -158,11 +189,12 @@ router.put('/me/description',
 /* Upgrade to paid (me) */
 router.put('/me/upgrade', authenticateToken, async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id);
-    if (!user) return sendError(res, 'User not found', 404);
-    user.tier = 'paid';
-    await user.save();
-    return sendSuccess(res, { message: 'Account upgraded to paid', user: withNormalizedUsername(toSafeUser(user)) });
+    const userRec = await User.findByPk(req.user.id);
+    if (!userRec) return sendError(res, 'User not found', 404);
+    userRec.tier = 'paid';
+    await userRec.save();
+    const user = normalizeUsername(toSafeUser(userRec));
+    return respondCompat(res, { message: 'Account upgraded to paid', user });
   } catch (err) {
     console.error('Upgrade error:', err);
     return sendError(res, 'Failed to upgrade account', 500);

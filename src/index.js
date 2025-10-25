@@ -7,26 +7,28 @@ require('dotenv').config();
 const { sequelize } = require('./config/database');
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
+const ratingRoutes = require('./routes/rating'); // ✅ add back
 
 const app = express();
 
 /* ---- Minimal middleware (fast) ---- */
 app.use(cors({
-  origin: true, // allow all (same as before)
+  origin: true, // allow all (simple & fast)
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization'],
   methods: ['GET','POST','PUT','PATCH','DELETE','OPTIONS']
 }));
 app.use(express.json());
 
-/* ---- Health endpoint (needed by frontend) ---- */
+/* ---- Health endpoint (frontend expects this) ---- */
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, ts: Date.now() });
 });
 
-/* ---- API routes (unchanged) ---- */
+/* ---- API routes ---- */
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
+app.use('/api/ratings', ratingRoutes); // ✅ restore ratings
 
 /* ---- Static frontend (serve ../public) ---- */
 const publicDir = path.join(__dirname, '../public');
