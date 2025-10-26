@@ -455,6 +455,10 @@ document.getElementById('goToMessagesBtn').addEventListener('click', ()=> locati
 document.getElementById('mobileServicesBtn').addEventListener('click', ()=> location.href='services.html');
 document.getElementById('mobileMessagesBtn').addEventListener('click', ()=> location.href='messages.html');
 
+/* --- FIX: Add back button handlers so the "My Profile" buttons navigate --- */
+document.getElementById('backToMyProfileBtn').addEventListener('click', ()=> location.href='profile.html');
+document.getElementById('mobileBackBtn').addEventListener('click', ()=> location.href='profile.html');
+
 document.getElementById('logoutBtn').addEventListener('click', ()=>{ localStorage.clear(); location.replace('/'); });
 document.getElementById('upgradeBtn').addEventListener('click', async ()=>{
   try{
