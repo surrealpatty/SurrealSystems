@@ -51,6 +51,7 @@ router.get(
       // Try raw aggregation using COALESCE(stars, score).
       // Use DB column names (snake_case) and alias to serviceId for JS code.
       const serviceIds = rows.map(r => r.id);
+      console.info('[services] fetched rows count=%d, serviceIds=%o', rows.length, serviceIds.slice(0,5));
       const summaryMap = {};
 
       try {
@@ -64,6 +65,8 @@ router.get(
            GROUP BY "service_id"`,
           { replacements: { ids: serviceIds }, type: QueryTypes.SELECT }
         );
+
+        console.info('[services] aggregation rowsRaw sample:', (rowsRaw || []).slice(0,5));
 
         (rowsRaw || []).forEach(r => {
           summaryMap[r.serviceId] = {
@@ -103,7 +106,9 @@ router.get(
   }
 );
 
-/* ----------------------------- CREATE ------------------------------ */
+/* ----------------------------- other routes unmodified ------------------------------ */
+// CREATE / GET by ID / UPDATE / DELETE remain unchanged - keep original code below
+
 router.post(
   '/',
   authenticateToken,
@@ -133,7 +138,6 @@ router.post(
   }
 );
 
-/* ---------------------------- GET BY ID ---------------------------- */
 router.get('/:id', [ param('id').isInt({ min: 1 }).toInt() ], validate, async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -148,7 +152,6 @@ router.get('/:id', [ param('id').isInt({ min: 1 }).toInt() ], validate, async (r
   }
 });
 
-/* ----------------------------- UPDATE ------------------------------ */
 router.put(
   '/:id',
   authenticateToken,
@@ -180,7 +183,6 @@ router.put(
   }
 );
 
-/* ----------------------------- DELETE ------------------------------ */
 router.delete('/:id', authenticateToken, [ param('id').isInt({ min: 1 }).toInt() ], validate, async (req, res) => {
   try {
     const id = Number(req.params.id);

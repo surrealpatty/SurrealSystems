@@ -1,12 +1,6 @@
 /* ============================================================================
-  CodeCrowds – shared client helpers
-  - Auth (token/userId) helpers
-  - API URL builder
-  - Robust apiFetch (JSON unwrap, forwards AbortSignal, optional timeout)
-  - Small DOM helpers
-  - Display-name helpers
-  - Login page wiring (index.html)
-============================================================================ */
+  CodeCrowds – shared client helpers (improved)
+============================================================================= */
 
 /* =============================== Auth keys =============================== */
 const TOKEN_KEY   = 'token';
@@ -26,9 +20,19 @@ function isLoggedIn()           { return !!getToken() && !!getUserId(); }
 /** Prefer explicit window.API_URL; otherwise default to current origin + /api */
 const API_BASE = (() => {
   try {
-    if (window.API_URL) return String(window.API_URL).replace(/\/+$/,'');
+    if (typeof window !== 'undefined' && window.API_URL) return String(window.API_URL).replace(/\/+$/,'');
   } catch {}
-  return (window.location.origin.replace(/\/$/, '')) + '/api';
+  // If window.API_BASE or window.API_URL are set to '/api' by the page, we still want
+  // to treat them as relative roots. So normalize '/api' -> '/api' (no trailing slash)
+  try {
+    if (typeof window !== 'undefined' && window.API_BASE) return String(window.API_BASE).replace(/\/+$/,'');
+  } catch {}
+  // Default to origin + '/api'
+  try {
+    return (window.location.origin.replace(/\/$/, '')) + '/api';
+  } catch {
+    return '/api';
+  }
 })();
 
 /** Build safe API URL from a path or absolute URL */
@@ -41,7 +45,6 @@ function apiUrl(path) {
 }
 
 /* ============================== JSON unwrap ============================== */
-/** Unwrap API envelope { success, data } -> data (or pass-through if not wrapped) */
 function unwrap(json) {
   return (json && typeof json === 'object' && Object.prototype.hasOwnProperty.call(json, 'data'))
     ? json.data
@@ -49,23 +52,6 @@ function unwrap(json) {
 }
 
 /* ============================== fetch helpers ============================ */
-/**
- * apiFetch(path, options)
- * - Adds Authorization: Bearer <token> if present
- * - Forwards AbortSignal (options.signal)
- * - Optional timeout via options.timeoutMs (default: no timeout)
- * - Automatically JSON-parses (when content-type suggests JSON)
- * - Unwraps API envelopes { success, data }
- * - Throws with a meaningful message on non-OK responses
- *
- * options:
- *   method?: string ('GET' default)
- *   headers?: Record<string,string>
- *   body?: any (auto-JSON stringified unless already a string)
- *   signal?: AbortSignal
- *   timeoutMs?: number
- *   withCredentials?: boolean  // if you rely on cookies
- */
 async function apiFetch(path, options = {}) {
   const {
     method = 'GET',
@@ -78,14 +64,12 @@ async function apiFetch(path, options = {}) {
 
   const url = apiUrl(path);
 
-  // Build headers
   const hdrs = { Accept: 'application/json', ...headers };
   if (body !== undefined && !hdrs['Content-Type']) hdrs['Content-Type'] = 'application/json';
 
   const token = getToken();
   if (token && !hdrs['Authorization']) hdrs['Authorization'] = `Bearer ${token}`;
 
-  // Build fetch init
   const init = {
     method,
     headers: hdrs,
@@ -94,7 +78,7 @@ async function apiFetch(path, options = {}) {
     credentials: withCredentials ? 'include' : 'same-origin',
   };
 
-  // Timeout support (without losing caller's AbortSignal)
+  // Timeout support
   let timeoutCtrl;
   let finalSignal = signal;
   if (Number.isFinite(timeoutMs) && timeoutMs > 0) {
@@ -102,14 +86,12 @@ async function apiFetch(path, options = {}) {
     const timeoutId = setTimeout(() => timeoutCtrl.abort(), timeoutMs);
 
     if (signal) {
-      // chain external + timeout signals into one
       const chained = new AbortController();
       const onExternalAbort = () => chained.abort();
       signal.addEventListener('abort', onExternalAbort, { once: true });
       timeoutCtrl.signal.addEventListener('abort', () => chained.abort(), { once: true });
       finalSignal = chained.signal;
 
-      // cleanup listener when finished
       init.signal = finalSignal;
       try {
         const res = await fetch(url, { ...init, signal: finalSignal });
@@ -120,7 +102,6 @@ async function apiFetch(path, options = {}) {
         throw normalizeFetchError(e);
       }
     } else {
-      // no external signal; just use timeout one
       init.signal = timeoutCtrl.signal;
       try {
         const res = await fetch(url, init);
@@ -132,7 +113,6 @@ async function apiFetch(path, options = {}) {
       }
     }
   } else {
-    // No timeout path
     try {
       const res = await fetch(url, init);
       return await handleResponse(res);
@@ -141,7 +121,6 @@ async function apiFetch(path, options = {}) {
     }
   }
 
-  // Handle fetch response (JSON, unwrap, errors)
   async function handleResponse(res) {
     const ct = (res.headers.get('content-type') || '').toLowerCase();
     const isJSON = ct.includes('application/json') || ct.includes('+json');
@@ -193,7 +172,6 @@ function getDescription(u = {}) {
 }
 
 /* ============================== Login wiring ============================= */
-/** Wire up login form on index.html if present */
 function initLoginPage() {
   const form = document.getElementById('loginForm');
   if (!form) return;
