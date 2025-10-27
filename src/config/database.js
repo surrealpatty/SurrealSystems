@@ -17,9 +17,11 @@ const baseOpts = {
     query_timeout: Number(process.env.PG_QUERY_TIMEOUT || 0)
   },
 
-  // <-- Important: map JS camelCase attributes to snake_case DB columns (userId -> user_id, createdAt -> created_at, etc.)
+  // IMPORTANT: Use camelCase timestamp and foreign key names to match existing DB.
+  // If you prefer snake_case DB columns (created_at) then set underscored: true
+  // but your current DB uses `createdAt` / `updatedAt`.
   define: {
-    underscored: true
+    underscored: false
   }
 };
 
