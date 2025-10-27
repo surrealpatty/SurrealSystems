@@ -169,7 +169,7 @@
   async function fetchMe() {
     const me = await doFetch('users/me', {}, 8000); // -> { user } or user object
     const u = me?.user || me || {};
-    if (!getUserId && u.id) setUserId && setUserId(String(u.id));
+    if (!getUserId() && u.id) setUserId && setUserId(String(u.id));
     try {
       localStorage.setItem('cc_me', JSON.stringify(u));
       const dn = getDisplayName(u);
@@ -310,7 +310,6 @@
     const div = btn.closest('.card');
     if (!div) return;
     // fetch values from the DOM and switch to edit mode...
-    // Reuse the editService implementation below
     editService(div, { id });
   }
   function onDeleteServiceClick(e) {
@@ -387,22 +386,54 @@
   }
 
   async function createService() {
+    if (!createServiceBtn) return;
+    // Read values
     const title = newServiceTitle?.value?.trim();
     const description = newServiceDesc?.value?.trim();
-    const price = Number(newServicePrice?.value);
+    const rawPrice = newServicePrice?.value;
+    const price = Number(rawPrice);
+
+    // Basic validation
     if (!title) { alert('Title is required'); return; }
     if (Number.isNaN(price) || price < 0) { alert('Enter a valid price'); return; }
 
+    // UI: disable while working
+    createServiceBtn.disabled = true;
+    const oldText = createServiceBtn.textContent;
+    createServiceBtn.textContent = 'Creating…';
+
     try {
-      await doFetch('services', { method: 'POST', body: { title, description, price } }, 8000);
+      const payload = { title, description, price };
+
+      // doFetch is our wrapper that uses apiFetch when available
+      const out = await doFetch('services', { method: 'POST', body: payload }, 10000);
+
+      // If server returned an envelope like { error: .. } surface it
+      if (out && (out.error || out.errors)) {
+        const msg = out.error || (Array.isArray(out.errors) ? out.errors.join(', ') : JSON.stringify(out.errors));
+        throw new Error(msg);
+      }
+
+      // Success: reload services and clear form
+      await loadServices({ reset: true, userId: getUserId() });
+
       if (newServiceTitle) newServiceTitle.value = '';
       if (newServiceDesc) newServiceDesc.value = '';
       if (newServicePrice) newServicePrice.value = '';
-      if (newServiceSection) newServiceSection.style.display = 'none';
-      await loadServices({ reset: true, userId: getUserId() });
+      if (newServiceSection) {
+        newServiceSection.classList.remove('show-flex');
+        newServiceSection.style.display = 'none';
+      }
     } catch (err) {
-      console.error(err);
-      alert('Failed to create service');
+      // Show best possible error message
+      console.error('Create service failed:', err);
+      const msg = err?.message || (err?.payload && JSON.stringify(err.payload)) || 'Failed to create service';
+      // show an alert and the diag banner for visibility
+      alert(msg);
+      Diag.show(`Create service failed. <span class="muted">${msg}</span>`);
+    } finally {
+      createServiceBtn.disabled = false;
+      createServiceBtn.textContent = oldText || 'Create Service';
     }
   }
 
