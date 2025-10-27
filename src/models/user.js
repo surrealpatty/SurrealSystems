@@ -12,7 +12,7 @@ module.exports = (sequelize) => {
   }, {
     tableName: 'users',
     timestamps: true,
-    underscored: true
+    underscored: false // Use createdAt/updatedAt to match existing DB column names
   });
 
   return User;
