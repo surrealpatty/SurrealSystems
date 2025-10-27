@@ -22,6 +22,15 @@ const messagesRoutes = require('./routes/messages'); // messages API (if present
 
 const app = express();
 
+/* ----------------- Basic hardening ----------------- */
+// Hide X-Powered-By header
+app.disable('x-powered-by');
+
+// Warn if JWT_SECRET missing in production — common source of auth errors
+if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
+  console.warn('⚠️ JWT_SECRET is not set. Authentication will fail when creating or verifying tokens.');
+}
+
 /* ----------------- Trust proxy (for X-Forwarded-* headers) ----------------- */
 if (process.env.NODE_ENV === 'production') {
   // if behind a load balancer (Render/Heroku/GCP), trust the proxy
@@ -62,6 +71,8 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .map(s => s.trim())
   .filter(Boolean);
 
+console.info('CORS allowedOrigins:', (allowedOrigins.length ? allowedOrigins : '[none configured]'));
+
 // Warn if configuration looks suspicious (helpful in production debugging)
 if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
   console.warn('⚠️ CORS_ALLOWED_ORIGINS is empty while NODE_ENV=production — this will block browser requests from other origins.');
@@ -71,6 +82,10 @@ if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
  * Primary cors() middleware — the origin callback returns (null, true/false)
  * instead of throwing an Error. Throwing would cause Express to respond with
  * an error and omit CORS headers (which confuses browsers).
+ *
+ * Keep this here for convenience; we also add an explicit header middleware
+ * below to ensure consistent Access-Control-* headers for both normal and
+ * preflight responses.
  */
 app.use(cors({
   origin: function(origin, callback) {
@@ -94,10 +109,9 @@ app.use(cors({
 }));
 
 /**
- * Ensure preflight responses are handled and always include the necessary
- * Access-Control-Allow-* headers. This helps avoid the common browser case
- * where OPTIONS preflight returns without CORS headers and the browser blocks
- * the actual request.
+ * Handle OPTIONS preflight centrally — mirror the same origin logic so preflight
+ * responses include proper CORS headers. This helps avoid the situation where
+ * a 204 is returned without Access-Control-Allow-Origin (browser then blocks).
  */
 app.options('*', cors({
   origin: function(origin, callback) {
@@ -121,31 +135,38 @@ app.options('*', cors({
  */
 app.use((req, res, next) => {
   const origin = req.headers.origin;
+  // Make caching proxies vary responses by origin
+  res.setHeader('Vary', 'Origin');
+
+  let originAllowed = false;
+
   if (!origin) {
     // Non-browser or same-origin requests
     res.setHeader('Access-Control-Allow-Origin', '*');
+    originAllowed = true;
   } else if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production') {
     // Dev convenience: echo origin
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
+    originAllowed = true;
   } else if (allowedOrigins.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
+    originAllowed = true;
   } else {
-    // origin not allowed: log and for preflight explicitly reject
+    // origin not allowed
     if (origin) console.warn('Blocked origin by CORS:', origin);
-    if (req.method === 'OPTIONS') {
-      // Preflight from disallowed origin — reply with a clear failure
-      return res.sendStatus(403);
-    }
-    // For non-OPTIONS requests we continue without setting CORS headers,
-    // the browser will block the response client-side.
   }
 
+  // Always advertise what headers/methods are allowed for browsers that do receive CORS
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,PATCH,DELETE,OPTIONS');
 
-  if (req.method === 'OPTIONS') return res.sendStatus(204);
+  // If this is a preflight, return 204 only when allowed; otherwise 403
+  if (req.method === 'OPTIONS') {
+    return originAllowed ? res.sendStatus(204) : res.sendStatus(403);
+  }
+
   next();
 });
 
@@ -160,7 +181,9 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 /* --------------------------- Body parsing --------------------------- */
+// JSON + urlencoded parsers
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 /* ----------------------------- Health ------------------------------ */
 app.get('/api/health', (_req, res) => {
