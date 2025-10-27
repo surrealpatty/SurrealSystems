@@ -1,17 +1,36 @@
+// src/middlewares/authMiddleware.js
 const jwt = require('jsonwebtoken');
 
 function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) return res.status(401).json({ error: 'No token provided' });
-
-  const token = authHeader.split(' ')[1];
-
   try {
-    const decoded = jwt.verify(token, 'supersecretkey');
-    req.user = decoded;
+    const auth = req.headers.authorization || req.headers.Authorization || '';
+    if (!auth || !auth.startsWith('Bearer ')) {
+      return res.status(401).json({ success: false, error: { message: 'Missing or invalid Authorization header' } });
+    }
+
+    const token = auth.slice('Bearer '.length).trim();
+    if (!token) return res.status(401).json({ success: false, error: { message: 'Empty token' } });
+
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+      console.error('JWT_SECRET is not set');
+      return res.status(500).json({ success: false, error: { message: 'Server misconfigured' } });
+    }
+
+    // Verify token and extract user info (align with authenticateToken.js)
+    const payload = jwt.verify(token, secret);
+
+    // Normalize req.user for downstream handlers
+    req.user = {
+      id: payload.id || payload.userId || payload.sub,
+      email: payload.email,
+      _payload: payload
+    };
+
     next();
   } catch (err) {
-    return res.status(403).json({ error: 'Invalid token' });
+    const msg = err && err.name === 'TokenExpiredError' ? 'Token expired' : 'Invalid token';
+    return res.status(401).json({ success: false, error: { message: msg } });
   }
 }
 
