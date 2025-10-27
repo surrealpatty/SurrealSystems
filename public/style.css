@@ -1,166 +1,298 @@
-/* ---------- Global ---------- */
-body, html {
-    margin: 0;
-    padding: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #4e54c8, #00aaff);
-    color: #fff;
-    min-height: 100%;
+/* public/style.css
+   Polished / accessibility-forward version of the stylesheet you provided.
+*/
+
+/* -------------------- Theme variables -------------------- */
+:root{
+  --brand-a: #4e54c8;
+  --brand-b: #00aaff;
+  --accent: #ffc107;
+  --success: #28a745;
+  --info: #17a2b8;
+  --danger: #ff4d4f;
+  --card-bg: #ffffff;
+  --card-text: #333333;
+  --muted: #555555;
+  --glass: rgba(255,255,255,0.95);
+
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-1: 0 8px 20px rgba(0,0,0,0.12);
+  --shadow-2: 0 12px 30px rgba(0,0,0,0.15);
+  --transition-fast: 180ms;
+
+  /* Computed focus color: mix(20% var(--brand-b), 80% white) => #cceeff */
+  --focus-ring: #cceeff;
 }
 
-/* ---------- Container ---------- */
+/* -------------------- Global -------------------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+body {
+  min-height: 100vh; /* <- was 100% */
+  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+  color: #fff;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1.45;
+}
+
+/* -------------------- Container -------------------- */
 .container {
-    max-width: 900px;
-    width: 90%;
-    padding: 2.5rem 2rem 120px 2rem;
-    margin: 50px auto 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    background: rgba(255,255,255,0.95);
-    border-radius: 16px;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.15);
-    color: #333;
-    text-align: center;
+  max-width: 900px;
+  width: 90%;
+  padding: 2.5rem 2rem 140px 2rem; /* extra bottom space to account for floating buttons */
+  margin: 50px auto 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  background: var(--glass);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  color: var(--card-text);
+  text-align: center;
 }
 
-/* ---------- Headings ---------- */
-h1, h2 { color: #4e54c8; margin-bottom: 0.5rem; }
+/* -------------------- Headings -------------------- */
+h1, h2 {
+  color: var(--brand-a);
+  margin: 0 0 0.5rem;
+  line-height: 1.1;
+}
 
-/* ---------- Spinner ---------- */
+/* -------------------- Spinner -------------------- */
 .spinner {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    border: 3px solid #ccc;
-    border-top-color: #4e54c8;
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #dcdcdc;
+  border-top-color: var(--brand-a);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
 }
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-/* ---------- Fade-in ---------- */
+/* -------------------- Fade-in -------------------- */
 .fade-in {
-    opacity: 0;
-    transform: translateY(10px);
-    animation: fadeIn 0.5s ease forwards;
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.5s ease forwards;
 }
 @keyframes fadeIn {
-    to { opacity: 1; transform: translateY(0); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ---------- Description ---------- */
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .spinner { animation: none; }
+  .fade-in { animation: none; transform: none; opacity: 1; }
+  * { transition: none !important; }
+}
+
+/* -------------------- Profile description -------------------- */
 #profile-description {
-    min-height: 50px;
-    margin-bottom: 10px;
-}
-#profile-description[contenteditable="true"] {
-    border: 1px solid #4e54c8;
-    border-radius: 8px;
-    padding: 5px;
-    background-color: #f0f0f0;
-    color: #333;
+  min-height: 50px;
+  margin-bottom: 10px;
+  text-align: left;
+  line-height: 1.5;
+  word-wrap: break-word;
 }
 
-/* ---------- Buttons ---------- */
-button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    color: #fff;
-    background-color: #4e54c8;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 5px;
-    transition: transform 0.3s, opacity 0.3s;
+#profile-description[contenteditable="true"] {
+  border: 1px solid var(--brand-a);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  background-color: #f0f0f0;
+  color: var(--card-text);
+  outline: none;
 }
-button:hover { transform: translateY(-5px); opacity: 0.9; }
-.logout-btn { background-color: #ff4d4f; }
+
+/* -------------------- Buttons -------------------- */
+button {
+  padding: 10px 20px;
+  font-size: 1rem;
+  color: #fff;
+  background-color: var(--brand-a);
+  border: none;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  margin-top: 5px;
+  transition: transform var(--transition-fast) ease, opacity var(--transition-fast) ease, box-shadow var(--transition-fast) ease;
+  box-shadow: var(--shadow-1);
+}
+
+button:hover,
+button:active {
+  transform: translateY(-4px);
+  opacity: 0.95;
+  box-shadow: 0 14px 32px rgba(0,0,0,0.14);
+}
+
+/* Visible focus for keyboard users
+   Replaced `color-mix(...)` with a computed hex fallback (#cceeff) for wide browser support.
+*/
+button:focus-visible {
+  /* Friendly, widely-supported focus ring */
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+
+  /* Additional box-shadow ensures the ring matches rounded corners and looks consistent */
+  box-shadow: 0 0 0 3px var(--focus-ring);
+  border-radius: var(--radius-sm);
+}
+
+/* Variant buttons */
+.logout-btn {
+  background-color: var(--danger);
+}
 .logout-btn:hover { background-color: #c30000; }
 
-/* ---------- Services Grid ---------- */
+.btn-success { background-color: var(--success); color: #fff; }
+.btn-info { background-color: var(--info); color: #fff; }
+.btn-warning { background-color: var(--accent); color: #333; }
+
+/* -------------------- Services Grid -------------------- */
 #services-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 20px;
+  align-items: start;
 }
+
 .card {
-    background: #fff;
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    color: #333;
-    transition: transform 0.2s;
+  background: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-1);
+  color: var(--card-text);
+  transition: transform 200ms ease, box-shadow 200ms ease;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-.card:hover { transform: translateY(-5px); }
-.card h3 { margin-bottom: 10px; color: #4e54c8; }
-.card p { margin: 5px 0; color: #555; }
+.card:hover { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(0,0,0,0.12); }
 
-/* ---------- New Service Section ---------- */
+.card h3 { margin: 0 0 8px; color: var(--brand-a); font-size: 1.1rem; }
+.card p { margin: 0; color: var(--muted); font-size: 0.95rem; word-break: break-word; }
+
+/* Ensure long content wraps */
+.card .meta { font-size: 0.9rem; color: #888; }
+
+/* -------------------- New Service Section -------------------- */
 #newServiceSection {
-    display: none;
-    flex-direction: column;
-    gap: 10px;
-    margin-top: 10px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
 }
-#newServiceSection input, #newServiceSection textarea {
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    width: 100%;
+#newServiceSection input,
+#newServiceSection textarea {
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  border: 1px solid #ccc;
+  width: 100%;
+  font-size: 1rem;
 }
 
-/* ---------- Floating Buttons ---------- */
+/* -------------------- Floating Buttons -------------------- */
 .floating-btn {
-    position: fixed;
-    right: 20px;
-    width: 150px;
-    text-align: center;
-    padding: 12px;
-    border-radius: 50px;
-    font-weight: bold;
-    color: #fff;
-    display: block;
-    z-index: 100;
+  position: fixed;
+  right: 20px;
+  width: 150px;
+  text-align: center;
+  padding: 12px;
+  border-radius: 50px;
+  font-weight: 700;
+  color: #fff;
+  display: block;
+  z-index: 100;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.18);
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  touch-action: manipulation;
 }
-#goToServicesBtn { background-color: #28a745; bottom: 160px; }
-#goToMessagesBtn { background-color: #17a2b8; bottom: 100px; }
-#addNewServiceBtn { background-color: #ffc107; color: #333; bottom: 40px; }
 
-/* ---------- Mobile Bottom Row ---------- */
+/* Individual floating buttons positioned from bottom */
+#goToServicesBtn { background-color: var(--success); bottom: 160px; }
+#goToMessagesBtn { background-color: var(--info); bottom: 100px; }
+#addNewServiceBtn { background-color: var(--accent); color: #333; bottom: 40px; }
+
+/* Give the floating buttons a slightly larger hit area on small screens */
+@media (max-width: 480px) {
+  .floating-btn {
+    right: 12px;
+    width: 44vw;
+    max-width: 180px;
+    padding: 14px;
+    font-size: 0.95rem;
+  }
+}
+
+/* -------------------- Mobile Bottom Row -------------------- */
 .mobile-button-row {
-    display: none;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    justify-content: space-around;
-    padding: 10px 0;
-    gap: 5px;
-    background-color: rgba(255,255,255,0.95);
-    z-index: 9999;
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  justify-content: space-around;
+  padding: 10px 10px;
+  gap: 6px;
+  background-color: rgba(255,255,255,0.95);
+  z-index: 9999;
+  box-shadow: 0 -6px 20px rgba(0,0,0,0.08);
 }
 .mobile-button-row button {
-    flex: 1;
-    border-radius: 8px;
-    font-weight: bold;
-    font-size: 1rem;
-    padding: 10px;
-    background-color: #4e54c8;
-    color: #fff;
-    transition: transform 0.3s, opacity 0.3s;
+  flex: 1;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 1rem;
+  padding: 10px;
+  background-color: var(--brand-a);
+  color: #fff;
+  transition: transform var(--transition-fast), opacity var(--transition-fast);
 }
-.mobile-button-row button:hover { transform: translateY(-5px); opacity: 0.9; }
+.mobile-button-row button:hover { transform: translateY(-4px); }
 
-/* ---------- Hidden Class ---------- */
+/* -------------------- Utility classes -------------------- */
 .hidden { display: none !important; }
 
-/* ---------- Responsive ---------- */
+/* -------------------- Responsive tweaks -------------------- */
 @media (max-width: 480px) {
-    .floating-btn { display: none; }
-    .mobile-button-row { display: flex; }
-    button { font-size: 0.9rem; padding: 8px 16px; }
+  .floating-btn { display: none; }
+  .mobile-button-row { display: flex; }
+  button { font-size: 0.95rem; padding: 8px 14px; }
+
+  /* Reduce container padding a bit on small screens */
+  .container {
+    width: 94%;
+    padding: 1.5rem 1rem 140px 1rem;
+    margin: 36px auto 0;
+    gap: 1.25rem;
+  }
+}
+
+/* -------------------- Small screen cards stacking -------------------- */
+@media (max-width: 360px) {
+  #services-list {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
 }
