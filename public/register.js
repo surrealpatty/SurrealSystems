@@ -28,7 +28,10 @@
 
     // Helpers
     function setMsg(text, type) {
-      if (!msg) { console[type === 'error' ? 'error' : 'log']('[register] ' + text); return; }
+      if (!msg) {
+        console[type === 'error' ? 'error' : 'log']('[register] ' + text);
+        return;
+      }
       msg.textContent = text || '';
       msg.className = 'message ' + (type || 'info');
     }
@@ -90,6 +93,52 @@
       setTimeout(function () {
         if (!/profile\.html/i.test(location.href)) location.assign(target);
       }, 300);
+    }
+
+    // New: robust error extractor
+    function extractErrorText(resp) {
+      // resp is r.data (parsed JSON)
+      if (!resp) return null;
+
+      // If server returned a plain string
+      if (typeof resp === 'string' && resp.trim()) return resp;
+
+      // If server used top-level message
+      if (typeof resp.message === 'string' && resp.message.trim()) return resp.message;
+
+      // If server used "error" as a string
+      if (typeof resp.error === 'string' && resp.error.trim()) return resp.error;
+
+      // If server used "error" as an object with .message
+      if (typeof resp.error === 'object' && resp.error !== null) {
+        if (typeof resp.error.message === 'string' && resp.error.message.trim()) return resp.error.message;
+        // sometimes validation details are attached
+        if (Array.isArray(resp.error.details) && resp.error.details.length) {
+          try {
+            return resp.error.details.map(d => (typeof d === 'string' ? d : (d.message || JSON.stringify(d)))).join('; ');
+          } catch (e) { /* fallthrough */ }
+        }
+      }
+
+      // If server returned an "errors" array or "details"
+      if (Array.isArray(resp.errors) && resp.errors.length) {
+        try {
+          return resp.errors.map(e => (typeof e === 'string' ? e : (e.message || JSON.stringify(e)))).join('; ');
+        } catch (e) { /* fallthrough */ }
+      }
+      if (Array.isArray(resp.details) && resp.details.length) {
+        try {
+          return resp.details.map(e => (typeof e === 'string' ? e : (e.message || JSON.stringify(e)))).join('; ');
+        } catch (e) { /* fallthrough */ }
+      }
+
+      // Fallback to JSON string if object has content
+      try {
+        const s = JSON.stringify(resp);
+        if (s && s !== '{}' && s !== '[]') return s;
+      } catch (e) { /* ignore */ }
+
+      return null;
     }
 
     // Event wiring (guard elements)
@@ -183,8 +232,11 @@
             }
           }
 
-          const errText = (r.data && (r.data.error || r.data.message)) || ('Registration failed (HTTP ' + r.status + ')');
+          // New: use extractErrorText to avoid showing [object Object]
+          const extracted = extractErrorText(r.data);
+          const errText = extracted || ('Registration failed (HTTP ' + r.status + ')');
           setMsg(errText, 'error');
+
         })
         .catch(function (err) {
           console.error('[register] network error:', err);
