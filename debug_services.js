@@ -1,59 +1,30 @@
 // debug_services.js
-require('dotenv').config();
-const { sequelize } = require('./src/config/database');
-const { QueryTypes } = require('sequelize');
 const models = require('./src/models');
+const { sequelize } = models;
+const { QueryTypes } = require('sequelize');
 
 (async () => {
   try {
-    console.log('== DEBUG: connecting to DB with sequelize ==');
-    await sequelize.authenticate();
-    console.log('✅ DB connected (sequelize.authenticate OK)\n');
-
-    // Raw SQL rows
-    const raw = await sequelize.query(
-      'SELECT id, user_id, title, created_at FROM services ORDER BY created_at DESC LIMIT 20',
-      { type: QueryTypes.SELECT }
-    );
-    console.log('== Raw services rows (DB columns) ==');
-    console.log(JSON.stringify(raw, null, 2), '\n');
-
-    // Query referenced user_ids
-    const userIds = Array.from(new Set(raw.map(r => r.user_id).filter(Boolean)));
-    if (userIds.length) {
-      const users = await sequelize.query(
-        `SELECT id, username, email FROM users WHERE id IN (${userIds.join(',')})`,
-        { type: QueryTypes.SELECT }
-      );
-      console.log('== Users referenced by services ==');
-      console.log(JSON.stringify(users, null, 2), '\n');
-    } else {
-      console.log('No user_id values found in those service rows.\n');
-    }
-
-    // ORM query (Sequelize + association) — show owner if attached
-    console.log('== ORM result: Service.findAll(...) with owner association ==');
-    const orm = await models.Service.findAll({
-      limit: 20,
-      include: [{ model: models.User, as: 'owner', attributes: ['id', 'username'] }],
-      order: [['createdAt', 'DESC']]
+    const rows = await models.Service.findAll({
+      attributes: ['id','userId','title','description','price','createdAt','updatedAt'],
+      include: [{ model: models.User, as: 'owner', attributes: ['id','username'] }],
+      order: [['createdAt','DESC']],
+      limit: 20
     });
+    console.log('ROWS:', JSON.stringify(rows.map(r => r.toJSON()), null, 2));
 
-    const ormPlain = orm.map(s => ({
-      id: s.id,
-      userId: s.userId,
-      title: s.title,
-      createdAt: s.createdAt,
-      owner: s.owner ? { id: s.owner.id, username: s.owner.username } : null
-    }));
-    console.log(JSON.stringify(ormPlain, null, 2), '\n');
+    const serviceIds = rows.map(r => r.id);
+    console.log('serviceIds:', serviceIds);
 
-    console.log('== DONE ==');
-    await sequelize.close();
-    process.exit(0);
-  } catch (err) {
-    console.error('DEBUG ERROR:', err && err.stack ? err.stack : err);
-    try { await sequelize.close(); } catch(e) {}
-    process.exit(1);
+    const rowsRaw = await sequelize.query(
+      'SELECT "service_id" AS "serviceId", AVG(COALESCE(stars, score))::numeric(10,2) AS "avgRating", COUNT(*)::int AS "ratingsCount" FROM ratings WHERE "service_id" IS NOT NULL AND "service_id" IN (:ids) GROUP BY "service_id"',
+      { replacements: { ids: serviceIds }, type: QueryTypes.SELECT }
+    );
+    console.log('AGG:', JSON.stringify(rowsRaw, null, 2));
+  } catch (e) {
+    console.error('ERROR:', e && e.stack ? e.stack : e);
+  } finally {
+    try { await sequelize.close(); } catch (e) {}
+    process.exit();
   }
 })();
