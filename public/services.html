@@ -6,7 +6,7 @@
 <title>Services - CodeCrowds</title>
 <link rel="stylesheet" href="services.css" />
 
-<!-- Make sure script.js knows the API base and is loaded BEFORE our inline code -->
+<!-- Allow the page to override API base if needed -->
 <script>window.API_BASE = '/api'; window.API_URL = '/api';</script>
 <script src="script.js"></script>
 
@@ -174,15 +174,12 @@ async function loadServices(){
   if (!servicesList) return;
   servicesList.innerHTML='<p><span class="spinner"></span> Loading services…</p>';
   try{
-    // Ask server for the chosen sort (client still sorts as safety)
     let sort = 'newest';
     if (sortSelect && sortSelect.value === 'priceLow')  sort = 'priceLow';
     if (sortSelect && sortSelect.value === 'priceHigh') sort = 'priceHigh';
 
-    // apiFetch auto-unwraps { success, data }, attaches token, and prefixes /api
     const out = await apiFetch(`services?limit=50&page=1&sort=${encodeURIComponent(sort)}`);
 
-    // Support both shapes: bare {services:[…]} OR {success:true,data:{services:[…]}}
     const payload = (out && out.services) ? out : (out && out.data) ? out.data : out;
     const list = Array.isArray(payload) ? payload : (payload && payload.services) ? payload.services : [];
 
@@ -245,7 +242,6 @@ async function sendMessage(){
   showInlineError('');
   try{
     if (sendMessageBtn) { sendMessageBtn.disabled=true; sendMessageBtn.textContent='Sending…'; }
-    // Use apiFetch so Authorization header and envelope-handling are consistent
     await apiFetch('messages', {
       method: 'POST',
       body: { receiverId: Number(messageState.toUserId), content: text, serviceId: messageState.serviceId ? Number(messageState.serviceId) : null },
@@ -271,7 +267,6 @@ async function sendMessage(){
 if (goToProfileBtn) goToProfileBtn.addEventListener('click', ()=> { location.href='profile.html'; });
 if (refreshBtn) refreshBtn.addEventListener('click', loadServices);
 
-// Debounced filter to avoid re-render on every keystroke
 let filterTimer = null;
 if (searchInput) {
   searchInput.addEventListener('input', () => {
@@ -279,12 +274,8 @@ if (searchInput) {
     filterTimer = setTimeout(applyFilters, 120);
   });
 }
-
-// When sort changes, re-fetch from server so large lists stay fast
 if (sortSelect) {
-  sortSelect.addEventListener('change', () => {
-    loadServices();
-  });
+  sortSelect.addEventListener('change', () => { loadServices(); });
 }
 
 if (servicesList) {
@@ -298,7 +289,6 @@ if (servicesList) {
 
     if (!toUserId){ toast('This service has no associated user.'); return; }
 
-    // If not logged in, prompt to login
     if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
       toast('Please log in to message sellers.');
       setTimeout(()=> { location.replace(`/?from=${encodeURIComponent(location.pathname + location.search)}`); }, 600);
@@ -319,7 +309,6 @@ if (messageModal) {
 }
 if (messageContent) messageContent.addEventListener('input', updateCounterAndState);
 
-// Initial load
 window.addEventListener('load', () => {
   updateCounterAndState();
   loadServices();

@@ -1,8 +1,13 @@
-// src/index.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 require('dotenv').config();
+
+// --- ENV check to help debug runtime configuration ---
+console.info('ENV CHECK: NODE_ENV=%s, CORS_ALLOWED_ORIGINS=%s, DATABASE_URL defined? %s',
+  process.env.NODE_ENV,
+  process.env.CORS_ALLOWED_ORIGINS || '<none>',
+  !!process.env.DATABASE_URL);
 
 const helmet = require('helmet');
 const compression = require('compression');
@@ -55,6 +60,11 @@ const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
   .map(s => s.trim())
   .filter(Boolean);
+
+// Warn if configuration looks suspicious (helpful in production debugging)
+if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
+  console.warn('⚠️ CORS_ALLOWED_ORIGINS is empty while NODE_ENV=production — this will block browser requests from other origins.');
+}
 
 /**
  * Primary cors() middleware — the origin callback returns (null, true/false)
@@ -129,6 +139,16 @@ app.use((req, res, next) => {
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
 });
+
+/* ------------------- Dev-only API request logger (helps debugging) ------------------ */
+if (process.env.NODE_ENV !== 'production') {
+  app.use((req, res, next) => {
+    if (req.path && req.path.startsWith('/api/')) {
+      console.info(`[API] ${req.method} ${req.path} origin=${req.headers.origin || '<none>'}`);
+    }
+    next();
+  });
+}
 
 /* --------------------------- Body parsing --------------------------- */
 app.use(express.json());
