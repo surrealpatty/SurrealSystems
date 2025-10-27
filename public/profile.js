@@ -1,206 +1,607 @@
-const API_URL = 'https://codecrowds.onrender.com/api';
-const token = localStorage.getItem('token');
-const currentUserId = localStorage.getItem('userId');
+/* profile.js - canonical profile client
+   Relies on script.js (apiFetch, getToken, getUserId, etc.) when available,
+   and falls back to safe behavior if not.
+*/
 
-if (!token || !currentUserId) window.location.href = 'index.html';
+(function () {
+  'use strict';
 
-const profileUsername = document.getElementById('profile-username');
-const profileDescription = document.getElementById('profile-description');
-const editDescBtn = document.getElementById('editDescBtn');
-const servicesList = document.getElementById('services-list');
-const newServiceSection = document.getElementById('newServiceSection');
-const newServiceTitle = document.getElementById('newServiceTitle');
-const newServiceDesc = document.getElementById('newServiceDesc');
-const newServicePrice = document.getElementById('newServicePrice');
-const createServiceBtn = document.getElementById('createServiceBtn');
-const addNewServiceBtn = document.getElementById('addNewServiceBtn');
-const mobileAddServiceBtn = document.getElementById('mobileAddServiceBtn');
-const logoutBtn = document.getElementById('logoutBtn');
-const goToServicesBtn = document.getElementById('goToServicesBtn');
-const goToMessagesBtn = document.getElementById('goToMessagesBtn');
-const mobileServicesBtn = document.getElementById('mobileServicesBtn');
-const mobileMessagesBtn = document.getElementById('mobileMessagesBtn');
+  // ---- small helpers ----
+  function safe(fn, fallback) { try { return typeof fn === 'function' ? fn : fallback; } catch { return fallback; } }
+  const getToken = safe(window.getToken, () => localStorage.getItem('token'));
+  const getUserId = safe(window.getUserId, () => localStorage.getItem('userId'));
+  const setUserId = safe(window.setUserId, (v) => localStorage.setItem('userId', v));
+  const getDisplayName = safe(window.getDisplayName, (u) => u?.username || u?.name || 'User');
+  const getDescription = safe(window.getDescription, (u) => u?.description || '');
+  const apiFetch = typeof window.apiFetch === 'function' ? window.apiFetch : null;
+  const API_URL = (window.API_URL || (window.location.origin + '/api')).replace(/\/+$/, '');
 
-// ---------------- Load Profile ----------------
-async function loadProfile() {
-    try {
-        const res = await fetch(`${API_URL}/users/me`, { headers: { Authorization: `Bearer ${token}` } });
-        if (!res.ok) throw new Error('Failed to fetch profile');
-        const data = await res.json();
-        const user = data.user;
-
-        profileUsername.textContent = user.username || 'Unknown User';
-        profileDescription.textContent = user.description || 'No description yet.';
-        profileUsername.classList.add('fade-in');
-        profileDescription.classList.add('fade-in');
-
-        editDescBtn.classList.remove('hidden');
-    } catch (err) {
-        console.error(err);
-        profileUsername.textContent = 'Unknown User';
-        profileDescription.textContent = 'Failed to load description';
+  // Diagnostic banner
+  const Diag = {
+    show(msg) {
+      const el = document.getElementById('diagBanner');
+      if (!el) return;
+      el.innerHTML = msg;
+      el.classList.remove('hidden');
+      console.error('[Diag]', el.textContent.replace(/\s+/g, ' ').trim());
+    },
+    hide() {
+      const el = document.getElementById('diagBanner');
+      if (!el) return;
+      el.classList.add('hidden');
     }
-}
+  };
 
-// ---------------- Edit / Save Description ----------------
-let editingDesc = false;
-editDescBtn.addEventListener('click', async () => {
-    editingDesc = !editingDesc;
-    profileDescription.contentEditable = editingDesc;
-    editDescBtn.textContent = editingDesc ? 'Save Description' : 'Edit Description';
+  // Do-fetch (uses apiFetch when available, otherwise fallback to fetch)
+  async function doFetch(pathOrUrl, opts = {}, timeoutMs = 8000) {
+    // If absolute URL passed, use it verbatim; else build relative to API_URL
+    const isAbsolute = typeof pathOrUrl === 'string' && /^https?:\/\//i.test(pathOrUrl);
+    const url = isAbsolute ? pathOrUrl : (pathOrUrl.startsWith('/') ? API_URL + pathOrUrl : API_URL + '/' + pathOrUrl.replace(/^\/+/, ''));
 
-    if (!editingDesc) {
-        const newDesc = profileDescription.textContent.trim();
-        try {
-            const res = await fetch(`${API_URL}/users/me/description`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ description: newDesc })
-            });
-            const data = await res.json();
-            profileDescription.textContent = data.user?.description || newDesc;
-        } catch (err) {
-            console.error(err);
-            alert('Failed to save description.');
+    if (apiFetch) {
+      // apiFetch accepts path or absolute
+      return apiFetch(pathOrUrl, { timeoutMs, ...opts });
+    }
+
+    // Fallback: use fetch with Authorization if token present
+    const headers = Object.assign({}, opts.headers || {});
+    const token = getToken();
+    if (token && !headers['Authorization']) headers['Authorization'] = `Bearer ${token}`;
+    if (opts.body !== undefined && !headers['Content-Type']) headers['Content-Type'] = 'application/json';
+
+    const init = {
+      method: opts.method || 'GET',
+      headers,
+      body: (opts.body === undefined || typeof opts.body === 'string') ? opts.body : JSON.stringify(opts.body),
+      signal: opts.signal
+    };
+
+    // implement timeout via AbortController
+    let timeoutController;
+    if (Number.isFinite(timeoutMs) && timeoutMs > 0) {
+      timeoutController = new AbortController();
+      const tid = setTimeout(() => timeoutController.abort(), timeoutMs);
+      if (init.signal) {
+        // chain signals
+        const chained = new AbortController();
+        init.signal.addEventListener('abort', () => chained.abort(), { once: true });
+        timeoutController.signal.addEventListener('abort', () => chained.abort(), { once: true });
+        init.signal = chained.signal;
+      } else {
+        init.signal = timeoutController.signal;
+      }
+      try {
+        const res = await fetch(url, init);
+        clearTimeout(tid);
+        if (!res.ok) {
+          const text = await res.text().catch(() => '');
+          throw new Error(text || `${res.status} ${res.statusText}`);
         }
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('application/json') || ct.includes('+json')) return res.json();
+        return res.text();
+      } catch (e) {
+        clearTimeout(tid);
+        if (e?.name === 'AbortError') throw new Error('Request aborted');
+        throw e;
+      }
+    } else {
+      // no timeout
+      const res = await fetch(url, init);
+      if (!res.ok) {
+        const text = await res.text().catch(() => '');
+        throw new Error(text || `${res.status} ${res.statusText}`);
+      }
+      const ct = (res.headers.get('content-type') || '').toLowerCase();
+      if (ct.includes('application/json') || ct.includes('+json')) return res.json();
+      return res.text();
     }
-});
+  }
 
-// ---------------- Load Services ----------------
-async function loadServices() {
-    servicesList.innerHTML = `<p><span class="spinner"></span> Loading services...</p>`;
+  // ---- DOM refs ----
+  const profileUsername = document.getElementById('profile-username');
+  const profileDescription = document.getElementById('profile-description');
+  const descControls = document.getElementById('descControls');
+  const editDescBtn = document.getElementById('editDescBtn');
+
+  const servicesList = document.getElementById('services-list');
+  const newServiceSection = document.getElementById('newServiceSection');
+  const newServiceTitle = document.getElementById('newServiceTitle');
+  const newServiceDesc = document.getElementById('newServiceDesc');
+  const newServicePrice = document.getElementById('newServicePrice');
+  const createServiceBtn = document.getElementById('createServiceBtn');
+
+  const goToServicesBtn = document.getElementById('goToServicesBtn');
+  const goToMessagesBtn = document.getElementById('goToMessagesBtn');
+  const addNewServiceBtn = document.getElementById('addNewServiceBtn');
+  const editDescBtnFloat = document.getElementById('editDescBtnFloat');
+  const mobileServicesBtn = document.getElementById('mobileServicesBtn');
+  const mobileMessagesBtn = document.getElementById('mobileMessagesBtn');
+  const mobileAddServiceBtn = document.getElementById('mobileAddServiceBtn');
+  const mobileRow = document.getElementById('mobileRow');
+  const mobileBackBtn = document.getElementById('mobileBackBtn');
+
+  const ratingsList = document.getElementById('ratings-list');
+  const avgStarsEl = document.getElementById('avg-stars');
+  const ratingsCountEl = document.getElementById('ratings-count');
+  const rateForm = document.getElementById('rate-form');
+
+  const rateStars = document.getElementById('rateStars');
+  const rateComment = document.getElementById('rateComment');
+  const submitRatingBtn = document.getElementById('submitRatingBtn');
+  const rateMsg = document.getElementById('rateMsg');
+  const rateUpgradeHint = document.getElementById('rateUpgradeHint');
+  const upgradeInlineBtn = document.getElementById('upgradeInlineBtn');
+
+  const logoutBtn = document.getElementById('logoutBtn');
+  const upgradeBtn = document.getElementById('upgradeBtn');
+  const backToMyProfileBtn = document.getElementById('backToMyProfileBtn');
+  const loadMoreBtn = document.getElementById('loadMoreServicesBtn');
+
+  // ---- state ----
+  let currentUserTier = 'free';
+  let currentProfileUserId = null;
+  let svcPage = 1, svcLoading = false;
+  let svcAborter = null, ratingsAborter = null;
+
+  // ---- utilities ----
+  function esc(s) { return String(s ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+  function showOwnerUI(isOwner) {
+    [goToServicesBtn, goToMessagesBtn, addNewServiceBtn, editDescBtnFloat, mobileRow, descControls]
+      .forEach(el => { if (el) el.classList.toggle('hidden', !isOwner); });
+    if (backToMyProfileBtn) backToMyProfileBtn.classList.toggle('hidden', isOwner);
+    if (mobileBackBtn) mobileBackBtn.classList.toggle('hidden', isOwner);
+    if (!isOwner && newServiceSection) { newServiceSection.classList.add('hidden'); newServiceSection.classList.remove('show-flex'); }
+  }
+
+  // ---- health check ----
+  (async function healthCheck() {
     try {
-        const res = await fetch(`${API_URL}/services`, { headers: { Authorization: `Bearer ${token}` } });
-        const data = await res.json();
-        const services = data.services || [];
-        const userServices = services.filter(s => s.user?.id == currentUserId);
-
-        servicesList.innerHTML = '';
-        if (!userServices.length) {
-            const placeholder = document.createElement('div');
-            placeholder.className = 'card fade-in';
-            placeholder.innerHTML = `<h3>No Services Yet</h3><p>Add your first service using the + Service button</p>`;
-            servicesList.appendChild(placeholder);
-            return;
-        }
-
-        userServices.forEach((s) => {
-            const div = document.createElement('div');
-            div.className = 'card fade-in';
-            div.innerHTML = `
-                <h3 class="service-title">${s.title}</h3>
-                <p class="service-desc">${s.description}</p>
-                <p><strong>Price:</strong> $<span class="service-price">${s.price}</span></p>
-                <div class="service-buttons">
-                    <button class="edit-service-btn">Edit</button>
-                    <button class="delete-service-btn">Delete</button>
-                </div>
-            `;
-            servicesList.appendChild(div);
-
-            div.querySelector('.edit-service-btn').addEventListener('click', () => editService(div, s));
-            div.querySelector('.delete-service-btn').addEventListener('click', () => deleteService(s.id));
-        });
+      // call API health using doFetch; use short timeout
+      await doFetch('health', {}, 4000);
+      Diag.hide();
     } catch (err) {
-        console.error(err);
-        servicesList.innerHTML = '<p>Failed to load services</p>';
+      Diag.show('API health check failed. <span class="muted">Verify that <code>/api/health</code> is reachable, check CORS, and confirm the server is running.</span>');
     }
-}
+  })();
 
-// ---------------- Edit / Delete Service ----------------
-async function editService(div, service) {
-    const titleEl = div.querySelector('.service-title');
-    const descEl = div.querySelector('.service-desc');
-    const priceEl = div.querySelector('.service-price');
+  // ---- data loaders ----
+  async function fetchMe() {
+    const me = await doFetch('users/me', {}, 8000); // -> { user } or user object
+    const u = me?.user || me || {};
+    if (!getUserId && u.id) setUserId && setUserId(String(u.id));
+    try {
+      localStorage.setItem('cc_me', JSON.stringify(u));
+      const dn = getDisplayName(u);
+      if (dn) localStorage.setItem('username', dn);
+    } catch {}
+    currentUserTier = u.tier || 'free';
+    return u;
+  }
 
-    const origTitle = titleEl.textContent;
-    const origDesc = descEl.textContent;
-    const origPrice = priceEl.textContent;
+  async function loadProfile() {
+    try {
+      const me = await fetchMe();
+      const loggedInUserId = getUserId();
 
-    titleEl.innerHTML = `<input type="text" value="${origTitle}" class="edit-title">`;
-    descEl.innerHTML = `<textarea class="edit-desc">${origDesc}</textarea>`;
-    priceEl.innerHTML = `<input type="number" value="${origPrice}" class="edit-price">`;
+      const params = new URLSearchParams(location.search);
+      const qsUserId = params.get('userId');
+      const profileUserId = (qsUserId || loggedInUserId)?.toString();
+      currentProfileUserId = profileUserId;
+
+      const data = qsUserId ? await doFetch(`users/${profileUserId}`, {}, 8000) : { user: me };
+      const u = data.user || data || {};
+
+      if (profileUsername) profileUsername.textContent = getDisplayName(u) || 'User';
+      if (profileDescription) profileDescription.textContent = getDescription(u) || 'No description yet.';
+
+      const viewingSelf = profileUserId === String(loggedInUserId);
+      showOwnerUI(viewingSelf);
+
+      const canRate = (!viewingSelf && currentUserTier === 'paid');
+      if (rateForm) rateForm.classList.toggle('hidden', !canRate);
+      if (rateUpgradeHint) rateUpgradeHint.classList.add('hidden');
+
+      if (viewingSelf && currentUserTier === 'free') upgradeBtn && upgradeBtn.classList.remove('hidden');
+      else upgradeBtn && upgradeBtn.classList.add('hidden');
+
+      await loadServices({ reset: true, userId: profileUserId });
+      (window.requestIdleCallback ? requestIdleCallback : (cb) => setTimeout(cb, 0))(() => loadRatings(profileUserId));
+    } catch (err) {
+      console.error('Profile load error:', err);
+      Diag.show('Failed to load profile. Check console and server logs.');
+    }
+  }
+
+  // ---- services loader/renderer ----
+  function serviceCardHTML(s, isOwner) {
+    return `<div class="card">
+      <h3>${esc(s.title)}</h3>
+      <p>${esc(s.description)}</p>
+      <p><strong>Price:</strong> $${Number(s.price).toLocaleString(undefined, { maximumFractionDigits: 2 })}</p>
+      <div class="service-buttons ${isOwner ? '' : 'hidden'}">
+        <button class="edit-service-btn" data-id="${s.id}">Edit</button>
+        <button class="delete-service-btn" data-id="${s.id}">Delete</button>
+      </div>
+    </div>`;
+  }
+  function renderServicesHTML(list, loggedInUserId) {
+    if (!list?.length) return '';
+    let out = '';
+    for (const s of list) {
+      const isOwner = String(loggedInUserId) === String(s.user?.id || s.userId || '');
+      out += serviceCardHTML(s, isOwner);
+    }
+    return out;
+  }
+
+  async function loadServices({ reset = false, userId } = {}) {
+    if (svcLoading) return; svcLoading = true;
+    try {
+      const loggedInUserId = getUserId();
+      const cacheKey = `cc_services_${userId || 'me'}_p${svcPage}`;
+
+      if (reset) {
+        svcPage = 1;
+        const cached = (function () { try { return JSON.parse(localStorage.getItem(cacheKey)); } catch { return null; } })();
+        if (cached && (Date.now() - (cached.ts || 0)) < 60000 && Array.isArray(cached.items) && cached.items.length) {
+          servicesList.innerHTML = renderServicesHTML(cached.items, loggedInUserId);
+          loadMoreBtn.classList.toggle('hidden', !cached.hasMore);
+        } else {
+          servicesList.innerHTML = Array.from({ length: 3 }).map(() => `
+            <div class="card fade-in">
+              <h3 style="background:#eee;height:18px;width:60%;border-radius:6px;"></h3>
+              <p style="background:#f2f2f2;height:14px;width:100%;border-radius:6px;"></p>
+              <p style="background:#f2f2f2;height:14px;width:80%;border-radius:6px;"></p>
+            </div>
+          `).join('');
+          loadMoreBtn.classList.add('hidden');
+        }
+      }
+
+      const url = new URL(`${API_URL}/services`, location.origin);
+      if (userId) url.searchParams.set('userId', userId);
+      url.searchParams.set('limit', svcPage === 1 ? '6' : '12');
+      url.searchParams.set('page', String(svcPage));
+
+      if (svcAborter) { try { svcAborter.abort(); } catch { } }
+      svcAborter = new AbortController();
+
+      const data = await doFetch(url.pathname + url.search, { signal: svcAborter.signal }, 8000);
+      const list = data.services || [];
+      const hasMore = !!data.hasMore;
+
+      try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), items: list, hasMore })); } catch {}
+
+      const html = renderServicesHTML(list, loggedInUserId);
+      if (reset) servicesList.innerHTML = html; else servicesList.insertAdjacentHTML('beforeend', html);
+
+      loadMoreBtn.classList.toggle('hidden', !hasMore);
+      if (hasMore) svcPage += 1;
+
+      if (!list.length && svcPage === 2 && reset) {
+        servicesList.innerHTML = '<div class="card"><h3>No Services Yet</h3><p class="muted">Nothing posted yet.</p></div>';
+        loadMoreBtn.classList.add('hidden');
+      }
+
+      // wire up edit/delete buttons (delegation could be used; simple rewire here)
+      servicesList.querySelectorAll('.edit-service-btn').forEach(btn => {
+        btn.removeEventListener('click', onEditServiceClick);
+        btn.addEventListener('click', onEditServiceClick);
+      });
+      servicesList.querySelectorAll('.delete-service-btn').forEach(btn => {
+        btn.removeEventListener('click', onDeleteServiceClick);
+        btn.addEventListener('click', onDeleteServiceClick);
+      });
+
+    } catch (err) {
+      if (err?.name !== 'AbortError') {
+        Diag.show('Failed to load services. <span class="muted">Check <code>/api/services</code> and server logs.</span>');
+        console.error(err);
+        if (svcPage === 1) servicesList.innerHTML = '<p>Failed to load services.</p>';
+      }
+    } finally { svcLoading = false; }
+  }
+
+  // Edit/Delete handlers require reading the service element
+  function onEditServiceClick(e) {
+    const btn = e.currentTarget;
+    const id = btn.getAttribute('data-id');
+    const div = btn.closest('.card');
+    if (!div) return;
+    // fetch values from the DOM and switch to edit mode...
+    // Reuse the editService implementation below
+    editService(div, { id });
+  }
+  function onDeleteServiceClick(e) {
+    const btn = e.currentTarget;
+    const id = btn.getAttribute('data-id');
+    deleteService(id);
+  }
+
+  async function editService(div, service) {
+    const titleEl = div.querySelector('h3') || div.querySelector('.service-title');
+    const descEl = div.querySelector('p') || div.querySelector('.service-desc');
+    const priceEl = div.querySelector('.service-price') || div.querySelector('p strong') || null;
+
+    const origTitle = (titleEl?.textContent || '').trim();
+    const origDesc = (descEl?.textContent || '').trim();
+    const origPrice = (priceEl?.textContent || '').trim();
+
+    titleEl.innerHTML = `<input type="text" value="${esc(origTitle)}" class="edit-title">`;
+    descEl.innerHTML = `<textarea class="edit-desc">${esc(origDesc)}</textarea>`;
+    // priceEl may be a <p> containing text; place an edit-price input near it:
+    if (priceEl && priceEl.parentElement) {
+      priceEl.parentElement.querySelector('.service-price')?.remove();
+      const priceContainer = document.createElement('div');
+      priceContainer.innerHTML = `<p><strong>Price:</strong> $<span class="service-price"><input type="number" value="${Number(origPrice).toString()}" class="edit-price"></span></p>`;
+      priceEl.parentElement.appendChild(priceContainer);
+    }
 
     const buttonsDiv = div.querySelector('.service-buttons');
-    buttonsDiv.innerHTML = `<button class="save-btn">Save</button><button class="cancel-btn">Cancel</button>`;
+    if (!buttonsDiv) {
+      div.insertAdjacentHTML('beforeend', `<div class="service-buttons"><button class="save-btn">Save</button><button class="cancel-btn">Cancel</button></div>`);
+    } else {
+      buttonsDiv.innerHTML = `<button class="save-btn">Save</button><button class="cancel-btn">Cancel</button>`;
+    }
 
-    buttonsDiv.querySelector('.save-btn').addEventListener('click', async () => {
-        const updatedTitle = div.querySelector('.edit-title').value.trim();
-        const updatedDesc = div.querySelector('.edit-desc').value.trim();
-        const updatedPrice = div.querySelector('.edit-price').value.trim();
-        if (!updatedTitle || !updatedDesc || !updatedPrice) return alert('All fields are required.');
+    const saveBtn = div.querySelector('.save-btn');
+    const cancelBtn = div.querySelector('.cancel-btn');
 
-        try {
-            await fetch(`${API_URL}/services/${service.id}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                body: JSON.stringify({ title: updatedTitle, description: updatedDesc, price: updatedPrice })
-            });
-            await loadServices();
-        } catch (err) {
-            console.error(err);
-            alert('Failed to update service.');
-        }
-    });
+    const onSave = async () => {
+      const updatedTitle = div.querySelector('.edit-title')?.value.trim();
+      const updatedDesc = div.querySelector('.edit-desc')?.value.trim();
+      const updatedPrice = div.querySelector('.edit-price')?.value.trim();
+      if (!updatedTitle || !updatedDesc || !updatedPrice) return alert('All fields are required.');
+      try {
+        await doFetch(`services/${service.id}`, {
+          method: 'PUT',
+          body: { title: updatedTitle, description: updatedDesc, price: updatedPrice }
+        }, 8000);
+        await loadServices({ reset: true, userId: getUserId() });
+      } catch (err) {
+        console.error(err);
+        alert('Failed to update service.');
+      }
+    };
 
-    buttonsDiv.querySelector('.cancel-btn').addEventListener('click', loadServices);
-}
+    saveBtn.addEventListener('click', onSave, { once: true });
+    cancelBtn.addEventListener('click', () => loadServices({ reset: true, userId: getUserId() }), { once: true });
+  }
 
-async function deleteService(serviceId) {
+  async function deleteService(serviceId) {
     if (!confirm('Are you sure you want to delete this service?')) return;
     try {
-        await fetch(`${API_URL}/services/${serviceId}`, { method: 'DELETE', headers: { Authorization: `Bearer ${token}` } });
-        await loadServices();
+      await doFetch(`services/${serviceId}`, { method: 'DELETE' }, 8000);
+      await loadServices({ reset: true, userId: getUserId() });
     } catch (err) {
-        console.error(err);
-        alert('Failed to delete service.');
+      console.error(err);
+      alert('Failed to delete service.');
     }
-}
+  }
 
-// ---------------- Toggle / Create New Service ----------------
-function toggleNewService() {
+  // ---- toggle + create new service ----
+  function toggleNewService() {
+    if (!newServiceSection) return;
     newServiceSection.style.display = newServiceSection.style.display === 'flex' ? 'none' : 'flex';
-}
-addNewServiceBtn.addEventListener('click', toggleNewService);
-mobileAddServiceBtn.addEventListener('click', toggleNewService);
+  }
 
-createServiceBtn.addEventListener('click', async () => {
-    const title = newServiceTitle.value.trim();
-    const description = newServiceDesc.value.trim();
-    const price = newServicePrice.value.trim();
-    if (!title || !description || !price) return alert('All fields are required.');
+  async function createService() {
+    const title = newServiceTitle?.value?.trim();
+    const description = newServiceDesc?.value?.trim();
+    const price = Number(newServicePrice?.value);
+    if (!title) { alert('Title is required'); return; }
+    if (Number.isNaN(price) || price < 0) { alert('Enter a valid price'); return; }
 
     try {
-        await fetch(`${API_URL}/services`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ title, description, price })
-        });
-        newServiceTitle.value = '';
-        newServiceDesc.value = '';
-        newServicePrice.value = '';
-        newServiceSection.style.display = 'none';
-        await loadServices();
+      await doFetch('services', { method: 'POST', body: { title, description, price } }, 8000);
+      if (newServiceTitle) newServiceTitle.value = '';
+      if (newServiceDesc) newServiceDesc.value = '';
+      if (newServicePrice) newServicePrice.value = '';
+      if (newServiceSection) newServiceSection.style.display = 'none';
+      await loadServices({ reset: true, userId: getUserId() });
     } catch (err) {
-        console.error(err);
-        alert('Failed to create service.');
+      console.error(err);
+      alert('Failed to create service');
     }
-});
+  }
 
-// ---------------- Navigation ----------------
-goToServicesBtn.addEventListener('click', () => window.location.href = 'services.html');
-goToMessagesBtn.addEventListener('click', () => window.location.href = 'messages.html');
-mobileServicesBtn.addEventListener('click', () => window.location.href = 'services.html');
-mobileMessagesBtn.addEventListener('click', () => window.location.href = 'messages.html');
+  // ---- ratings ----
+  function renderStars(n) { const r = Math.round(n); return '★'.repeat(r) + '☆'.repeat(5 - r); }
 
-// ---------------- Logout ----------------
-logoutBtn.addEventListener('click', () => {
-    localStorage.clear();
-    window.location.href = 'index.html';
-});
+  async function loadRatings(userId) {
+    const cacheKey = `cc_ratings_${userId}`;
+    const cachedRaw = (function () { try { return JSON.parse(localStorage.getItem(cacheKey)); } catch { return null; } })();
+    if (cachedRaw && (Date.now() - (cachedRaw.ts || 0)) < 60000 && Array.isArray(cachedRaw.ratings)) {
+      paintRatings(cachedRaw.summary || { average: 0, count: 0 }, cachedRaw.ratings);
+    } else {
+      if (ratingsList) ratingsList.innerHTML = '<p><span class="spinner"></span> Loading ratings...</p>';
+    }
 
-// ---------------- Initial Load ----------------
-window.addEventListener('load', async () => {
-    await loadProfile();
-    await loadServices();
-});
+    if (ratingsAborter) { try { ratingsAborter.abort(); } catch { } }
+    ratingsAborter = new AbortController();
+    try {
+      const data = await doFetch(`ratings/user/${userId}`, { signal: ratingsAborter.signal }, 8000);
+      const summary = { average: data.summary?.average ?? 0, count: data.summary?.count ?? 0 };
+      const ratings = data.ratings || [];
+      try { localStorage.setItem(cacheKey, JSON.stringify({ ts: Date.now(), summary, ratings })); } catch {}
+      paintRatings(summary, ratings);
+    } catch (err) {
+      if (err?.name !== 'AbortError') {
+        console.error(err);
+        if (!cachedRaw) ratingsList && (ratingsList.innerHTML = '<p class="muted">Failed to load ratings.</p>');
+      }
+    }
+  }
+
+  function paintRatings(summary, ratings) {
+    if (avgStarsEl) avgStarsEl.textContent = Number(summary.average || 0).toFixed(1);
+    if (ratingsCountEl) ratingsCountEl.textContent = summary.count || 0;
+    if (!ratings?.length) {
+      if (ratingsList) ratingsList.innerHTML = '<p class="muted">No ratings yet.</p>';
+      return;
+    }
+    let html = '';
+    for (const r of ratings) {
+      html += `<div class="review">
+        <div class="meta-row">
+          <strong>${esc(r.rater?.username || ('User ' + r.raterId))}</strong>
+          <span class="stars">${renderStars(r.stars)}</span>
+          <span class="badge">${Number(r.stars).toFixed(1)}</span>
+          <span class="muted">${new Date(r.createdAt).toLocaleString()}</span>
+        </div>
+        ${r.comment ? `<p>${esc(r.comment)}</p>` : '<p class="muted">No comment</p>'}
+      </div>`;
+    }
+    if (ratingsList) ratingsList.innerHTML = html;
+  }
+
+  // ---- edit / save description ----
+  let editingDesc = false;
+  function toggleDescEdit(force) {
+    editingDesc = typeof force === 'boolean' ? force : !editingDesc;
+    if (profileDescription) profileDescription.contentEditable = editingDesc;
+    if (editDescBtn) editDescBtn.textContent = editingDesc ? 'Save Description' : 'Edit Description';
+    if (editingDesc && profileDescription) profileDescription.focus(); else profileDescription && profileDescription.blur();
+  }
+  async function saveDescription() {
+    const newDesc = profileDescription?.textContent?.trim();
+    try {
+      const out = await doFetch('users/me/description', { method: 'PUT', body: { description: newDesc } }, 8000);
+      const saved = out?.user || {};
+      if (profileDescription) profileDescription.textContent = getDescription(saved) || newDesc || '';
+    } catch {
+      alert('Failed to save description');
+    } finally {
+      toggleDescEdit(false);
+    }
+  }
+
+  // ---- handlers wiring ----
+  function wireHandlers() {
+    if (editDescBtn) editDescBtn.addEventListener('click', () => !editingDesc ? toggleDescEdit(true) : saveDescription());
+    if (editDescBtnFloat) editDescBtnFloat.addEventListener('click', () => !editingDesc ? toggleDescEdit(true) : saveDescription());
+
+    if (goToServicesBtn) goToServicesBtn.addEventListener('click', () => location.href = 'services.html');
+    if (goToMessagesBtn) goToMessagesBtn.addEventListener('click', () => location.href = 'messages.html');
+    if (mobileServicesBtn) mobileServicesBtn.addEventListener('click', () => location.href = 'services.html');
+    if (mobileMessagesBtn) mobileMessagesBtn.addEventListener('click', () => location.href = 'messages.html');
+
+    if (backToMyProfileBtn) backToMyProfileBtn.addEventListener('click', () => location.href = 'profile.html');
+    if (mobileBackBtn) mobileBackBtn.addEventListener('click', () => location.href = 'profile.html');
+
+    if (logoutBtn) logoutBtn.addEventListener('click', () => { localStorage.clear(); location.replace('/'); });
+    if (upgradeBtn) upgradeBtn.addEventListener('click', async () => {
+      try {
+        if (!confirm('Upgrade to a paid account?')) return;
+        await doFetch('users/me/upgrade', { method: 'PUT' }, 8000);
+        alert('Upgraded successfully!');
+        currentUserTier = 'paid';
+        await loadProfile();
+      } catch (err) {
+        alert(err.message || 'Upgrade failed');
+      }
+    });
+
+    if (addNewServiceBtn) addNewServiceBtn.addEventListener('click', toggleNewService);
+    if (mobileAddServiceBtn) mobileAddServiceBtn.addEventListener('click', toggleNewService);
+    if (createServiceBtn) createServiceBtn.addEventListener('click', createService);
+    if (loadMoreBtn) loadMoreBtn.addEventListener('click', () => loadServices({ reset: false }));
+
+    if (submitRatingBtn) {
+      submitRatingBtn.addEventListener('click', async () => {
+        const stars = parseInt((rateStars?.value || '0'), 10) || 0;
+        const comment = (rateComment?.value || '').trim();
+        const rateeId = currentProfileUserId || (new URLSearchParams(location.search)).get('userId') || getUserId();
+
+        if (!rateeId) { showRateMsg('No target user to rate', true); return; }
+        if (!stars || stars < 1 || stars > 5) { showRateMsg('Please pick 1–5 stars', true); return; }
+
+        submitRatingBtn.disabled = true;
+        showRateMsg('Submitting…');
+
+        try {
+          const payload = { rateeId, stars, comment: comment || null };
+          const out = await doFetch('ratings', { method: 'POST', body: payload }, 8000);
+          showRateMsg(out?.message || 'Rating saved');
+          await loadRatings(rateeId);
+          if (rateComment) rateComment.value = '';
+          if (rateUpgradeHint) rateUpgradeHint.classList.add('hidden');
+        } catch (err) {
+          console.error('Rating submit error', err);
+          const m = String(err?.message || '');
+          if (m.includes('403') || m.toLowerCase().includes('upgrade')) {
+            if (rateUpgradeHint) rateUpgradeHint.classList.remove('hidden');
+            showRateMsg('Upgrade required to rate users.', true);
+          } else {
+            showRateMsg(err?.message || 'Failed to submit rating', true);
+          }
+        } finally {
+          submitRatingBtn.disabled = false;
+        }
+      });
+    }
+
+    if (upgradeInlineBtn) {
+      upgradeInlineBtn.addEventListener('click', async () => {
+        try {
+          if (!confirm('Upgrade to a paid account?')) return;
+          await doFetch('users/me/upgrade', { method: 'PUT' }, 8000);
+          alert('Upgraded successfully!');
+          currentUserTier = 'paid';
+          await loadProfile();
+        } catch (err) {
+          alert(err?.message || 'Upgrade failed');
+        }
+      });
+    }
+  }
+
+  function showRateMsg(txt, isError = false) {
+    if (!rateMsg) return;
+    rateMsg.textContent = txt || '';
+    rateMsg.style.color = isError ? '#b91c1c' : '#2b7a2b';
+    if (!txt) return;
+    setTimeout(() => { if (rateMsg) rateMsg.textContent = ''; }, 4500);
+  }
+
+  // ---- init ----
+  document.addEventListener('DOMContentLoaded', () => {
+    // instant paint from cache
+    try {
+      const cached = JSON.parse(localStorage.getItem('cc_me') || 'null');
+      if (cached) {
+        const cachedName = getDisplayName(cached);
+        if (cachedName && profileUsername) profileUsername.textContent = cachedName;
+        const cachedDesc = getDescription(cached);
+        if (cachedDesc && profileDescription) profileDescription.textContent = cachedDesc;
+
+        const params = new URLSearchParams(location.search);
+        if (cached.id && !params.get('userId')) showOwnerUI(true);
+      }
+    } catch { /* ignore */ }
+
+    wireHandlers();
+
+    // The guard: do not redirect immediately on parse-time.
+    try {
+      if (typeof window.isLoggedIn === 'function') {
+        if (!isLoggedIn()) {
+          const here = location.pathname + location.search;
+          // do a redirect to login if you want; otherwise show diag (we show diag)
+          Diag.show('You appear to be logged out. <span class="muted">No token found. UI will load, but protected API calls will fail.</span>');
+        }
+      } else {
+        const token = getToken();
+        if (!token) {
+          Diag.show('You appear to be logged out. <span class="muted">No token found. UI will load, but protected API calls will fail.</span>');
+        }
+      }
+    } catch (e) {
+      Diag.show('Login guard error. <span class="muted">Check <code>isLoggedIn()</code> or <code>script.js</code>.</span>');
+    }
+
+    // load profile
+    loadProfile();
+  });
+})();
