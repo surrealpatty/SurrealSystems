@@ -1,418 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Services - CodeCrowds</title>
-<link rel="stylesheet" href="services.css" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Services - CodeCrowds</title>
 
-<!-- Optional: If you prefer explicit config, add a meta:
-<meta name="api-url" content="https://api.your-domain.com/api" />
--->
-<script>
-  // Ensure a sane API_URL / API_BASE is present before script.js runs.
-  (function () {
-    try {
-      function normalize(u) {
-        if (!u) return u;
-        return String(u).replace(/\/+$/, '');
-      }
+  <!-- Page CSS (external file only) -->
+  <link rel="stylesheet" href="services.css" />
 
-      let api = null;
+  <!-- Init MUST run before script.js so API_URL is set -->
+  <script src="init.js" defer></script>
 
-      // 1) explicit window.__API_URL__ (host/build injection)
-      try { if (typeof window.__API_URL__ !== 'undefined' && window.__API_URL__) api = normalize(window.__API_URL__); } catch (e) {}
+  <!-- Shared helpers (apiFetch, etc.) -->
+  <script src="script.js" defer></script>
 
-      // 2) meta tag
-      try {
-        if (!api) {
-          const meta = document.querySelector('meta[name="api-url"]');
-          if (meta && meta.content) api = normalize(meta.content);
-        }
-      } catch (e) {}
-
-      // 3) existing inline page config (older pages)
-      try {
-        if (!api && typeof window.API_URL !== 'undefined' && window.API_URL) api = normalize(window.API_URL);
-        if (!api && typeof window.API_BASE !== 'undefined' && window.API_BASE) api = normalize(window.API_BASE);
-      } catch (e) {}
-
-      // 4) fallback to same-origin + /api
-      if (!api) {
-        try { api = (window.location.origin || '').replace(/\/$/, '') + '/api'; } catch (e) { api = '/api'; }
-      }
-
-      window.API_BASE = api;
-      window.API_URL = api;
-      try { console.info('Init: API_URL =', window.API_URL); } catch (e) {}
-    } catch (e) { /* ignore */ }
-  })();
-</script>
-
-<script src="script.js"></script>
-
-<style>
-  .error{color:#c0392b}
-  .service-card{background:#fff;border-radius:12px;padding:16px;box-shadow:0 8px 20px rgba(0,0,0,.06);margin-bottom:12px}
-  .controls{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-  .card-actions{margin-top:8px}
-  #toast{position:fixed;right:12px;bottom:12px;background:#333;color:#fff;padding:10px 12px;border-radius:8px;opacity:0;transition:.2s}
-  #toast.show{opacity:1}
-  #messageModal{display:none;position:fixed;inset:0;align-items:center;justify-content:center;background:rgba(0,0,0,.4)}
-  #messageModal .modal-content{background:#fff;border-radius:12px;max-width:520px;width:92%;padding:16px}
-  .button-secondary{background:#f0f0f0}
-
-/* small diagnostic banner (hidden by default) */
-#diagBanner {
-  display:none;
-  position:fixed;
-  top:0; left:0; right:0;
-  background:#b91c1c;color:#fff;padding:8px 12px;font-weight:600; z-index:9999;
-}
-#diagBanner .muted { opacity:0.9; font-weight:400; font-size:0.95rem; }
-</style>
+  <!-- Page-specific JS -->
+  <script src="services.js" defer></script>
 </head>
 <body>
-<div id="diagBanner"><span id="diagMsg"></span></div>
+  <div id="diagBanner"><span id="diagMsg"></span></div>
 
-<div class="container">
-  <h1>All Services</h1>
-  <p class="subtle">Browse everything users are offering across CodeCrowds.</p>
+  <div class="container">
+    <h1>All Services</h1>
+    <p class="subtle">Browse everything users are offering across CodeCrowds.</p>
 
-  <div class="controls" role="group" aria-label="Service search and sorting">
-    <label class="sr-only" for="search">Search services</label>
-    <input id="search" placeholder="Search services…" aria-describedby="searchHelp" />
-    <span id="searchHelp" class="sr-only">Type to filter services by title, description, or username</span>
+    <div class="controls" role="group" aria-label="Service search and sorting">
+      <label class="sr-only" for="search">Search services</label>
+      <input id="search" placeholder="Search services…" aria-describedby="searchHelp" />
+      <span id="searchHelp" class="sr-only">Type to filter services by title, description, or username</span>
 
-    <label class="sr-only" for="sort">Sort services</label>
-    <select id="sort" title="Sort services">
-      <option value="newest">Newest</option>
-      <option value="priceLow">Price: Low → High</option>
-      <option value="priceHigh">Price: High → Low</option>
-    </select>
-  </div>
+      <label class="sr-only" for="sort">Sort services</label>
+      <select id="sort" title="Sort services">
+        <option value="newest">Newest</option>
+        <option value="priceLow">Price: Low → High</option>
+        <option value="priceHigh">Price: High → Low</option>
+      </select>
+    </div>
 
-  <div id="services-list" aria-live="polite">
-    <p><span class="spinner"></span> Loading services…</p>
-  </div>
+    <div id="services-list" aria-live="polite">
+      <p><span class="spinner"></span> Loading services…</p>
+    </div>
 
-  <!-- Compose Message Modal -->
-  <div id="messageModal" role="dialog" aria-modal="true" aria-labelledby="messageTitle" aria-hidden="true">
-    <div class="modal-content" role="document">
-      <h2 id="messageTitle">Message <span id="messageRecipient"></span></h2>
+    <!-- Compose Message Modal -->
+    <div id="messageModal" role="dialog" aria-modal="true" aria-labelledby="messageTitle" aria-hidden="true">
+      <div class="modal-content" role="document">
+        <h2 id="messageTitle">Message <span id="messageRecipient"></span></h2>
 
-      <div class="field-wrap">
-        <textarea id="messageContent" placeholder="Write your message…" maxlength="2000" aria-label="Message body"></textarea>
+        <div class="field-wrap">
+          <textarea id="messageContent" placeholder="Write your message…" maxlength="2000" aria-label="Message body"></textarea>
+        </div>
+
+        <p id="sendError" class="error" aria-live="polite" hidden></p>
+
+        <div class="modal-meta">
+          <span id="charCount" aria-live="polite">0 / 2000</span>
+        </div>
+        <div class="modal-actions">
+          <button type="button" id="sendMessageBtn">Send</button>
+          <button type="button" id="cancelMessageBtn" class="button-secondary">Cancel</button>
+        </div>
       </div>
+    </div>
 
-      <p id="sendError" class="error" aria-live="polite" hidden></p>
-
-      <div class="modal-meta">
-        <span id="charCount" aria-live="polite">0 / 2000</span>
-      </div>
-      <div class="modal-actions">
-        <button type="button" id="sendMessageBtn">Send</button>
-        <button type="button" id="cancelMessageBtn" class="button-secondary">Cancel</button>
-      </div>
+    <div class="actions-row">
+      <button type="button" id="goToProfileBtn" class="button-secondary" aria-label="Back to your profile">Back to Profile</button>
+      <button type="button" id="refreshBtn" aria-label="Refresh services list">Refresh</button>
     </div>
   </div>
 
-  <div class="actions-row">
-    <button type="button" id="goToProfileBtn" class="button-secondary" aria-label="Back to your profile">Back to Profile</button>
-    <button type="button" id="refreshBtn" aria-label="Refresh services list">Refresh</button>
-  </div>
-</div>
-
-<!-- Toast -->
-<div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-
-<script>
-// ===================== DOM =====================
-const diagBanner = document.getElementById('diagBanner');
-const diagMsg = document.getElementById('diagMsg');
-function showDiag(msg, ttl = 7000) {
-  if (!diagBanner) return;
-  diagMsg.textContent = msg;
-  diagBanner.style.display = 'block';
-  setTimeout(()=> { diagBanner.style.display = 'none'; diagMsg.textContent=''; }, ttl);
-}
-
-const servicesList = document.getElementById('services-list');
-const goToProfileBtn = document.getElementById('goToProfileBtn');
-const refreshBtn = document.getElementById('refreshBtn');
-const searchInput = document.getElementById('search');
-const sortSelect = document.getElementById('sort');
-
-const messageModal = document.getElementById('messageModal');
-const messageRecipient = document.getElementById('messageRecipient');
-const messageContent = document.getElementById('messageContent');
-const sendMessageBtn = document.getElementById('sendMessageBtn');
-const cancelMessageBtn = document.getElementById('cancelMessageBtn');
-const charCount = document.getElementById('charCount');
-const sendError = document.getElementById('sendError');
-
-let allServices = [];
-let messageState = { toUserId: null, serviceId: null, username: '' };
-let lastFocusedBeforeModal = null;
-
-// ===================== Utils =====================
-const esc = (s)=> String(s ?? '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-const fmtPrice = (v)=> {
-  const n = Number(v);
-  return Number.isFinite(n) ? n.toLocaleString(undefined,{ maximumFractionDigits:2 }) : esc(v);
-};
-function toast(msg){
-  const el=document.getElementById('toast');
-  if(!el){ alert(msg); return; }
-  el.textContent=msg; el.classList.add('show');
-  setTimeout(()=>el.classList.remove('show'), 2200);
-}
-function showInlineError(msg){
-  if (sendError) {
-    sendError.textContent = msg || '';
-    sendError.hidden = !msg;
-  }
-}
-function stringifyAny(v){ if(v==null) return ''; if(typeof v==='string') return v; try{return JSON.stringify(v);}catch{return String(v);} }
-
-async function readError(res){
-  let data=null, text='';
-  try{ data=await res.json(); }catch{ text=await res.text().catch(()=> ''); }
-  const nested = data && typeof data==='object'
-    ? (data.error?.message || data.error || data.message || data?.errors || data)
-    : text || `HTTP ${res.status}`;
-  return `[${res.status}] ${typeof nested==='string' ? nested : stringifyAny(nested)}`;
-}
-
-function makeFriendlyError(err) {
-  if (!err) return 'Unknown error';
-  if (err?.payload) {
-    try {
-      const p = err.payload;
-      const msg = p?.error?.message || p?.message || (p?.error ? JSON.stringify(p.error) : null);
-      if (msg) return String(msg);
-    } catch (e) {}
-  }
-  return err.message || String(err);
-}
-
-// ===================== Render =====================
-function render(services){
-  if (!servicesList) return;
-  servicesList.innerHTML='';
-  if(!services.length){
-    servicesList.innerHTML='<p>No services available.</p>';
-    return;
-  }
-  services.forEach(s=>{
-    const div=document.createElement('div');
-    div.className='service-card';
-    const usernameHtml = s.user && s.user.id
-      ? `<a href="profile.html?userId=${encodeURIComponent(s.user.id)}">${esc(s.user.username)}</a>`
-      : 'Unknown';
-    div.innerHTML=`
-      <h3>${esc(s.title)}</h3>
-      <p>${esc(s.description)}</p>
-      <p><strong>Price:</strong> $${fmtPrice(s.price)}</p>
-      <p class="username">
-        Posted by:
-        ${usernameHtml}
-      </p>
-      <div class="card-actions">
-        <button type="button" class="message-btn"
-          data-user-id="${s.user?.id ?? ''}"
-          data-username="${esc(s.user?.username ?? '')}"
-          data-service-id="${s.id ?? ''}"
-          ${s.user ? '' : 'disabled'}
-          aria-label="Message ${esc(s.user?.username ?? 'seller')}"
-          title="${s.user ? 'Send a message to the seller' : 'No seller attached'}">
-          Message
-        </button>
-      </div>`;
-    servicesList.appendChild(div);
-  });
-}
-
-// ===================== Filters =====================
-function applyFilters(){
-  const q = (searchInput?.value || '').toLowerCase().trim();
-  const filtered = allServices.filter(s=>{
-    const hay = `${s.title||''} ${s.description||''} ${s.user?.username||''}`.toLowerCase();
-    return hay.includes(q);
-  });
-  switch (sortSelect?.value){
-    case 'priceLow':  filtered.sort((a,b)=> Number(a.price)-Number(b.price)); break;
-    case 'priceHigh': filtered.sort((a,b)=> Number(b.price)-Number(a.price)); break;
-    default:          filtered.sort((a,b)=> new Date(b.createdAt||0)-new Date(a.createdAt||0));
-  }
-  render(filtered);
-}
-
-// ===================== Data (uses apiFetch from script.js) =====================
-async function loadServices(){
-  if (!servicesList) return;
-  servicesList.innerHTML='<p><span class="spinner"></span> Loading services…</p>';
-  try{
-    let sort = 'newest';
-    if (sortSelect && sortSelect.value === 'priceLow')  sort = 'priceLow';
-    if (sortSelect && sortSelect.value === 'priceHigh') sort = 'priceHigh';
-
-    const out = await apiFetch(`services?limit=50&page=1&sort=${encodeURIComponent(sort)}`);
-
-    const payload = (out && out.services) ? out : (out && out.data) ? out.data : out;
-    const list = Array.isArray(payload) ? payload : (payload && payload.services) ? payload.services : [];
-
-    allServices = list;
-    applyFilters();
-  }catch(e){
-    console.error('[services] load failed:', e);
-    const friendly = makeFriendlyError(e);
-    servicesList.innerHTML = `<p class="error">Failed to load services: ${esc(friendly)}</p>`;
-    // Helpful hint for the user/admin
-    showDiag('Failed to load services. If you see CORS errors in the console, update CORS_ALLOWED_ORIGINS to include your frontend origin (e.g. https://codecrowds.onrender.com).');
-  }
-}
-
-// ===================== Modal / a11y =====================
-function updateCounterAndState(){
-  const len = (messageContent?.value || '').length;
-  if (charCount) charCount.textContent = `${len} / 2000`;
-  const ok = len > 0 && len <= 2000 && !!messageState.toUserId;
-  if (sendMessageBtn) sendMessageBtn.disabled = !ok;
-}
-function trapFocusIn(node, e){
-  if (e.key!=='Tab') return;
-  const focusables = node.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])');
-  const a = Array.from(focusables).filter(x=>!x.disabled && x.offsetParent!==null);
-  if(!a.length) return;
-  const first=a[0], last=a[a.length-1];
-  if(e.shiftKey && document.activeElement===first){ e.preventDefault(); last.focus(); }
-  else if(!e.shiftKey && document.activeElement===last){ e.preventDefault(); first.focus(); }
-}
-function showModal(){
-  lastFocusedBeforeModal = document.activeElement;
-  if (!messageModal) return;
-  messageModal.style.display='flex';
-  messageModal.setAttribute('aria-hidden','false');
-  showInlineError(''); updateCounterAndState();
-  setTimeout(()=> messageContent?.focus(),0);
-  window.addEventListener('keydown', onModalKey);
-}
-function hideModal(){
-  if (!messageModal) return;
-  messageModal.style.display='none';
-  messageModal.setAttribute('aria-hidden','true');
-  if (messageContent) messageContent.value='';
-  showInlineError(''); updateCounterAndState();
-  messageState = { toUserId:null, serviceId:null, username:'' };
-  window.removeEventListener('keydown', onModalKey);
-  if (lastFocusedBeforeModal?.focus) lastFocusedBeforeModal.focus();
-}
-function onModalKey(e){
-  if (!messageModal || messageModal.style.display!=='flex') return;
-  if (e.key==='Tab') trapFocusIn(messageModal,e);
-  if ((e.ctrlKey||e.metaKey) && e.key==='Enter'){ e.preventDefault(); if(!sendMessageBtn.disabled) sendMessage(); }
-}
-
-// ===================== Send Message =====================
-async function sendMessage(){
-  const token = getToken(); // from script.js
-  if (!token){ showInlineError('Please log in to send messages.'); return; }
-  const text = (messageContent?.value||'').trim();
-  if (!messageState.toUserId){ showInlineError('Missing recipient.'); return; }
-  if (!text){ showInlineError('Please write a message.'); messageContent.focus(); return; }
-  showInlineError('');
-  try{
-    if (sendMessageBtn) { sendMessageBtn.disabled=true; sendMessageBtn.textContent='Sending…'; }
-
-    // Send both "to" (server expects this) and "receiverId" (safe fallback).
-    const body = {
-      to: Number(messageState.toUserId),
-      receiverId: Number(messageState.toUserId),
-      content: text
-    };
-    if (messageState.serviceId) body.serviceId = Number(messageState.serviceId);
-
-    await apiFetch('messages', {
-      method: 'POST',
-      body,
-      timeoutMs: 10000
-    });
-
-    hideModal(); toast('Message sent!');
-  }catch(err){
-    console.error('[messages] network error:', err);
-    const friendly = makeFriendlyError(err);
-    if (err?.status === 401 || err?.status === 403) {
-      try { clearToken(); clearUserId(); } catch {}
-      showInlineError(`${friendly}. Please log in again.`);
-    } else {
-      // If the error looks like a network/CORS problem suggest the probable fix
-      const lower = String(err?.message || '').toLowerCase();
-      const possibleCors = lower.includes('cors') || lower.includes('blocked') || lower.includes('network') || lower.includes('failed to fetch');
-      if (possibleCors) {
-        showInlineError(`Failed to send: ${friendly}. Possible CORS or network issue — ensure CORS_ALLOWED_ORIGINS includes your frontend origin and API_URL is correct.`);
-        showDiag('Network/CORS issue sending messages. Check server logs and update CORS_ALLOWED_ORIGINS to include your frontend origin.');
-      } else {
-        showInlineError(`Failed to send: ${friendly}`);
-      }
-    }
-  }finally{
-    if (sendMessageBtn) { sendMessageBtn.disabled=false; sendMessageBtn.textContent='Send'; }
-    updateCounterAndState();
-  }
-}
-
-// ===================== Events =====================
-if (goToProfileBtn) goToProfileBtn.addEventListener('click', ()=> { location.href='profile.html'; });
-if (refreshBtn) refreshBtn.addEventListener('click', loadServices);
-
-let filterTimer = null;
-if (searchInput) {
-  searchInput.addEventListener('input', () => {
-    clearTimeout(filterTimer);
-    filterTimer = setTimeout(applyFilters, 120);
-  });
-}
-if (sortSelect) {
-  sortSelect.addEventListener('change', () => { loadServices(); });
-}
-
-if (servicesList) {
-  servicesList.addEventListener('click', (e)=>{
-    const btn = e.target.closest('.message-btn'); if (!btn) return;
-    const rawUserId = btn.getAttribute('data-user-id');
-    const toUserId = rawUserId ? Number(rawUserId) : null;
-    const username = btn.getAttribute('data-username') || 'seller';
-    const rawServiceId = btn.getAttribute('data-service-id');
-    const serviceId = rawServiceId ? Number(rawServiceId) : null;
-
-    if (!toUserId){ toast('This service has no associated user.'); return; }
-
-    if (typeof isLoggedIn === 'function' && !isLoggedIn()) {
-      toast('Please log in to message sellers.');
-      setTimeout(()=> { location.replace(`/?from=${encodeURIComponent(location.pathname + location.search)}`); }, 600);
-      return;
-    }
-
-    messageState = { toUserId, serviceId, username };
-    messageRecipient.textContent = username || 'seller';
-    showModal();
-  });
-}
-
-if (cancelMessageBtn) cancelMessageBtn.addEventListener('click', hideModal);
-if (sendMessageBtn) sendMessageBtn.addEventListener('click', sendMessage);
-window.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && messageModal?.style?.display==='flex') hideModal(); });
-if (messageModal) {
-  messageModal.addEventListener('click', (e)=>{ if (e.target===messageModal) hideModal(); });
-}
-if (messageContent) messageContent.addEventListener('input', updateCounterAndState);
-
-window.addEventListener('load', () => {
-  updateCounterAndState();
-  loadServices();
-});
-</script>
+  <!-- Toast -->
+  <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
 </body>
 </html>
