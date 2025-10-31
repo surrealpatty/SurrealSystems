@@ -35,6 +35,16 @@ jobs:
           node-version: '20'
           cache: 'npm'
 
+      - name: Confirm JWT secret presence
+        # Fail fast and print only a presence message (does not reveal the secret)
+        run: |
+          if [ -z "${JWT_SECRET:-}" ] && [ -z "${JWT_SECRETS:-}" ]; then
+            echo "ERROR: JWT secret(s) not set"
+            exit 1
+          else
+            echo "JWT secret(s) present"
+          fi
+
       - name: Wait for Postgres to be ready
         run: |
           sudo apt-get update -y
