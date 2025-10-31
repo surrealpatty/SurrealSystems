@@ -1,10 +1,10 @@
-const { Service } = require("../models");
+const { Service } = require('../models');
 
 // Helpers
 function ownOr403(service, userId, res) {
-  if (!service) return res.status(404).json({ error: "Service not found" });
+  if (!service) return res.status(404).json({ error: 'Service not found' });
   if (String(service.userId) !== String(userId)) {
-    return res.status(403).json({ error: "Not allowed" });
+    return res.status(403).json({ error: 'Not allowed' });
   }
   return null;
 }
@@ -12,23 +12,20 @@ function ownOr403(service, userId, res) {
 // GET /api/services?search=&page=&limit=
 exports.list = async (req, res) => {
   try {
-    const page = Math.max(parseInt(req.query.page || "1", 10), 1);
-    const limit = Math.min(
-      Math.max(parseInt(req.query.limit || "10", 10), 1),
-      50,
-    );
+    const page = Math.max(parseInt(req.query.page || '1', 10), 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit || '10', 10), 1), 50);
     const offset = (page - 1) * limit;
     const where = {};
     // simple search by title
     if (req.query.search) where.title = { $iLike: `%${req.query.search}%` }; // requires Sequelize.Op.iLike below
-    const { Op } = require("sequelize");
+    const { Op } = require('sequelize');
     if (where.title) where.title = { [Op.iLike]: `%${req.query.search}%` };
 
     const result = await Service.findAndCountAll({
       where,
       limit,
       offset,
-      order: [["createdAt", "DESC"]],
+      order: [['createdAt', 'DESC']],
     });
     res.json({
       items: result.rows,
@@ -37,8 +34,8 @@ exports.list = async (req, res) => {
       pages: Math.ceil(result.count / limit),
     });
   } catch (err) {
-    console.error("Services list error:", err);
-    res.status(500).json({ error: "Failed to list services" });
+    console.error('Services list error:', err);
+    res.status(500).json({ error: 'Failed to list services' });
   }
 };
 
@@ -46,11 +43,11 @@ exports.list = async (req, res) => {
 exports.getById = async (req, res) => {
   try {
     const service = await Service.findByPk(req.params.id);
-    if (!service) return res.status(404).json({ error: "Service not found" });
+    if (!service) return res.status(404).json({ error: 'Service not found' });
     res.json({ service });
   } catch (err) {
-    console.error("Service get error:", err);
-    res.status(500).json({ error: "Failed to fetch service" });
+    console.error('Service get error:', err);
+    res.status(500).json({ error: 'Failed to fetch service' });
   }
 };
 
@@ -66,8 +63,8 @@ exports.create = async (req, res) => {
     });
     res.status(201).json({ service });
   } catch (err) {
-    console.error("Service create error:", err);
-    res.status(500).json({ error: "Failed to create service" });
+    console.error('Service create error:', err);
+    res.status(500).json({ error: 'Failed to create service' });
   }
 };
 
@@ -86,8 +83,8 @@ exports.update = async (req, res) => {
 
     res.json({ service });
   } catch (err) {
-    console.error("Service update error:", err);
-    res.status(500).json({ error: "Failed to update service" });
+    console.error('Service update error:', err);
+    res.status(500).json({ error: 'Failed to update service' });
   }
 };
 
@@ -99,9 +96,9 @@ exports.remove = async (req, res) => {
     if (early) return;
 
     await service.destroy();
-    res.json({ message: "Service deleted" });
+    res.json({ message: 'Service deleted' });
   } catch (err) {
-    console.error("Service delete error:", err);
-    res.status(500).json({ error: "Failed to delete service" });
+    console.error('Service delete error:', err);
+    res.status(500).json({ error: 'Failed to delete service' });
   }
 };

@@ -1,9 +1,9 @@
 // src/models/billing.js
 module.exports = (sequelize) => {
-  const { DataTypes, Op } = require("sequelize");
+  const { DataTypes, Op } = require('sequelize');
 
   const Billing = sequelize.define(
-    "Billing",
+    'Billing',
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
@@ -19,7 +19,7 @@ module.exports = (sequelize) => {
       currentPeriodEnd: { type: DataTypes.DATE, allowNull: true },
     },
     {
-      tableName: "billings",
+      tableName: 'billings',
       timestamps: true,
       underscored: false,
     },

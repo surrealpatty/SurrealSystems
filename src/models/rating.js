@@ -1,9 +1,9 @@
 // src/models/rating.js
 module.exports = (sequelize) => {
-  const { DataTypes, Op } = require("sequelize");
+  const { DataTypes, Op } = require('sequelize');
 
   const Rating = sequelize.define(
-    "Rating",
+    'Rating',
     {
       id: {
         type: DataTypes.INTEGER,
@@ -33,8 +33,8 @@ module.exports = (sequelize) => {
         allowNull: false,
         defaultValue: 1,
         validate: {
-          min: { args: [1], msg: "stars must be >= 1" },
-          max: { args: [5], msg: "stars must be <= 5" },
+          min: { args: [1], msg: 'stars must be >= 1' },
+          max: { args: [5], msg: 'stars must be <= 5' },
         },
       },
 
@@ -50,7 +50,7 @@ module.exports = (sequelize) => {
       },
     },
     {
-      tableName: "ratings",
+      tableName: 'ratings',
       timestamps: true,
       underscored: false, // use camelCase columns: serviceId, raterId, rateeId
 
@@ -59,7 +59,7 @@ module.exports = (sequelize) => {
       indexes: [
         {
           unique: true,
-          fields: ["raterId", "rateeId"],
+          fields: ['raterId', 'rateeId'],
           where: {
             rateeId: { [Op.ne]: null },
           },

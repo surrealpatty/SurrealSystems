@@ -1,9 +1,9 @@
-﻿const m = require("./src/models");
-const { QueryTypes } = require("sequelize");
+﻿const m = require('./src/models');
+const { QueryTypes } = require('sequelize');
 (async () => {
   try {
     await m.sequelize.authenticate();
-    console.log("DB connected for agg test");
+    console.log('DB connected for agg test');
 
     const rows = await m.sequelize.query(
       `SELECT service_id AS "serviceId",
@@ -16,10 +16,10 @@ const { QueryTypes } = require("sequelize");
       { type: QueryTypes.SELECT },
     );
 
-    console.log("\nAGG RAW:");
+    console.log('\nAGG RAW:');
     console.log(JSON.stringify(rows, null, 2));
   } catch (e) {
-    console.error("\nAGG ERR:");
+    console.error('\nAGG ERR:');
     console.error(e && e.stack ? e.stack : e);
     process.exit(1);
   }

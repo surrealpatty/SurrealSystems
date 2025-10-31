@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 module.exports = {
   async up(queryInterface, Sequelize) {
@@ -9,16 +9,16 @@ module.exports = {
       // Columns (IF NOT EXISTS semantics via try/catch on addColumn)
       const add = async (name, def) => {
         try {
-          await qi.addColumn("ratings", name, def, { transaction: t });
+          await qi.addColumn('ratings', name, def, { transaction: t });
         } catch (_) {}
       };
 
-      await add("service_id", { type: Sequelize.INTEGER, allowNull: true });
-      await add("rater_id", { type: Sequelize.INTEGER, allowNull: true });
-      await add("ratee_id", { type: Sequelize.INTEGER, allowNull: true });
-      await add("stars", { type: Sequelize.INTEGER, allowNull: true });
-      await add("score", { type: Sequelize.INTEGER, allowNull: true });
-      await add("comment", { type: Sequelize.TEXT, allowNull: true });
+      await add('service_id', { type: Sequelize.INTEGER, allowNull: true });
+      await add('rater_id', { type: Sequelize.INTEGER, allowNull: true });
+      await add('ratee_id', { type: Sequelize.INTEGER, allowNull: true });
+      await add('stars', { type: Sequelize.INTEGER, allowNull: true });
+      await add('score', { type: Sequelize.INTEGER, allowNull: true });
+      await add('comment', { type: Sequelize.TEXT, allowNull: true });
 
       // Backfill from user_id -> rater_id if present
       await qi.sequelize.query(
@@ -83,11 +83,7 @@ module.exports = {
 
   async down(queryInterface, Sequelize) {
     // Non-destructive down: just drop the indexes (leave columns/data intact)
-    await queryInterface.sequelize.query(
-      `DROP INDEX IF EXISTS ratings_unique_rater_ratee;`,
-    );
-    await queryInterface.sequelize.query(
-      `DROP INDEX IF EXISTS ratings_ratee_idx;`,
-    );
+    await queryInterface.sequelize.query(`DROP INDEX IF EXISTS ratings_unique_rater_ratee;`);
+    await queryInterface.sequelize.query(`DROP INDEX IF EXISTS ratings_ratee_idx;`);
   },
 };

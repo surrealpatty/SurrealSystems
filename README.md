@@ -1,4 +1,4 @@
-# 🌐 CodeCrowds
+﻿# 🌐 CodeCrowds
 
 **CodeCrowds** is a Fiverr-like platform where users can sell their skills, post services, and hire others for tasks.  
 Built with **Node.js, Express, Sequelize**, and **PostgreSQL**, it connects freelancers and clients in a lightweight, modern web app.
@@ -8,11 +8,17 @@ Built with **Node.js, Express, Sequelize**, and **PostgreSQL**, it connects free
 ## 🚀 Features
 
 - 🔐 **User authentication** with JWT (register, login, profile)
+
 - 💼 **Service management:** create, edit, delete, and list services
+
 - 🔎 **Browse and search** services from other users
+
 - ⭐ **Ratings system** for users and services
+
 - 🧱 **REST API** for users, services, and ratings
+
 - 🖥️ **Frontend served** via Express static routes (`/public`)
+
 - ☁️ **Production ready** with Render deployment and SSL-enabled Postgres
 
 ---

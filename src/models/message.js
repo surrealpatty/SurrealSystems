@@ -1,9 +1,9 @@
 // src/models/message.js
 module.exports = (sequelize) => {
-  const { DataTypes } = require("sequelize");
+  const { DataTypes } = require('sequelize');
 
   const Message = sequelize.define(
-    "Message",
+    'Message',
     {
       id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
 
@@ -11,18 +11,18 @@ module.exports = (sequelize) => {
       senderId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "senderId",
+        field: 'senderId',
       },
       receiverId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: "receiverId",
+        field: 'receiverId',
       },
 
       content: { type: DataTypes.TEXT, allowNull: false },
     },
     {
-      tableName: "messages",
+      tableName: 'messages',
       timestamps: true,
       underscored: false, // ensure createdAt/updatedAt are used (camelCase)
     },

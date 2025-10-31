@@ -1,10 +1,10 @@
 // src/config/database.js
-const { Sequelize } = require("sequelize");
-require("dotenv").config();
+const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
 const baseOpts = {
-  dialect: "postgres",
-  logging: process.env.SQL_LOG === "true" ? console.log : false,
+  dialect: 'postgres',
+  logging: process.env.SQL_LOG === 'true' ? console.log : false,
   pool: {
     max: Number(process.env.DB_POOL_MAX || 10),
     min: Number(process.env.DB_POOL_MIN || 2),
@@ -32,16 +32,13 @@ const baseOpts = {
  *  - OR the DATABASE_URL contains "sslmode=require" (Render/managed PG)
  */
 function ensureSslIfNeeded(opts) {
-  const dbRequireSslEnv = String(
-    process.env.DB_REQUIRE_SSL || "",
-  ).toLowerCase();
+  const dbRequireSslEnv = String(process.env.DB_REQUIRE_SSL || '').toLowerCase();
   const dbRequiresSsl =
-    process.env.NODE_ENV === "production" ||
-    dbRequireSslEnv === "true" ||
-    dbRequireSslEnv === "1" ||
-    dbRequireSslEnv === "yes" ||
-    (process.env.DATABASE_URL &&
-      /sslmode=require/i.test(process.env.DATABASE_URL));
+    process.env.NODE_ENV === 'production' ||
+    dbRequireSslEnv === 'true' ||
+    dbRequireSslEnv === '1' ||
+    dbRequireSslEnv === 'yes' ||
+    (process.env.DATABASE_URL && /sslmode=require/i.test(process.env.DATABASE_URL));
 
   if (dbRequiresSsl) {
     opts.dialectOptions = {
@@ -57,9 +54,7 @@ let sequelize;
 
 // Safe initialization: validate DATABASE_URL before passing to Sequelize.
 // If DATABASE_URL is missing or invalid, fall back to DB_* env vars.
-const rawDbUrl = process.env.DATABASE_URL
-  ? String(process.env.DATABASE_URL).trim()
-  : "";
+const rawDbUrl = process.env.DATABASE_URL ? String(process.env.DATABASE_URL).trim() : '';
 
 if (rawDbUrl) {
   // If the URL appears valid per the WHATWG URL constructor, try to use it.
@@ -75,7 +70,7 @@ if (rawDbUrl) {
     sequelize = new Sequelize(rawDbUrl, opts);
   } catch (err) {
     console.warn(
-      "Warning: invalid or unsupported DATABASE_URL. Falling back to DB_* env vars. Error:",
+      'Warning: invalid or unsupported DATABASE_URL. Falling back to DB_* env vars. Error:',
       err && err.message ? err.message : err,
     );
     // fallback to DB_* env vars
@@ -107,12 +102,9 @@ if (rawDbUrl) {
 const testConnection = async () => {
   try {
     await sequelize.authenticate();
-    console.log("✅ PostgreSQL connection established successfully.");
+    console.log('✅ PostgreSQL connection established successfully.');
   } catch (err) {
-    console.error(
-      "❌ Unable to connect to PostgreSQL:",
-      err && err.message ? err.message : err,
-    );
+    console.error('❌ Unable to connect to PostgreSQL:', err && err.message ? err.message : err);
     throw err;
   }
 };
