@@ -1,39 +1,44 @@
-﻿"use strict";
-
-const bcrypt = require("bcrypt");
+﻿'use strict';
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {
-    // Change these values to suit your environment before running in production
-    const email = "admin@example.com";
-    const username = "admin";
-    const rawPassword = "AdminPass123!"; // change this to something secure before going live
+    // bcrypt / bcryptjs fallback
+    let bcrypt;
+    try { bcrypt = require("bcrypt"); } catch (e) { bcrypt = require("bcryptjs"); }
 
-    const hash = await bcrypt.hash(rawPassword, 10);
-    await queryInterface.bulkInsert(
-      "users",
-      [
-        {
-          username: username,
-          email: email,
-          password: hash,
-          description: "Seeded admin user (paid)",
-          tier: "paid",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ],
-      {},
+    const { QueryTypes } = Sequelize;
+    const now = new Date();
+    const pw = "adminpass";
+    const pwHash = await bcrypt.hash(pw, 10);
+
+    const adminEmail = "admin@example.com";
+
+    // check existing admin by email
+    const existing = await queryInterface.sequelize.query(
+      "SELECT id FROM users WHERE email = :email",
+      { replacements: { email: adminEmail }, type: QueryTypes.SELECT }
     );
-    console.log("Seeded admin user:", email);
+
+    if (!existing || existing.length === 0) {
+      await queryInterface.bulkInsert('users', [
+        {
+          username: 'admin',
+          email: adminEmail,
+          password: pwHash,
+          description: 'Administrator account',
+          tier: 'paid',
+          stripecustomerid: null,
+          createdAt: now,
+          updatedAt: now
+        }
+      ], {});
+      console.info('Seeded admin user: admin@example.com');
+    } else {
+      console.info('Admin user already exists, skipping insert.');
+    }
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete(
-      "users",
-      { email: "admin@example.com" },
-      {},
-    );
-    console.log("Removed seeded admin user: admin@example.com");
-  },
+    await queryInterface.bulkDelete('users', { email: 'admin@example.com' }, {});
+  }
 };
