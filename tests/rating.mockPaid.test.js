@@ -1,5 +1,4 @@
 // tests/rating.mockPaid.test.js
-// Safe test: does NOT modify billing rows or Stripe — it mocks the Billing.findOne call
 const request = require('supertest');
 
 let app;
@@ -32,7 +31,7 @@ describe('POST /api/ratings (mock-paid rater)', () => {
         password: 'Password123!',
         description: 'rater',
       })
-      .expect(200);
+      .expect(201); // <- register returns 201
 
     const rateeRes = await request(app)
       .post('/api/users/register')
@@ -42,7 +41,7 @@ describe('POST /api/ratings (mock-paid rater)', () => {
         password: 'Password123!',
         description: 'ratee',
       })
-      .expect(200);
+      .expect(201); // <- and this one too
 
     // extract token and ratee id from responses
     const token = raterRes.body.token || raterRes.body.data?.token;
