@@ -49,14 +49,14 @@ module.exports = {
       },
     ];
 
-    const emails = usersToEnsure.map(u => u.email);
+    const emails = usersToEnsure.map((u) => u.email);
     const existingUsers = await queryInterface.sequelize.query(
       'SELECT email FROM users WHERE email IN (:emails)',
-      { replacements: { emails }, type: QueryTypes.SELECT }
+      { replacements: { emails }, type: QueryTypes.SELECT },
     );
-    const existingEmails = new Set(existingUsers.map(r => r.email));
+    const existingEmails = new Set(existingUsers.map((r) => r.email));
 
-    const usersToInsert = usersToEnsure.filter(u => !existingEmails.has(u.email));
+    const usersToInsert = usersToEnsure.filter((u) => !existingEmails.has(u.email));
     if (usersToInsert.length) {
       await queryInterface.bulkInsert('users', usersToInsert, {});
     }
@@ -64,10 +64,10 @@ module.exports = {
     // map emails -> ids
     const usersRows = await queryInterface.sequelize.query(
       'SELECT id, email, username FROM users WHERE email IN (:emails)',
-      { replacements: { emails }, type: QueryTypes.SELECT }
+      { replacements: { emails }, type: QueryTypes.SELECT },
     );
     const idByEmail = {};
-    usersRows.forEach(r => idByEmail[r.email] = r.id);
+    usersRows.forEach((r) => (idByEmail[r.email] = r.id));
 
     // SERVICES (idempotent by title + user)
     const servicesToEnsure = [
@@ -97,13 +97,15 @@ module.exports = {
       },
     ];
 
-    const serviceTitles = servicesToEnsure.map(s => s.title);
+    const serviceTitles = servicesToEnsure.map((s) => s.title);
     const existingServices = await queryInterface.sequelize.query(
       'SELECT title, "userId" FROM services WHERE title IN (:titles)',
-      { replacements: { titles: serviceTitles }, type: QueryTypes.SELECT }
+      { replacements: { titles: serviceTitles }, type: QueryTypes.SELECT },
     );
-    const existingKey = new Set(existingServices.map(r => `${r.title}::${r.userId}`));
-    const servicesToInsertFinal = servicesToEnsure.filter(s => !existingKey.has(`${s.title}::${s.userId}`));
+    const existingKey = new Set(existingServices.map((r) => `${r.title}::${r.userId}`));
+    const servicesToInsertFinal = servicesToEnsure.filter(
+      (s) => !existingKey.has(`${s.title}::${s.userId}`),
+    );
     if (servicesToInsertFinal.length) {
       await queryInterface.bulkInsert('services', servicesToInsertFinal, {});
     }
@@ -113,22 +115,26 @@ module.exports = {
     if (bobId) {
       const existingBilling = await queryInterface.sequelize.query(
         'SELECT id FROM billings WHERE "userId" = :bobId LIMIT 1',
-        { replacements: { bobId }, type: QueryTypes.SELECT }
+        { replacements: { bobId }, type: QueryTypes.SELECT },
       );
 
       if (!existingBilling || existingBilling.length === 0) {
-        await queryInterface.bulkInsert('billings', [
-          {
-            userId: bobId,
-            stripeCustomerId: 'cus_demo_bob',
-            stripeSubscriptionId: 'sub_demo_bob',
-            status: 'active',
-            priceId: 'price_demo',
-            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
-            createdAt: now,
-            updatedAt: now,
-          },
-        ], {});
+        await queryInterface.bulkInsert(
+          'billings',
+          [
+            {
+              userId: bobId,
+              stripeCustomerId: 'cus_demo_bob',
+              stripeSubscriptionId: 'sub_demo_bob',
+              status: 'active',
+              priceId: 'price_demo',
+              currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+              createdAt: now,
+              updatedAt: now,
+            },
+          ],
+          {},
+        );
       }
     }
   },
@@ -138,7 +144,15 @@ module.exports = {
 
     // Remove demo billings, services, users (safe selective deletion)
     await queryInterface.bulkDelete('billings', { stripeCustomerId: 'cus_demo_bob' }, {});
-    await queryInterface.bulkDelete('services', { title: { [Op.in]: ['Fix bugs', 'Build REST API', 'Frontend review'] } }, {});
-    await queryInterface.bulkDelete('users', { email: { [Op.in]: ['alice@example.com', 'bob@example.com', 'carol@example.com'] } }, {});
+    await queryInterface.bulkDelete(
+      'services',
+      { title: { [Op.in]: ['Fix bugs', 'Build REST API', 'Frontend review'] } },
+      {},
+    );
+    await queryInterface.bulkDelete(
+      'users',
+      { email: { [Op.in]: ['alice@example.com', 'bob@example.com', 'carol@example.com'] } },
+      {},
+    );
   },
 };
