@@ -79,8 +79,8 @@ async function comparePassword(password, hashed) {
 function toSafeUser(user) {
   if (!user) return user;
   const raw = user.toJSON ? user.toJSON() : user;
-  /* eslint-disable-next-line no-unused-vars */
-
+  const { password: _password, ...safe } = raw;
+  void _password; // intentionally unused
   return safe;
 }
 function normalizeUsername(u) {
