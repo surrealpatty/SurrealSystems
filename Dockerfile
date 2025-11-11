@@ -1,4 +1,4 @@
-﻿# Dockerfile for CodeCrowds (production-friendly, installs dev deps at build time)
+# Dockerfile for CodeCrowds (production-friendly, installs dev deps at build time)
 FROM node:20-alpine
 
 WORKDIR /app
@@ -27,6 +27,6 @@ EXPOSE 10000
 # Use non-root user for runtime (node user provided by official image)
 USER node
 
-ENTRYPOINT ["./docker-entrypoint.sh"]
+ENTRYPOINT ["sh","./docker-entrypoint.sh"]
 # Default CMD (can be overridden by docker-compose or CLI)
 CMD ["node", "src/index.js"]
