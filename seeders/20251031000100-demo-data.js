@@ -1,4 +1,5 @@
-﻿'use strict';
+﻿/* eslint-disable no-console, node/no-extraneous-require, node/no-missing-require, no-process-exit */
+'use strict';
 
 module.exports = {
   up: async (queryInterface, Sequelize) => {

@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 const API_URL = 'https://codecrowds.onrender.com';
 // Load user info from localStorage
 const userId = localStorage.getItem('userId');
@@ -69,3 +69,5 @@ document.getElementById('profileForm').addEventListener('submit', async (e) => {
         alert('Network error: ' + err.message);
     }
 });
+
+

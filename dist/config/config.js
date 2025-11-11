@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 module.exports = {
     development: {
         url: process.env.DATABASE_URL,
@@ -22,3 +22,5 @@ module.exports = {
         },
     },
 };
+
+

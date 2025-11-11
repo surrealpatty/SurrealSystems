@@ -1,4 +1,4 @@
-// src/index.js
+﻿// src/index.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -243,6 +243,6 @@ module.exports = { app, startServer };
 if (require.main === module) {
   startServer().catch((err) => {
     console.error('❌ DB init error:', err && err.message ? err.message : err);
-    process.exit(1);
+    throw new Error('Exiting with status 1');
   });
 }

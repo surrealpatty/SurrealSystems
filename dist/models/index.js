@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 // User model
@@ -19,3 +19,5 @@ const Service = sequelize.define('Service', {
 User.hasMany(Service, { as: 'services', foreignKey: 'userId' });
 Service.belongsTo(User, { as: 'user', foreignKey: 'userId' });
 module.exports = { sequelize, User, Service };
+
+

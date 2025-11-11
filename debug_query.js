@@ -1,4 +1,5 @@
-﻿// debug_query.js
+﻿/* eslint-disable no-empty */
+// debug_query.js
 const models = require('./src/models');
 const { sequelize } = models;
 const { QueryTypes } = require('sequelize');

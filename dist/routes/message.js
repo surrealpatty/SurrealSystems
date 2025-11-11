@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const { Op } = require('sequelize');
@@ -81,3 +81,5 @@ router.post('/', authenticateToken, async (req, res) => {
     }
 });
 module.exports = router;
+
+

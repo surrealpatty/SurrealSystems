@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 const User = sequelize.define('User', {
@@ -7,3 +7,5 @@ const User = sequelize.define('User', {
     password: { type: DataTypes.STRING, allowNull: false },
 });
 module.exports = { User };
+
+

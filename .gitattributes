@@ -1,7 +1,4 @@
-# Ensure shell scripts keep LF line endings
-docker-entrypoint.sh text eol=lf
-*.sh text eol=lf
-
-# Optionally force other files to use LF
-Dockerfile text eol=lf
-docker-compose.yml text eol=lf
+﻿# enforce LF in repo
+* text=auto eol=lf
+*.js text eol=lf
+*.json text eol=lf

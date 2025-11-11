@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-console, node/no-extraneous-require, node/no-missing-require, no-process-exit */
 // src/sync.js
 const sequelize = require('./config/database');
 const { User } = require('./models/User');

@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 require('dotenv').config();
 const { Sequelize } = require('sequelize');
 const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, process.env.DB_PASSWORD, {
@@ -11,11 +11,13 @@ const sequelize = new Sequelize(process.env.DB_NAME, process.env.DB_USER, proces
 const testConnection = async () => {
     try {
         await sequelize.authenticate();
-        console.log('✅ PostgreSQL connection established successfully.');
+        console.log('âœ… PostgreSQL connection established successfully.');
     }
     catch (err) {
-        console.error('❌ PostgreSQL connection failed:', err);
+        console.error('âŒ PostgreSQL connection failed:', err);
         throw err;
     }
 };
 module.exports = { sequelize, testConnection };
+
+

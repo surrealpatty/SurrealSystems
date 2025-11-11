@@ -49,9 +49,11 @@ describe('POST /api/ratings (mock-paid rater)', () => {
     expect(rateeId).toBeTruthy();
 
     // Mock Billing.findOne so isUserPaid returns true
-    const billingFindOneMock = jest.spyOn(models.Billing, 'findOne').mockImplementation(async () => {
-      return { status: 'active' };
-    });
+    const billingFindOneMock = jest
+      .spyOn(models.Billing, 'findOne')
+      .mockImplementation(async () => {
+        return { status: 'active' };
+      });
 
     // Post rating
     const resp = await request(app)
@@ -75,4 +77,3 @@ describe('POST /api/ratings (mock-paid rater)', () => {
 });
 
 // CHORE: small edit to trigger PR
-

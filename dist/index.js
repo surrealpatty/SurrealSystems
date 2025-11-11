@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 const express = require('express');
 const cors = require('cors');
 const { sequelize, testConnection } = require('./config/database');
@@ -16,11 +16,13 @@ app.use('/services', serviceRoutes);
     try {
         await testConnection();
         await sequelize.sync({ alter: true });
-        console.log('✅ Database synced successfully.');
+        console.log('âœ… Database synced successfully.');
     }
     catch (err) {
         console.error(err);
     }
 })();
 const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`ðŸš€ Server running on port ${PORT}`));
+
+

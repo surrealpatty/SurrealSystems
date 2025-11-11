@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
 const User = require('./User');
@@ -16,3 +16,5 @@ Message.belongsTo(User, { as: 'receiver', foreignKey: 'receiverId' });
 User.hasMany(Message, { as: 'sentMessages', foreignKey: 'senderId' });
 User.hasMany(Message, { as: 'receivedMessages', foreignKey: 'receiverId' });
 module.exports = Message;
+
+

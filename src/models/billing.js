@@ -1,5 +1,6 @@
-// src/models/billing.js
+﻿// src/models/billing.js
 module.exports = (sequelize) => {
+  /* eslint-disable-next-line no-unused-vars */
   const { DataTypes, Op } = require('sequelize');
 
   const Billing = sequelize.define(

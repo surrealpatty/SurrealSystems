@@ -1,7 +1,8 @@
-// src/routes/service.js
+﻿// src/routes/service.js
 const express = require('express');
 const router = express.Router();
 const models = require('../models');
+/* eslint-disable-next-line no-unused-vars */
 const { Service, User, Rating, sequelize } = models;
 const { QueryTypes } = require('sequelize');
 const authenticateToken = require('../middlewares/authenticateToken');

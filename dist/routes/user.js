@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 const express = require('express');
 const { register, login, getProfile, updateProfile, upgradeToPaid } = require('../controllers/userController');
 const authenticateToken = require('../middlewares/authenticateToken');
@@ -9,3 +9,5 @@ router.get('/:id?', authenticateToken, getProfile);
 router.put('/update', authenticateToken, updateProfile);
 router.put('/upgrade', authenticateToken, upgradeToPaid);
 module.exports = router;
+
+

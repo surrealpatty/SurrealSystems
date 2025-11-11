@@ -1,3 +1,4 @@
+﻿/* eslint-disable no-empty */
 // debug_services.js
 require('dotenv').config();
 const { sequelize } = require('./src/config/database');

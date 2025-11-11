@@ -1,4 +1,4 @@
-"use strict";
+﻿"use strict";
 // src/models/service.js
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/database');
@@ -11,3 +11,5 @@ const Service = sequelize.define('Service', {
 Service.belongsTo(User, { foreignKey: 'userId' });
 User.hasMany(Service, { foreignKey: 'userId' });
 module.exports = { Service };
+
+

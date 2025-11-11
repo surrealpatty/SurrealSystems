@@ -1,4 +1,4 @@
-const { User, Service } = require('../models');
+﻿const { User, Service } = require('../models');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 function toSafeUser(user) {
   if (!user) return user;
   const raw = user.toJSON ? user.toJSON() : user;
+  /* eslint-disable-next-line no-unused-vars */
   const { password, ...safe } = raw;
   return safe;
 }
@@ -53,7 +54,7 @@ const register = async (req, res) => {
       expiresIn: '1d',
     });
 
-    // ✅ Always return token+user on success
+    // âœ… Always return token+user on success
     res.status(201).json({ token, user: toSafeUser(user) });
   } catch (err) {
     console.error('Register error:', err);

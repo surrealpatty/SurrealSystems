@@ -1,6 +1,6 @@
-"use strict";
+﻿"use strict";
 const { User, Service } = require('../models');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 // ---------------- Register ----------------
 const register = async (req, res) => {
@@ -89,3 +89,5 @@ const upgradeToPaid = async (req, res) => {
     }
 };
 module.exports = { register, login, getProfile, updateProfile, upgradeToPaid };
+
+
