@@ -82,6 +82,13 @@
       files: ['src/routes/payments.js'],
       rules: { 'no-inner-declarations': 'off' },
     },
+    {
+      files: ['migrations/**', 'seeders/**', 'src/migrations/**', 'src/seeders/**'],
+      rules: {
+        'node/no-extraneous-require': 'off',
+        'no-unused-vars': 'off',
+      },
+    },
   ],
 
   // Also set top-level ignore patterns so eslint doesn't touch workspace/build outputs
