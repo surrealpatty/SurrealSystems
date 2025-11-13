@@ -33,3 +33,7 @@ prisma/migrations/
 *.ntvs*
 *.njsproj
 *.sln
+docker-compose.parsed.yml
+docker-compose.yml.bak
+docker-compose.yml.fixbak
+docker-entrypoint.sh.bak
