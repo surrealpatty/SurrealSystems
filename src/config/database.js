@@ -108,6 +108,8 @@ const testConnection = async () => {
     console.log('✅ PostgreSQL connection established successfully.');
   } catch (err) {
     console.error('❌ Unable to connect to PostgreSQL:', err && err.message ? err.message : err);
+    // tiny safe change: print full stack so we can diagnose
+    if (err && err.stack) console.error(err.stack);
     throw err;
   }
 };
