@@ -28,7 +28,7 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
-const { sequelize } = require('./config/database');
+const { sequelize, testConnection } = require('./config/database');
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
 const ratingRoutes = require('./routes/rating'); // ratings API
@@ -198,7 +198,8 @@ const PORT = process.env.PORT || 10000;
  *  - when imported, it performs DB init and returns the app (without starting listener)
  */
 async function startServer() {
-  await sequelize.authenticate();
+  // Use the testConnection helper which does retries and provides better logs.
+  await testConnection();
   console.log('✅ Database connected');
 
   // Keep schema in sync during development only when explicitly enabled.
