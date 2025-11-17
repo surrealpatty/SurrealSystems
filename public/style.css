@@ -177,7 +177,12 @@ button:focus-visible, .btn:focus-visible {
 }
 
 /* Button variants */
-.btn--primary { background: var(--color-primary); color: #fff; }
+.btn--primary {
+  /* polished gradient primary */
+  background: linear-gradient(180deg, var(--brand-a), var(--brand-b));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(37, 61, 180, 0.12);
+}
 .btn--accent  { background: var(--color-accent); color: #111; }
 .btn--accent:hover { opacity: 0.95; }
 .btn--ghost   { background: transparent; color: var(--color-primary); border: 1px solid rgba(0,0,0,0.06); box-shadow:none; }
@@ -224,7 +229,21 @@ button:focus-visible, .btn:focus-visible {
   gap: 12px;
   z-index: 60;
 }
-.action-rail .btn { min-width: 150px; border-radius: 999px; }
+.action-rail .btn {
+  min-width: 150px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--brand-a), var(--brand-b));
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+  text-decoration: none;
+}
+.action-rail .btn.primary,
+.action-rail .btn.primary:hover {
+  box-shadow: 0 16px 40px rgba(78, 84, 200, 0.18);
+}
+.action-rail .btn:hover {
+  transform: translateY(-4px);
+}
 
 /* Legacy floating pills (kept minimal for compatibility) */
 .floating-btn { display:none; } /* prefer .action-rail; hide old pills by default */
@@ -275,7 +294,20 @@ button:focus-visible, .btn:focus-visible {
 .feature-card h3 { color: #fff; }
 .feature-card p { color: rgba(255,255,255,0.9); }
 
-/* Login card — translucent on top of gradient (for index page) */
+/* Homepage main layout: features + login column */
+main {
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 40px;
+  align-items: start;
+  padding-top: 8px;
+}
+@media (max-width: 900px) {
+  main { grid-template-columns: 1fr; gap: 20px; }
+  .login-container { width: 100%; }
+}
+
+/* Login card — translucent on top of gradient (default), but when used with .card it becomes a white card */
 .login-container {
   width: 360px;
   margin: 0 auto;
@@ -302,6 +334,29 @@ button:focus-visible, .btn:focus-visible {
   box-shadow: 0 0 0 3px rgba(204,238,255,0.14);
   border-color: rgba(204,238,255,0.5);
 }
+
+/* If the login container also has .card, make it match the register look (white card) */
+.login-container.card {
+  width: 420px;
+  margin: 0;
+  background: var(--color-card);
+  color: var(--color-text);
+  padding: 22px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-1);
+  border: none;
+}
+.login-container.card h2 { color: var(--brand-a); margin-top: 0; }
+.login-container.card input[type="email"],
+.login-container.card input[type="password"] {
+  background: #ffffff;
+  color: #222;
+  border: 1px solid #e6e9ef;
+  padding: 10px 12px;
+  width: 100%;
+  border-radius: var(--radius-sm);
+}
+.login-container.card .message { color: var(--danger); min-height: 1.25em; margin-bottom: 8px; }
 
 /* Message area (error/success) */
 .message { color: var(--danger); min-height: 1.25em; margin-bottom: 8px; }
