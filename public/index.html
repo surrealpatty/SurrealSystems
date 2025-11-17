@@ -46,6 +46,7 @@
           </article>
         </section>
 
+        <!-- Login card: use .card to match the Register page visual language -->
         <aside class="login-container card" aria-labelledby="login-heading">
           <h2 id="login-heading">Login</h2>
 
@@ -70,19 +71,42 @@
               required
             />
 
-            <button type="submit" class="btn-primary">Login</button>
+            <!-- Use the canonical button classes -->
+            <button type="submit" class="btn btn--primary">Login</button>
           </form>
 
           <p id="loginMessage" class="message" role="status" aria-live="polite"></p>
 
-          <p>Don't have an account? <a href="register.html">Sign up here</a></p>
+          <p class="signup-switch">Don't have an account? <a href="register.html">Sign up here</a></p>
         </aside>
       </main>
 
-      <footer>
+      <footer class="site-footer">
         &copy; <span id="year"></span> CodeCrowds. All rights reserved.
       </footer>
     </div>
+
+    <!-- Unified action rail (floating buttons on desktop) -->
+    <nav class="action-rail" aria-label="Quick actions">
+      <a class="btn" href="/services.html" role="button">Services</a>
+      <a class="btn" href="/messages.html" role="button">Messages</a>
+      <a class="btn btn--primary" href="/services.html#new" role="button">+ Service</a>
+      <a class="btn" href="/profile.html" role="button">Edit Bio</a>
+    </nav>
+
+    <!-- Mobile quick actions (visible only on small screens via CSS) -->
+    <div class="mobile-button-row" role="navigation" aria-label="Quick actions">
+      <button onclick="location.href='/services.html'">Services</button>
+      <button onclick="location.href='/messages.html'">Messages</button>
+      <button onclick="location.href='/services.html#new'">+ Service</button>
+    </div>
+
+    <!-- Small year script -->
+    <script>
+      try {
+        document.getElementById('year').textContent = new Date().getFullYear();
+      } catch (e) { /* ignore */ }
+    </script>
 
     <!-- init sets simple UI things (non-module) -->
     <script src="init.js"></script>
@@ -91,4 +115,3 @@
     <script type="module" src="script.js"></script>
   </body>
 </html>
-

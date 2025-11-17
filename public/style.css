@@ -165,6 +165,7 @@ button, .btn {
   font-size: 1rem;
   color: #fff;
   background-color: var(--color-primary);
+  text-decoration: none;
 }
 button:hover, .btn:hover { transform: translateY(-4px); opacity: 0.95; box-shadow: 0 14px 32px rgba(0,0,0,0.14); }
 button:active, .btn:active { transform: translateY(-2px); }
@@ -183,6 +184,15 @@ button:focus-visible, .btn:focus-visible {
   color: #fff;
   box-shadow: 0 8px 20px rgba(37, 61, 180, 0.12);
 }
+
+/* Backwards-compatible alias for code that uses .btn-primary */
+.btn-primary,
+.btn.btn-primary {
+  background: linear-gradient(180deg, var(--brand-a), var(--brand-b));
+  color: #fff;
+  box-shadow: 0 8px 20px rgba(37, 61, 180, 0.12);
+}
+
 .btn--accent  { background: var(--color-accent); color: #111; }
 .btn--accent:hover { opacity: 0.95; }
 .btn--ghost   { background: transparent; color: var(--color-primary); border: 1px solid rgba(0,0,0,0.06); box-shadow:none; }
@@ -237,8 +247,8 @@ button:focus-visible, .btn:focus-visible {
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
   text-decoration: none;
 }
-.action-rail .btn.primary,
-.action-rail .btn.primary:hover {
+.action-rail .btn.btn--primary,
+.action-rail .btn.btn--primary:hover {
   box-shadow: 0 16px 40px rgba(78, 84, 200, 0.18);
 }
 .action-rail .btn:hover {
@@ -276,7 +286,7 @@ button:focus-visible, .btn:focus-visible {
 
 /* -------------------- Responsive tweaks -------------------- */
 @media (max-width: 480px) {
-  .action-rail { right: 12px; bottom: 18px; }
+  .action-rail { right: 12px; bottom: 18px; display: none; }
   .mobile-button-row { display: flex; }
   button, .btn { font-size: 0.95rem; padding: 8px 14px; }
   .container { width: 94%; padding: 1.5rem 1rem 140px 1rem; margin: 36px auto 0; gap: 1.25rem; }
@@ -360,7 +370,29 @@ main {
 
 /* Message area (error/success) */
 .message { color: var(--danger); min-height: 1.25em; margin-bottom: 8px; }
-.login-container a { color: #fff; text-decoration: underline; }
+
+/* Footer & signup-switch moved from inline styles */
+.site-footer {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+/* small "don't have an account" switch line on hero */
+.signup-switch {
+  margin-top: 8px;
+  color: rgba(255,255,255,0.9);
+}
+.container:not(.container--transparent) .signup-switch {
+  color: var(--color-muted);
+}
+.signup-switch a {
+  color: #fff;
+  text-decoration: underline;
+}
+.container:not(.container--transparent) .signup-switch a {
+  color: var(--color-primary);
+  text-decoration: none;
+}
 
 /* tiny accessibility helper for labels hidden visually but still available to screen readers */
 .visually-hidden {
