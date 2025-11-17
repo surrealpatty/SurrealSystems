@@ -1,4 +1,4 @@
-/* ============================================================================
+/* ============================================================================ 
   CodeCrowds – shared client helpers (improved)
 ============================================================================= */
 
@@ -284,6 +284,15 @@ function initLoginPage() {
 
 /* ================================ Boot ================================== */
 document.addEventListener("DOMContentLoaded", () => {
+  // Hide action rail by default if user not logged in (extra safety for public pages)
+  try {
+    if (!isLoggedIn()) {
+      document.querySelectorAll('.action-rail, .mobile-button-row').forEach(el => el && el.classList.add('hidden'));
+    } else {
+      document.body.classList.add('logged-in');
+    }
+  } catch (e) { /* ignore */ }
+
   initLoginPage();
 });
 

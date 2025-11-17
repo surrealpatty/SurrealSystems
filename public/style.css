@@ -6,6 +6,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
 
 :root {
+  /* Existing brand colors */
   --brand-a: #4e54c8;
   --brand-b: #00aaff;
   --accent: #ffc107;
@@ -17,6 +18,7 @@
   --muted: #555555;
   --glass: rgba(255, 255, 255, 0.95);
 
+  /* Radii / Shadows / Motion */
   --radius-lg: 16px;
   --radius-md: 12px;
   --radius-sm: 8px;
@@ -24,6 +26,7 @@
   --shadow-2: 0 12px 30px rgba(0, 0, 0, 0.15);
   --transition-fast: 180ms;
 
+  /* Simple aliases */
   --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
   --color-primary: var(--brand-a);
   --color-primary-2: var(--brand-b);
@@ -42,8 +45,12 @@
 /* -------------------- Global Reset + Typography -------------------- */
 *,
 *::before,
-*::after { box-sizing: border-box; }
-html, body, .container, .card, .row, .meta-row { min-width: 0; }
+*::after {
+  box-sizing: border-box;
+}
+html, body, .container, .card, .row, .meta-row {
+  min-width: 0;
+}
 html, body {
   height: 100%;
   margin: 0;
@@ -90,27 +97,34 @@ body {
 
 /* -------------------- Headings -------------------- */
 .site-title { font-weight: 700; }
-h1, h2 { margin: 0 0 0.5rem; line-height: 1.1; color: var(--color-primary); }
+h1, h2 {
+  margin: 0 0 0.5rem;
+  line-height: 1.1;
+  color: var(--color-primary);
+}
 .container--transparent h1,
 .container--transparent h2 { color: #fff; }
 
 h3 { margin: 0 0 0.5rem; }
+
 header p { margin: 0 0 1rem; color: var(--color-muted); }
 .container--transparent header p { color: rgba(255,255,255,0.95); }
 
-/* -------------------- Accessibility helpers -------------------- */
-.visually-hidden {
-  position: absolute !important;
-  height: 1px; width: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
-  white-space: nowrap;
-}
-
 /* -------------------- Spinner / Fade-in -------------------- */
-.spinner { display:inline-block; width:20px; height:20px; border:3px solid #dcdcdc; border-top-color:var(--brand-a); border-radius:50%; animation:spin .8s linear infinite; vertical-align:middle; }
+.spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #dcdcdc;
+  border-top-color: var(--brand-a);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  vertical-align: middle;
+}
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.fade-in { opacity:0; transform:translateY(10px); animation:fadeIn .5s ease forwards; }
-@keyframes fadeIn { to { opacity:1; transform:translateY(0); } }
+.fade-in { opacity: 0; transform: translateY(10px); animation: fadeIn 0.5s ease forwards; }
+@keyframes fadeIn { to { opacity: 1; transform: translateY(0); } }
 
 @media (prefers-reduced-motion: reduce) {
   .spinner, .fade-in { animation: none; transform: none; opacity: 1; }
@@ -132,27 +146,27 @@ header p { margin: 0 0 1rem; color: var(--color-muted); }
 }
 .card:hover { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(0,0,0,0.12); }
 .card h3 { color: var(--color-primary); font-size: 1.1rem; margin: 0 0 8px; }
-.card p { margin:0; color:var(--color-muted); font-size:0.95rem; }
+.card p { margin: 0; color: var(--color-muted); font-size: 0.95rem; }
 
 /* -------------------- Buttons (system) -------------------- */
 button, .btn {
   display: inline-flex;
-  align-items:center;
-  justify-content:center;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
   padding: 10px 18px;
   border-radius: 10px;
-  font-weight:700;
-  border:none;
-  cursor:pointer;
+  font-weight: 700;
+  border: none;
+  cursor: pointer;
   transition: transform var(--transition-fast), opacity var(--transition-fast), box-shadow var(--transition-fast);
   box-shadow: var(--shadow-1);
-  font-size:1rem;
-  color:#fff;
+  font-size: 1rem;
+  color: #fff;
   background-color: var(--color-primary);
   text-decoration: none;
 }
-button:hover, .btn:hover { transform: translateY(-4px); opacity:0.95; box-shadow: 0 14px 32px rgba(0,0,0,0.14); }
+button:hover, .btn:hover { transform: translateY(-4px); opacity: 0.95; box-shadow: 0 14px 32px rgba(0,0,0,0.14); }
 button:active, .btn:active { transform: translateY(-2px); }
 
 button:focus-visible, .btn:focus-visible {
@@ -162,7 +176,7 @@ button:focus-visible, .btn:focus-visible {
   border-radius: var(--radius-sm);
 }
 
-/* Primary button (canonical) */
+/* Button variants */
 .btn--primary {
   background: linear-gradient(180deg, var(--brand-a), var(--brand-b));
   color: #fff;
@@ -196,15 +210,15 @@ button:focus-visible, .btn:focus-visible {
 }
 
 /* -------------------- Layout helpers -------------------- */
-#services-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap:20px; align-items:start; }
-#newServiceSection { display:none; flex-direction:column; gap:10px; margin-top:10px; }
+#services-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; align-items: start; }
+#newServiceSection { display: none; flex-direction: column; gap: 10px; margin-top: 10px; }
 
-/* -------------------- Action rail (floating) -------------------- */
+/* -------------------- Unified Action Rail (floating) -------------------- */
 .action-rail {
   position: fixed;
   right: 20px;
   bottom: 28px;
-  display:flex;
+  display: flex;
   flex-direction: column;
   gap: 12px;
   z-index: 60;
@@ -215,7 +229,7 @@ button:focus-visible, .btn:focus-visible {
   background: linear-gradient(90deg, var(--brand-a), var(--brand-b));
   color: #fff;
   box-shadow: 0 10px 30px rgba(0,0,0,0.16);
-  text-decoration:none;
+  text-decoration: none;
 }
 .action-rail .btn.btn--primary,
 .action-rail .btn.btn--primary:hover {
@@ -223,10 +237,10 @@ button:focus-visible, .btn:focus-visible {
 }
 .action-rail .btn:hover { transform: translateY(-4px); }
 
-/* Legacy floating pills (hide by default) */
-.floating-btn { display:none; }
+/* Legacy floating pills (kept minimal for compatibility) */
+.floating-btn { display:none; } /* prefer .action-rail; hide old pills by default */
 
-/* Mobile bottom row */
+/* -------------------- Mobile Bottom Row -------------------- */
 .mobile-button-row {
   display:none;
   position: fixed;
@@ -242,33 +256,36 @@ button:focus-visible, .btn:focus-visible {
 }
 .mobile-button-row button { flex:1; border-radius:8px; font-weight:700; font-size:1rem; padding:10px; background-color:var(--color-primary); color:#fff; transition: transform var(--transition-fast), opacity var(--transition-fast); }
 
-/* -------------------- Utilities -------------------- */
+/* -------------------- Utility classes -------------------- */
 .hidden { display:none !important; }
 .mb-sm { margin-bottom: var(--space-sm); }
 .mb-md { margin-bottom: var(--space-md); }
 .mb-lg { margin-bottom: var(--space-lg); }
-.row { display:flex; }
+.row { display: flex; }
 .row-center { display:flex; align-items:center; }
-.w-full { width:100%; }
+.w-full { width: 100%; }
 
 /* -------------------- Responsive tweaks -------------------- */
 @media (max-width: 480px) {
-  .action-rail { right:12px; bottom:18px; display:none; }
-  .mobile-button-row { display:flex; }
-  button, .btn { font-size:0.95rem; padding:8px 14px; }
-  .container { width:94%; padding:1.5rem 1rem 140px 1rem; margin:36px auto 0; gap:1.25rem; }
+  .action-rail { right: 12px; bottom: 18px; display:none; }
+  .mobile-button-row { display: flex; }
+  button, .btn { font-size: 0.95rem; padding: 8px 14px; }
+  .container { width: 94%; padding: 1.5rem 1rem 140px 1rem; margin: 36px auto 0; gap: 1.25rem; }
 }
 
-/* -------------------- Small screen stacking -------------------- */
+/* -------------------- Small screen cards stacking -------------------- */
 @media (max-width: 360px) {
-  #services-list { grid-template-columns: 1fr; gap:12px; }
+  #services-list { grid-template-columns: 1fr; gap: 12px; }
 }
 
-/* -------------------- Page helpers -------------------- */
-.features { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap:20px; align-items:start; margin:0; }
-.feature-card { background: transparent; border-radius: var(--radius-md); padding:18px; box-shadow:none; color: rgba(255,255,255,0.95); text-align:left; }
+/* -------------------- Page-specific helpers (kept small) -------------------- */
+/* Feature grid for the three highlight cards */
+.features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; align-items: start; margin: 0; }
+.feature-card { background: transparent; border-radius: var(--radius-md); padding: 18px; box-shadow: none; color: rgba(255,255,255,0.95); text-align: left; }
+.feature-card h3 { color: #fff; }
+.feature-card p { color: rgba(255,255,255,0.9); }
 
-/* Homepage layout: features + login */
+/* Homepage main layout: features + login column */
 main {
   display: grid;
   grid-template-columns: 1fr 440px;
@@ -277,11 +294,11 @@ main {
   padding-top: 8px;
 }
 @media (max-width: 900px) {
-  main { grid-template-columns: 1fr; gap:20px; }
+  main { grid-template-columns: 1fr; gap: 20px; }
   .login-container { width: 100%; }
 }
 
-/* Login card default (translucent on hero) */
+/* Login card default (translucent on top of gradient) */
 .login-container {
   width: 360px;
   margin: 0 auto;
@@ -293,8 +310,7 @@ main {
   color: #fff;
   border: 1px solid rgba(255,255,255,0.06);
 }
-.login-container input[type="email"],
-.login-container input[type="password"] {
+.login-container input[type="email"], .login-container input[type="password"] {
   width: 100%;
   padding: 10px 12px;
   margin-bottom: 10px;
@@ -310,7 +326,7 @@ main {
   border-color: rgba(204,238,255,0.5);
 }
 
-/* When login container is used with .card, make it the white card (register style) */
+/* When login container is used with .card, make it match the register look (white card) */
 .login-container.card {
   width: 440px;
   margin: 0;
@@ -321,9 +337,8 @@ main {
   box-shadow: 0 18px 40px rgba(24,34,80,0.08);
   border: 1px solid #e9eef8;
 }
-.login-container.card h2 { color: var(--brand-a); margin-top:0; font-size:1.2rem; }
-.login-container.card input[type="email"],
-.login-container.card input[type="password"] {
+.login-container.card h2 { color: var(--brand-a); margin-top: 0; font-size: 1.2rem; }
+.login-container.card input[type="email"], .login-container.card input[type="password"] {
   background: #ffffff;
   color: #222;
   border: 1px solid #e6e9ef;
@@ -331,18 +346,17 @@ main {
   width: 100%;
   border-radius: var(--radius-sm);
 }
-.login-container.card .message { color: var(--danger); min-height:1.25em; margin-bottom:8px; }
+.login-container.card .message { color: var(--danger); min-height: 1.25em; margin-bottom: 8px; }
 
-/* Message area, footer, signup */
-.message { color: var(--danger); min-height: 1.25em; margin-bottom:8px; }
-.site-footer { text-align:center; margin-top:2rem; color: rgba(255,255,255,0.85); }
-.signup-switch { margin-top:8px; color: rgba(255,255,255,0.9); }
-.container:not(.container--transparent) .signup-switch { color: var(--color-muted); }
-.signup-switch a { color: #fff; text-decoration: underline; }
-.container:not(.container--transparent) .signup-switch a { color: var(--color-primary); text-decoration: none; }
+/* Message area (error/success) */
+.message { color: var(--danger); min-height: 1.25em; margin-bottom: 8px; }
+.login-container a { color: #fff; text-decoration: underline; }
 
-/* Anchor contrast override for transparent hero */
-.container--transparent a { color: #fff; }
+/* tiny accessibility helper for labels hidden visually but still available to screen readers */
+.visually-hidden {
+  position: absolute !important; height: 1px; width: 1px; overflow: hidden; clip: rect(1px, 1px, 1px, 1px);
+  white-space: nowrap;
+}
 
 /* -------------------- HERO READABILITY & ACTION-RAIL VISIBILITY -------------------- */
 /* Improve contrast for left-side feature cards on the gradient hero */
@@ -356,15 +370,15 @@ main {
   font-size: 1.06rem;
   margin-bottom: 8px;
 }
-container--transparent .feature-card p {
+.container--transparent .feature-card p {
   color: rgba(255,255,255,0.92);
   font-weight: 500;
   line-height: 1.6;
 }
 
-/* Hide floating action rail and mobile actions on the public hero (index/sign-in) */
-/* REPLACED: descendant selector didn't match because action-rail is outside .container */
- /* Use sibling selectors to hide rail/mobile row when the transparent hero container exists */
+/* Hide floating action rail and mobile actions on the public hero (index/sign-in)
+   The action-rail / mobile-button-row are outside the .container element, so
+   use sibling selectors to target them when the hero container is present. */
 .container--transparent + .action-rail,
 .container--transparent ~ .action-rail,
 .container--transparent + .mobile-button-row,
@@ -377,7 +391,7 @@ container--transparent .feature-card p {
   box-shadow: 0 22px 50px rgba(20,30,60,0.10);
 }
 
-/* small screens */
+/* Responsive tweaks for login card */
 @media (max-width: 480px) {
   .login-container { width: 100%; padding: 14px; }
   .features { grid-template-columns: 1fr; }

@@ -10,6 +10,8 @@
       // If you have a separate API server (e.g. http://localhost:3000/api),
       // set window.API_URL here or via server-side injection.
       window.API_URL = window.API_URL || (window.location.origin.replace(/\/$/, "") + "/api");
+      // Helpful log for debugging on deployed site
+      console.info("Init: API_URL =", window.API_URL);
     </script>
 
     <!-- stylesheet (relative so it works when serving from a subpath/local) -->
@@ -54,6 +56,7 @@
         </section>
 
         <!-- Login card: .card to match Register page visual language -->
+        <!-- NOTE: this includes the "card" class so the white/solid card styles apply -->
         <aside class="login-container card" aria-labelledby="login-heading">
           <h2 id="login-heading">Login</h2>
 
