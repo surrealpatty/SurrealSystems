@@ -7,12 +7,11 @@
 
     <!-- make API_URL sensible for local testing; override in production if needed -->
     <script>
-      // If you have a separate API server (e.g. http://localhost:3000/api),
-      // set window.API_URL here or via server-side injection.
-      window.API_URL = window.API_URL || (window.location.origin.replace(/\/$/, "") + "/api");
-      // Helpful log for debugging on deployed site
-      console.info("Init: API_URL =", window.API_URL);
-    </script>
+  // Replace with your real API host that accepts POST /users/login
+  window.API_URL = 'https://your-api-host.example.com/api';
+  console.info("Init: API_URL =", window.API_URL);
+</script>
+
 
     <!-- stylesheet (relative so it works when serving from a subpath/local) -->
     <link rel="stylesheet" href="style.css" />
