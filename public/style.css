@@ -16,7 +16,11 @@
   --card-bg: #ffffff;
   --card-text: #333333;
   --muted: #555555;
-  --glass: rgba(255, 255, 255, 0.95);
+
+  /* Glass / helpers */
+  --glass-light: rgba(255,255,255,0.95);
+  --glass-translucent: rgba(255,255,255,0.06);
+  --glass-dark: rgba(0,0,0,0.18);
 
   /* Radii / Shadows / Motion */
   --radius-lg: 16px;
@@ -40,6 +44,11 @@
   --space-sm: 8px;
   --space-md: 20px;
   --space-lg: 32px;
+
+  /* Buttons */
+  --btn-gradient: linear-gradient(180deg, var(--brand-a), var(--brand-b));
+  --btn-bg: var(--brand-a);
+  --btn-text: #ffffff;
 }
 
 /* -------------------- Global Reset + Typography -------------------- */
@@ -103,12 +112,15 @@ h1, h2 {
   color: var(--color-primary);
 }
 .container--transparent h1,
-.container--transparent h2 { color: #fff; }
+.container--transparent h2 {
+  color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.35);
+}
 
 h3 { margin: 0 0 0.5rem; }
 
 header p { margin: 0 0 1rem; color: var(--color-muted); }
-.container--transparent header p { color: rgba(255,255,255,0.95); }
+.container--transparent header p { color: rgba(255,255,255,0.95); font-size: 1.03rem; }
 
 /* -------------------- Spinner / Fade-in -------------------- */
 .spinner {
@@ -162,11 +174,12 @@ button, .btn {
   transition: transform var(--transition-fast), opacity var(--transition-fast), box-shadow var(--transition-fast);
   box-shadow: var(--shadow-1);
   font-size: 1rem;
-  color: #fff;
-  background-color: var(--color-primary);
+  color: var(--btn-text);
+  background-image: var(--btn-gradient);
+  background-size: 200% 100%;
   text-decoration: none;
 }
-button:hover, .btn:hover { transform: translateY(-4px); opacity: 0.95; box-shadow: 0 14px 32px rgba(0,0,0,0.14); }
+button:hover, .btn:hover { transform: translateY(-4px); opacity: 0.96; box-shadow: 0 14px 32px rgba(0,0,0,0.14); }
 button:active, .btn:active { transform: translateY(-2px); }
 
 button:focus-visible, .btn:focus-visible {
@@ -177,19 +190,26 @@ button:focus-visible, .btn:focus-visible {
 }
 
 /* Button variants */
-.btn--primary {
-  background: linear-gradient(180deg, var(--brand-a), var(--brand-b));
-  color: #fff;
+.btn--primary, .btn-primary, .btn.btn-primary {
+  background-image: var(--btn-gradient);
+  color: var(--btn-text);
   box-shadow: 0 8px 20px rgba(37, 61, 180, 0.12);
   padding: 12px 18px;
   border-radius: 10px;
 }
 
-/* Backwards-compatible alias */
-.btn-primary, .btn.btn-primary {
-  background: linear-gradient(180deg, var(--brand-a), var(--brand-b));
+/* Destructive / logout */
+.logout-btn {
+  background: var(--danger);
   color: #fff;
-  box-shadow: 0 8px 20px rgba(37, 61, 180, 0.12);
+  box-shadow: 0 8px 20px rgba(255, 77, 79, 0.10);
+}
+
+/* Secondary (outline) */
+.btn--secondary {
+  background: transparent;
+  color: var(--btn-text);
+  border: 2px solid rgba(255,255,255,0.18);
 }
 
 /* -------------------- Inputs / Forms -------------------- */
@@ -226,8 +246,8 @@ button:focus-visible, .btn:focus-visible {
 .action-rail .btn {
   min-width: 150px;
   border-radius: 999px;
-  background: linear-gradient(90deg, var(--brand-a), var(--brand-b));
-  color: #fff;
+  background-image: var(--btn-gradient);
+  color: var(--btn-text);
   box-shadow: 0 10px 30px rgba(0,0,0,0.16);
   text-decoration: none;
 }
@@ -254,7 +274,7 @@ button:focus-visible, .btn:focus-visible {
   z-index: 9999;
   box-shadow:0 -6px 20px rgba(0,0,0,0.08);
 }
-.mobile-button-row button { flex:1; border-radius:8px; font-weight:700; font-size:1rem; padding:10px; background-color:var(--color-primary); color:#fff; transition: transform var(--transition-fast), opacity var(--transition-fast); }
+.mobile-button-row button { flex:1; border-radius:8px; font-weight:700; font-size:1rem; padding:10px; background-image:var(--btn-gradient); color:#fff; transition: transform var(--transition-fast), opacity var(--transition-fast); }
 
 /* -------------------- Utility classes -------------------- */
 .hidden { display:none !important; }
@@ -281,9 +301,40 @@ button:focus-visible, .btn:focus-visible {
 /* -------------------- Page-specific helpers (kept small) -------------------- */
 /* Feature grid for the three highlight cards */
 .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; align-items: start; margin: 0; }
-.feature-card { background: transparent; border-radius: var(--radius-md); padding: 18px; box-shadow: none; color: rgba(255,255,255,0.95); text-align: left; }
-.feature-card h3 { color: #fff; }
-.feature-card p { color: rgba(255,255,255,0.9); }
+
+/* Default feature-card: neutral (for use on white container) */
+.feature-card {
+  background: var(--color-card);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  box-shadow: var(--shadow-1);
+  color: var(--color-text);
+  text-align: left;
+}
+
+/* When the page is the hero (transparent container) show glass-dark cards so text reads well */
+.container--transparent .feature-card {
+  background: var(--glass-dark);
+  border-radius: var(--radius-md);
+  padding: 18px;
+  box-shadow: var(--shadow-1);
+  color: rgba(255,255,255,0.97);
+  text-align: left;
+  border: 1px solid rgba(255,255,255,0.06);
+  /* optional blur for modern browsers */
+  /* backdrop-filter: blur(6px); */
+}
+.container--transparent .feature-card h3 {
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.06rem;
+  margin-bottom: 8px;
+}
+.container--transparent .feature-card p {
+  color: rgba(255,255,255,0.92);
+  font-weight: 500;
+  line-height: 1.6;
+}
 
 /* Homepage main layout: features + login column */
 main {
@@ -302,7 +353,7 @@ main {
 .login-container {
   width: 360px;
   margin: 0 auto;
-  background: rgba(255,255,255,0.06);
+  background: var(--glass-translucent);
   padding: 18px;
   border-radius: var(--radius-md);
   box-shadow: none;
@@ -310,6 +361,17 @@ main {
   color: #fff;
   border: 1px solid rgba(255,255,255,0.06);
 }
+
+/* Stronger dark glass when login is on the transparent hero for readability */
+.container--transparent .login-container {
+  background: var(--glass-dark);
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #fff;
+  box-shadow: var(--shadow-1);
+  /* optional blur for modern browsers */
+  /* backdrop-filter: blur(6px); */
+}
+
 .login-container input[type="email"], .login-container input[type="password"] {
   width: 100%;
   padding: 10px 12px;
@@ -321,6 +383,7 @@ main {
   color: #fff;
   outline: none;
 }
+.login-container input::placeholder { color: rgba(255,255,255,0.66); }
 .login-container input:focus {
   box-shadow: 0 0 0 3px rgba(204,238,255,0.14);
   border-color: rgba(204,238,255,0.5);
@@ -359,24 +422,7 @@ main {
 }
 
 /* -------------------- HERO READABILITY & ACTION-RAIL VISIBILITY -------------------- */
-/* Improve contrast for left-side feature cards on the gradient hero */
-.container--transparent .feature-card {
-  color: rgba(255,255,255,0.97);
-  text-shadow: 0 2px 8px rgba(0,0,0,0.20);
-}
-.container--transparent .feature-card h3 {
-  color: #fff;
-  font-weight: 700;
-  font-size: 1.06rem;
-  margin-bottom: 8px;
-}
-.container--transparent .feature-card p {
-  color: rgba(255,255,255,0.92);
-  font-weight: 500;
-  line-height: 1.6;
-}
-
-/* Hide floating action rail and mobile actions on the public hero (index/sign-in)
+/* Hide floating action rail and mobile actions on the public hero (index/sign-in).
    The action-rail / mobile-button-row are outside the .container element, so
    use sibling selectors to target them when the hero container is present. */
 .container--transparent + .action-rail,
