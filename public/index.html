@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>CodeCrowds - Showcase & Sell Your Skills</title>
 
-    <!-- Local/test API host (override in production) -->
+    <!-- Local/test API host -->
     <script>window.API_URL = 'https://your-api-host.example.com/api';</script>
 
     <!-- External stylesheet -->
@@ -15,15 +15,14 @@
   <body>
     <div class="container container--transparent fade-in">
       <header role="banner" class="site-header">
-        <!-- Hidden H1 for SEO/accessibility -->
         <h1 class="visually-hidden">Code Crowds</h1>
 
         <div class="header-inner">
-          <!-- Monogram: app-friendly square with clear C shapes -->
+          <!-- Monogram -->
           <a class="site-logo" href="/" aria-label="Code Crowds home">
             <svg viewBox="0 0 160 72" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logoTitle logoDesc" focusable="false">
               <title id="logoTitle">Code Crowds</title>
-              <desc id="logoDesc">Code Crowds logo: monogram</desc>
+              <desc id="logoDesc">Code Crowds monogram</desc>
 
               <defs>
                 <linearGradient id="brandGrad" x1="0" x2="1" y1="0" y2="1">
@@ -32,10 +31,7 @@
                 </linearGradient>
               </defs>
 
-              <!-- rounded square background -->
               <rect x="6" y="6" width="64" height="64" rx="14" fill="url(#brandGrad)"/>
-
-              <!-- two balanced C shapes -->
               <g transform="translate(18,18)" fill="none" stroke="#fff" stroke-width="6.6" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M6 12c-6 4-6 12 0 16" />
                 <path d="M46 12c6 4 6 12 0 16" />
@@ -43,7 +39,7 @@
             </svg>
           </a>
 
-          <!-- Wordmark (text) — gradient on 'Code', white 'Crowds' -->
+          <!-- Wordmark: now solid white for strong contrast -->
           <a class="brand-wordmark" href="/" aria-label="Code Crowds home">
             <span class="brand-code">Code</span>
             <span class="brand-crowds">Crowds</span>
@@ -52,7 +48,6 @@
       </header>
 
       <main>
-        <!-- Features on left, login on right (hero) -->
         <section class="features" aria-label="Highlights">
           <article class="feature-card card">
             <h3>Offer Your Services</h3>
@@ -109,10 +104,9 @@
     </div>
 
     <script>
-      try { document.getElementById('year').textContent = new Date().getFullYear(); } catch (e) { /* ignore */ }
+      try { document.getElementById('year').textContent = new Date().getFullYear(); } catch (e) {}
     </script>
 
-    <!-- Project scripts -->
     <script src="init.js"></script>
     <script type="module" src="script.js"></script>
   </body>
