@@ -83,7 +83,7 @@ body {
   max-width: var(--max-width);
   width: 90%;
   padding: 2.5rem 2rem 140px 2rem;
-  margin: 50px auto 0;
+  margin: 30px auto 0; /* reduced top margin to fit hero better */
   display: flex;
   flex-direction: column;
   gap: 2rem;
@@ -353,39 +353,43 @@ button:focus-visible, .btn:focus-visible {
   line-height: 1.6;
 }
 
-/* ---------- Homepage: long rectangle feature cards ---------- */
-/* On wide screens, make the feature cards long rectangles stacked vertically
-   (keeps the login panel on the right). */
+/* ---------- Homepage: long rectangle feature cards (more compact) ---------- */
 @media (min-width: 900px) {
   /* stack the features in a single column so each card becomes a long rectangle */
   .container--transparent .features,
   .features {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 18px;
     align-items: start;
   }
 
-  /* make feature cards taller and center their content */
+  /* make feature cards slightly smaller so 3 fit without scrolling on common desktop heights */
   .container--transparent .feature-card,
   .feature-card {
-    min-height: 160px;
-    padding: 22px;
+    min-height: 120px;      /* compact height */
+    padding: 16px 18px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-    border-radius: 14px; /* slightly more rectangular */
+    border-radius: 12px;
   }
 
-  /* make headings & copy sit nicely */
+  /* compact heading & copy */
   .container--transparent .feature-card h3,
   .feature-card h3 {
-    margin-bottom: 10px;
-    font-size: 1.08rem;
+    margin-bottom: 8px;
+    font-size: 1.02rem;
   }
   .container--transparent .feature-card p,
   .feature-card p {
     margin: 0;
-    line-height: 1.55;
+    line-height: 1.45;
+    font-size: 0.95rem;
+  }
+
+  /* tighten overall vertical spacing on the hero */
+  main {
+    gap: 28px;
   }
 }
 
@@ -421,25 +425,6 @@ main {
   border: 1px solid rgba(255,255,255,0.06);
   color: #fff;
   box-shadow: var(--shadow-1);
-  /* optional blur for modern browsers */
-  /* backdrop-filter: blur(6px); */
-}
-
-.login-container input[type="email"], .login-container input[type="password"] {
-  width: 100%;
-  padding: 10px 12px;
-  margin-bottom: 10px;
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(255,255,255,0.18);
-  font-size: 1rem;
-  background: rgba(255,255,255,0.08);
-  color: #fff;
-  outline: none;
-}
-.login-container input::placeholder { color: rgba(255,255,255,0.66); }
-.login-container input:focus {
-  box-shadow: 0 0 0 3px rgba(204,238,255,0.14);
-  border-color: rgba(204,238,255,0.5);
 }
 
 /* When login container is used with .card, make it match the register look (white card) */
@@ -481,7 +466,7 @@ main {
 .container--transparent + .action-rail,
 .container--transparent ~ .action-rail,
 .container--transparent + .mobile-button-row,
-container--transparent ~ .mobile-button-row {
+.container--transparent ~ .mobile-button-row {
   display: none !important;
 }
 
