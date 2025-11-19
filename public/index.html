@@ -18,38 +18,45 @@
 
   <body>
     <div class="container container--transparent fade-in">
-      <header role="banner" class="site-header">
+     <header role="banner" class="site-header">
   <h1 class="visually-hidden">Code Crowds</h1>
 
   <div class="logo-wrap" aria-hidden="false">
-    <!-- Wordmark: bespoke "C" ligature -->
-    <a class="site-logo" href="/" aria-label="Code Crowds home — wordmark">
-      <svg viewBox="0 0 420 72" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="wmTitle wmDesc">
-        <title id="wmTitle">Code Crowds</title>
-        <desc id="wmDesc">Wordmark logo: bespoke C ligature and modern type for Code Crowds</desc>
+    <!-- Symbolic: code brackets + crowd arc -->
+    <a class="site-logo" href="/" aria-label="Code Crowds home — brackets crowd">
+      <svg viewBox="0 0 320 72" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="symTitle symDesc">
+        <title id="symTitle">Code Crowds</title>
+        <desc id="symDesc">Badge combining code brackets and a crowd arc for Code Crowds</desc>
 
         <defs>
-          <linearGradient id="gA" x1="0" x2="1" y1="0" y2="1">
+          <linearGradient id="gB" x1="0" x2="1" y1="0" y2="1">
             <stop offset="0" stop-color="#4e54c8"/>
             <stop offset="1" stop-color="#00aaff"/>
           </linearGradient>
         </defs>
 
-        <!-- Bespoke C (stroked) -->
-        <g transform="translate(12,12)">
-          <path d="M18 36 C18 26, 28 20, 40 20 L44 20" fill="none" stroke="url(#gA)" stroke-width="6.6" stroke-linecap="round" stroke-linejoin="round"/>
-          <path d="M18 36 C18 46, 28 52, 40 52" fill="none" stroke="url(#gA)" stroke-width="6.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <!-- Badge -->
+        <g transform="translate(8,8)">
+          <rect x="0" y="0" width="56" height="56" rx="14" fill="url(#gB)" />
+          <path d="M22 20 L14 36 L22 52" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M54 20 L62 36 L54 52" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <g transform="translate(10,44)">
+            <circle cx="20" cy="0" r="2.6" fill="#fff" />
+            <circle cx="30" cy="0" r="2.6" fill="#fff" />
+            <circle cx="40" cy="0" r="2.6" fill="#fff" />
+          </g>
         </g>
 
         <!-- Wordmark -->
-        <g transform="translate(90,46)" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial" font-weight="700">
-          <text x="0" y="0" font-size="34" fill="url(#gA)" letter-spacing="0.2">Code</text>
-          <text x="120" y="0" font-size="34" fill="#ffffff" letter-spacing="0.2">Crowds</text>
+        <g transform="translate(96,46)" font-family="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial" font-weight="700">
+          <text x="0" y="0" font-size="34" fill="#ffffff">Code</text>
+          <text x="118" y="0" font-size="34" fill="#ffffff" opacity="0.95">Crowds</text>
         </g>
       </svg>
     </a>
   </div>
-  </header>
+</header>
+
 
 
       <main>
