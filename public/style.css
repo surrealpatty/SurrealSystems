@@ -94,6 +94,21 @@ body {
 
   color: var(--color-text);
   text-align: left;
+
+  /* center the inner blocks so non-hero pages' content sits visually centered */
+  align-items: center;
+}
+
+/* Constrain and center the primary content blocks inside container */
+.container > header,
+.container > section,
+.container > .card,
+.container > form {
+  width: 100%;
+  max-width: 920px;
+  margin-left: auto;
+  margin-right: auto;
+  box-sizing: border-box;
 }
 
 /* Transparent hero container (index) */
@@ -102,6 +117,8 @@ body {
   box-shadow: none;
   color: #fff;
   text-align: center;
+  /* For hero we stretch children (login + features layout) */
+  align-items: stretch;
 }
 
 /* -------------------- Headings -------------------- */
@@ -290,7 +307,7 @@ button:focus-visible, .btn:focus-visible {
   .action-rail { right: 12px; bottom: 18px; display:none; }
   .mobile-button-row { display: flex; }
   button, .btn { font-size: 0.95rem; padding: 8px 14px; }
-  .container { width: 94%; padding: 1.5rem 1rem 140px 1rem; margin: 36px auto 0; gap: 1.25rem; }
+  .container { width: 94%; padding: 1.5rem 1rem 140px 1rem; margin: 36px auto 0; gap: 1.25rem; align-items: stretch; }
 }
 
 /* -------------------- Small screen cards stacking -------------------- */
@@ -334,6 +351,42 @@ button:focus-visible, .btn:focus-visible {
   color: rgba(255,255,255,0.92);
   font-weight: 500;
   line-height: 1.6;
+}
+
+/* ---------- Homepage: long rectangle feature cards ---------- */
+/* On wide screens, make the feature cards long rectangles stacked vertically
+   (keeps the login panel on the right). */
+@media (min-width: 900px) {
+  /* stack the features in a single column so each card becomes a long rectangle */
+  .container--transparent .features,
+  .features {
+    grid-template-columns: 1fr;
+    gap: 28px;
+    align-items: start;
+  }
+
+  /* make feature cards taller and center their content */
+  .container--transparent .feature-card,
+  .feature-card {
+    min-height: 160px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    border-radius: 14px; /* slightly more rectangular */
+  }
+
+  /* make headings & copy sit nicely */
+  .container--transparent .feature-card h3,
+  .feature-card h3 {
+    margin-bottom: 10px;
+    font-size: 1.08rem;
+  }
+  .container--transparent .feature-card p,
+  .feature-card p {
+    margin: 0;
+    line-height: 1.55;
+  }
 }
 
 /* Homepage main layout: features + login column */
@@ -424,4 +477,21 @@ main {
 /* -------------------- HERO READABILITY & ACTION-RAIL VISIBILITY -------------------- */
 /* Hide floating action rail and mobile actions on the public hero (index/sign-in).
    The action-rail / mobile-button-row are outside the .container element, so
-   use sibling selecto
+   use sibling selectors to target them when the hero container is present. */
+.container--transparent + .action-rail,
+.container--transparent ~ .action-rail,
+.container--transparent + .mobile-button-row,
+container--transparent ~ .mobile-button-row {
+  display: none !important;
+}
+
+/* Slightly stronger login card shadow for the white card variant */
+.login-container.card {
+  box-shadow: 0 22px 50px rgba(20,30,60,0.10);
+}
+
+/* Responsive tweaks for login card */
+@media (max-width: 480px) {
+  .login-container { width: 100%; padding: 14px; }
+  .features { grid-template-columns: 1fr; }
+}
