@@ -1,5 +1,6 @@
 /* public/style.css
-   Polished / accessibility-forward stylesheet (updated header + wordmark contrast)
+   Polished / accessibility-forward version of the stylesheet.
+   Includes header/logo rules (permanent monogram + wordmark).
 */
 
 /* -------------------- Load UI font + Theme variables -------------------- */
@@ -62,14 +63,14 @@ html,body{
   color:var(--color-text);
 }
 
-/* Page gradient */
+/* Page background gradient */
 body{
   min-height:100vh;
   background:linear-gradient(135deg,var(--brand-a),var(--brand-b));
   -webkit-tap-highlight-color:transparent;
 }
 
-/* -------------------- Container -------------------- */
+/* -------------------- Container (default = white card) -------------------- */
 .container{
   max-width:var(--max-width);
   width:90%;
@@ -85,36 +86,50 @@ body{
   text-align:left;
   align-items:center;
 }
-.container>header,.container>section,.container>.card,.container>form{width:100%;max-width:920px;margin-left:auto;margin-right:auto;box-sizing:border-box;}
+
+/* Constrain main content */
+.container>header,
+.container>section,
+.container>.card,
+.container>form{width:100%;max-width:920px;margin-left:auto;margin-right:auto;box-sizing:border-box;}
 .container--transparent{background:transparent;box-shadow:none;color:#fff;text-align:center;align-items:stretch;}
 
-/* -------------------- Header / Logo (permanent) -------------------- */
+/* -------------------- Header / Logo styles (permanent) -------------------- */
 .site-header{padding-top:28px;padding-bottom:20px;}
-.header-inner{display:flex;align-items:center;justify-content:center;gap:18px;width:100%;}
-@media(max-width:900px){.header-inner{flex-direction:column;gap:10px;padding-top:12px;}}
+.header-inner{display:flex;align-items:center;justify-content:center;gap:28px;width:100%;}
+@media(max-width:900px){
+  .header-inner{flex-direction:column;gap:10px;padding-top:12px;}
+}
 
-/* monogram */
+/* monogram sizing */
 .site-logo{display:inline-flex;align-items:center;text-decoration:none;flex-shrink:0;}
-.site-logo svg{height:72px;width:auto;display:block;filter:drop-shadow(0 8px 18px rgba(0,0,0,0.08));}
+.site-logo svg{height:84px;width:auto;display:block;filter:drop-shadow(0 8px 18px rgba(0,0,0,0.08));}
 
-/* wordmark: SOLID WHITE for best contrast + subtle shadow */
+/* brand wordmark (text) */
 .brand-wordmark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;line-height:1;}
-.brand-code,.brand-crowds{font-family:var(--font-sans);font-weight:800;font-size:36px;display:inline-block;color:#ffffff;text-shadow:0 4px 20px rgba(13,22,60,0.08);}
-.brand-code{opacity:0.95;}
-.brand-crowds{opacity:1;}
-@media(max-width:900px){.site-logo svg{height:56px}.brand-code,.brand-crowds{font-size:28px}}
-@media(max-width:420px){.header-inner{gap:12px;padding-top:10px}.brand-code,.brand-crowds{font-size:22px}.site-logo svg{height:48px}}
+.brand-code{
+  font-family:var(--font-sans);font-weight:800;font-size:40px;
+  background:linear-gradient(90deg,var(--brand-a),var(--brand-b));
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;display:inline-block;
+}
+.brand-crowds{
+  font-family:var(--font-sans);font-weight:800;font-size:40px;color:#ffffff;display:inline-block;
+}
+@media(max-width:900px){
+  .site-logo svg{height:56px}
+  .brand-code,.brand-crowds{font-size:28px}
+}
+@media(max-width:420px){
+  .header-inner{gap:12px;padding-top:10px}
+  .brand-code,.brand-crowds{font-size:22px}
+  .site-logo svg{height:48px}
+}
 
-/* -------------------- Spinner / Fade-in -------------------- */
-.spinner{display:inline-block;width:20px;height:20px;border:3px solid #dcdcdc;border-top-color:var(--brand-a);border-radius:50%;animation:spin .8s linear infinite;vertical-align:middle;}
-@keyframes spin{to{transform:rotate(360deg)}}
-.fade-in{opacity:0;transform:translateY(10px);animation:fadeIn .5s ease forwards;}
-@keyframes fadeIn{to{opacity:1;transform:translateY(0)}}
-@media(prefers-reduced-motion:reduce){.spinner,.fade-in{animation:none;transform:none;opacity:1}*{transition:none!important}}
+/* Visually hidden */
+.visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap;border:0;padding:0;margin:-1px}
 
-/* -------------------- Card / Buttons / Inputs / Layout -------------------- */
-/* ... (unchanged from the main polished CSS) - keep your existing card/button/input/layout rules below ... */
-
+/* -------------------- Card, Buttons, Inputs, etc. (unchanged) -------------------- */
+/* Reuse the rest of the polished CSS for cards, buttons, inputs, features, layout, etc. */
 /* Cards */
 .card{background:var(--color-card);border-radius:var(--radius-md);padding:var(--space-md);box-shadow:var(--shadow-1);color:var(--color-text);transition:transform 200ms ease,box-shadow 200ms ease;text-align:left;display:flex;flex-direction:column;gap:12px;}
 .card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(0,0,0,0.12);}
@@ -128,6 +143,7 @@ button:active,.btn:active{transform:translateY(-2px);}
 button:focus-visible,.btn:focus-visible{outline:3px solid var(--focus-ring);outline-offset:3px;box-shadow:0 0 0 3px var(--focus-ring);border-radius:var(--radius-sm);}
 .btn--primary,.btn-primary,.btn.btn-primary{background-image:var(--btn-gradient);color:var(--btn-text);box-shadow:0 8px 20px rgba(37,61,180,0.12);padding:12px 18px;border-radius:10px;}
 .logout-btn{background:var(--danger);color:#fff;box-shadow:0 8px 20px rgba(255,77,79,0.10);}
+.btn--secondary{background:transparent;color:var(--btn-text);border:2px solid rgba(255,255,255,0.18);}
 
 /* Inputs */
 .input,input,textarea,select{padding:10px 12px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);font-size:15px;color:var(--color-text);background:#fff;width:100%;box-sizing:border-box;}
@@ -140,8 +156,9 @@ button:focus-visible,.btn:focus-visible{outline:3px solid var(--focus-ring);outl
 /* Action rail */
 .action-rail{position:fixed;right:20px;bottom:28px;display:flex;flex-direction:column;gap:12px;z-index:60;}
 .action-rail .btn{min-width:150px;border-radius:999px;background-image:var(--btn-gradient);color:var(--btn-text);box-shadow:0 10px 30px rgba(0,0,0,0.16);text-decoration:none;}
+.action-rail .btn.btn--primary,.action-rail .btn.btn--primary:hover{box-shadow:0 16px 40px rgba(78,84,200,0.18);}
 
-/* Mobile */
+/* Mobile bottom row */
 .mobile-button-row{display:none;position:fixed;bottom:0;left:0;width:100%;justify-content:space-around;padding:10px;gap:6px;background-color:rgba(255,255,255,0.95);z-index:9999;box-shadow:0 -6px 20px rgba(0,0,0,0.08);}
 .mobile-button-row button{flex:1;border-radius:8px;font-weight:700;font-size:1rem;padding:10px;background-image:var(--btn-gradient);color:#fff;transition:transform var(--transition-fast),opacity var(--transition-fast);}
 
@@ -162,7 +179,10 @@ button:focus-visible,.btn:focus-visible{outline:3px solid var(--focus-ring);outl
   .container{width:94%;padding:1.5rem 1rem 140px 1rem;margin:36px auto 0;gap:1.25rem;align-items:stretch}
 }
 
-/* Features / hero */
+/* Small-screen */
+@media(max-width:360px){#services-list{grid-template-columns:1fr;gap:12px}}
+
+/* Features & hero */
 .features{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px;align-items:start;margin:0}
 .feature-card{background:var(--color-card);border-radius:var(--radius-md);padding:18px;box-shadow:var(--shadow-1);color:var(--color-text);text-align:left}
 .container--transparent .feature-card{background:var(--glass-dark);border-radius:var(--radius-md);padding:18px;box-shadow:var(--shadow-1);color:rgba(255,255,255,0.97);text-align:left;border:1px solid rgba(255,255,255,0.06)}
