@@ -1,11 +1,12 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="en">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>CodeCrowds - Showcase & Sell Your Skills</title>
+    <meta name="description" content="Code Crowds — show and sell your coding skills, connect with developers, and grow your network." />
 
-    <!-- Load font via link (more reliable than @import) -->
+    <!-- Load font via link -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
@@ -15,29 +16,29 @@
   </head>
 
   <body>
+    <!-- Skip link for keyboard users -->
+    <a class="visually-hidden" href="#main">Skip to content</a>
+
     <div class="container container--transparent fade-in">
- <header class="site-header">
-  <div class="header-inner">
-    <a href="/" class="site-logo" aria-label="Code Crowds home">
-      <!-- NO inline styles, use external CSS rules -->
-      <img
-        class="site-logo__img"
-        src="/images/logo-open-right-no-tail.min.svg"
-        alt="Code Crowds logo"
-      />
-    </a>
+      <header class="site-header" role="banner">
+        <div class="header-inner">
+          <!-- Single heading + link for the site brand -->
+          <h1 class="brand-heading">
+            <a href="/" class="site-logo" aria-label="Code Crowds home">
+              <!-- image is decorative for screen readers -->
+              <img class="site-logo__img" src="/images/logo-open-right-no-tail.svg" alt="" />
 
-    <a class="brand-wordmark" href="/" aria-hidden="true">
-      <span class="brand-code">Code</span>
-      <span class="brand-crowds">Crowds</span>
-    </a>
-  </div>
-</header>
+              <!-- Visible text — the site title -->
+              <span class="brand-wordmark">
+                <span class="brand-code">Code</span>
+                <span class="brand-crowds">Crowds</span>
+              </span>
+            </a>
+          </h1>
+        </div>
+      </header>
 
-
-
-
-      <main>
+      <main id="main">
         <section class="features" aria-label="Highlights">
           <article class="feature-card card">
             <h3>Offer Your Services</h3>
