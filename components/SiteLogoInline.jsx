@@ -1,18 +1,16 @@
 'use client';
 
 import React from 'react';
+import PropTypes from 'prop-types';
 
 /**
  * SiteLogoInline
  * - size: pixel width of the logo (height scales by SVG aspect ratio)
  * - color: brand color used for the C stroke and "Code" text (default is #062e7f)
  * - idSuffix: optional string to guarantee unique gradient/title ids (useful in SSR without React.useId)
- *
- * Note: This is a client component (use 'use client') because it uses React.useId when available.
  */
 export default function SiteLogoInline({ size = 160, color = '#062e7f', idSuffix = '' }) {
-  // generate unique id for gradient / title / desc:
-  const hookId = (typeof React.useId === 'function') ? React.useId() : null;
+  const hookId = typeof React.useId === 'function' ? React.useId() : null;
   const uid = hookId || idSuffix || 'logo';
   const gradId = `gradL-${uid}`;
   const titleId = `logoTitle-${uid}`;
@@ -32,7 +30,9 @@ export default function SiteLogoInline({ size = 160, color = '#062e7f', idSuffix
         preserveAspectRatio="xMinYMin meet"
       >
         <title id={titleId}>Code Crowds — Monogram (open right, no tail)</title>
-        <desc id={descId}>Rounded-square badge with centered C opening to the right (no terminal tail)</desc>
+        <desc id={descId}>
+          Rounded-square badge with centered C opening to the right (no terminal tail)
+        </desc>
 
         <defs>
           <linearGradient id={gradId} x1="0" x2="1" y1="0" y2="1">
@@ -61,7 +61,10 @@ export default function SiteLogoInline({ size = 160, color = '#062e7f', idSuffix
           />
         </g>
 
-        <g transform="translate(170,98)" fontFamily="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial">
+        <g
+          transform="translate(170,98)"
+          fontFamily="Inter, system-ui, -apple-system, 'Segoe UI', Roboto, Arial"
+        >
           <text x="0" y="0" fontWeight="800" fontSize="36" fill={color}>
             Code
           </text>
@@ -73,3 +76,9 @@ export default function SiteLogoInline({ size = 160, color = '#062e7f', idSuffix
     </a>
   );
 }
+
+SiteLogoInline.propTypes = {
+  size: PropTypes.number,
+  color: PropTypes.string,
+  idSuffix: PropTypes.string,
+};
