@@ -1,6 +1,6 @@
 /* public/style.css
    Polished / accessibility-forward version of the stylesheet.
-   Includes header/logo rules (permanent monogram + wordmark).
+   Includes header/logo rules (permanent wordmark).
 */
 
 /* -------------------- Load UI font + Theme variables -------------------- */
@@ -74,9 +74,9 @@ body{
 .container{
   max-width:var(--max-width);
   width:90%;
-  /* reduced top padding and slightly reduced top margin to tighten header */
-  padding:1.25rem 2rem 140px 2rem; /* was 2.5rem */
-  margin:12px auto 0;             /* was 30px */
+  /* keep the tightened top spacing */
+  padding:1.25rem 2rem 140px 2rem;
+  margin:12px auto 0;
   display:flex;
   flex-direction:column;
   gap:2rem;
@@ -95,49 +95,51 @@ body{
 .container>form{width:100%;max-width:920px;margin-left:auto;margin-right:auto;box-sizing:border-box;}
 .container--transparent{background:transparent;box-shadow:none;color:#fff;text-align:center;align-items:stretch;}
 
-/* -------------------- Header / Logo styles (permanent) -------------------- */
-.site-header{padding-top:8px;padding-bottom:12px;} /* tightened */
+/* -------------------- Header / Wordmark styles -------------------- */
+.site-header{padding-top:8px;padding-bottom:12px;}
 .header-inner{display:flex;align-items:center;justify-content:center;gap:28px;width:100%;}
 @media(max-width:900px){
   .header-inner{flex-direction:column;gap:10px;padding-top:12px;}
 }
 
-/* monogram sizing (supports inline svg and <img src="...svg"> fallback) */
-.site-logo{display:inline-flex;align-items:center;text-decoration:none;flex-shrink:0;}
-.site-logo svg,
-.site-logo img,
-.site-logo__img{
-  height:64px; /* reduced from 84px to tighten header */
-  width:auto;
-  display:block;
-  filter:drop-shadow(0 6px 12px rgba(0,0,0,0.06));
-}
+/* site-logo anchor */
+.site-logo{display:inline-flex;align-items:center;text-decoration:none;flex-shrink:0;padding:6px 8px;border-radius:8px;}
 
-/* brand wordmark (text) - kept for fallback / React component usage */
-.brand-wordmark{display:inline-flex;align-items:baseline;gap:8px;text-decoration:none;line-height:1;}
+/* brand wordmark (big and bold) */
+.brand-wordmark{display:inline-flex;align-items:baseline;gap:12px;text-decoration:none;line-height:1;margin:0;padding:0;}
+.brand-code,
+.brand-crowds{font-family:var(--font-sans);font-weight:800;display:inline-block;letter-spacing:-0.02em;}
+
+/* Make the header / wordmark larger on desktop */
 .brand-code{
-  font-family:var(--font-sans);font-weight:800;font-size:40px;
+  font-size:64px;
   background:linear-gradient(90deg,var(--brand-a),var(--brand-b));
-  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;display:inline-block;
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;color:transparent;
+  margin:0;
 }
 .brand-crowds{
-  font-family:var(--font-sans);font-weight:800;font-size:40px;color:#ffffff;display:inline-block;
+  font-size:64px;
+  color:var(--brand-b); /* blue on white backgrounds */
+  margin:0;
 }
+
+/* When the container is transparent (blue background), show Crowds as white like the original look */
+.container--transparent .brand-crowds {
+  color: #ffffff;
+}
+
+/* Smaller sizes for tablet / phone */
 @media(max-width:900px){
-  .site-logo svg{height:56px}
-  .brand-code,.brand-crowds{font-size:28px}
+  .brand-code,.brand-crowds{font-size:44px}
 }
 @media(max-width:420px){
-  .header-inner{gap:12px;padding-top:10px}
-  .brand-code,.brand-crowds{font-size:22px}
-  .site-logo svg{height:48px}
+  .brand-code,.brand-crowds{font-size:28px}
 }
 
 /* Visually hidden */
 .visually-hidden{position:absolute!important;height:1px;width:1px;overflow:hidden;clip:rect(1px,1px,1px,1px);white-space:nowrap;border:0;padding:0;margin:-1px}
 
 /* -------------------- Card, Buttons, Inputs, etc. (unchanged) -------------------- */
-/* Reuse the rest of the polished CSS for cards, buttons, inputs, features, layout, etc. */
 /* Cards */
 .card{background:var(--color-card);border-radius:var(--radius-md);padding:var(--space-md);box-shadow:var(--shadow-1);color:var(--color-text);transition:transform 200ms ease,box-shadow 200ms ease;text-align:left;display:flex;flex-direction:column;gap:12px;}
 .card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(0,0,0,0.12);}
