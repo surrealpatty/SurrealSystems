@@ -101,6 +101,19 @@ function sendError(res, message = 'Something went wrong', status = 500, details)
   return res.status(status).json(payload);
 }
 
+/* ------------------ Cookie settings ------------------ */
+const COOKIE_NAME = 'codecrowds_token';
+const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day
+function cookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: COOKIE_MAX_AGE,
+    path: '/',
+  };
+}
+
 /* ------------------ routes ------------------ */
 
 router.post(
@@ -144,8 +157,11 @@ router.post(
         expiresIn: '1d',
       });
 
+      // Set HttpOnly cookie (do not return token in JSON)
+      res.cookie(COOKIE_NAME, token, cookieOptions());
+
       const user = normalizeUsername(toSafeUser(newUser));
-      return respondCompat(res, { token, user }, 201);
+      return respondCompat(res, { user }, 201);
     } catch (err) {
       console.error('Register error:', err && err.stack ? err.stack : err);
       if (err && err.name === 'SequelizeUniqueConstraintError') {
@@ -199,8 +215,11 @@ router.post(
         expiresIn: '1d',
       });
 
+      // Set HttpOnly cookie with token and return user only
+      res.cookie(COOKIE_NAME, token, cookieOptions());
+
       const user = normalizeUsername(toSafeUser(userRec));
-      return respondCompat(res, { token, user });
+      return respondCompat(res, { user });
     } catch (err) {
       console.error('Login error:', err && err.stack ? err.stack : err);
       if (err && err.name === 'SequelizeValidationError') {
@@ -215,6 +234,12 @@ router.post(
     }
   },
 );
+
+router.post('/logout', authenticateToken, (req, res) => {
+  // Clear the cookie
+  res.clearCookie(COOKIE_NAME, { path: '/' });
+  return respondCompat(res, { message: 'Logged out' });
+});
 
 router.get('/me', authenticateToken, async (req, res) => {
   try {
