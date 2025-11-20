@@ -101,6 +101,19 @@ function sendError(res, message = 'Something went wrong', status = 500, details)
   return res.status(status).json(payload);
 }
 
+/* ------------------ Cookie settings ------------------ */
+const COOKIE_NAME = 'codecrowds_token';
+const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day
+function cookieOptions() {
+  return {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === 'production', // ensure HTTPS in production
+    sameSite: 'lax',
+    maxAge: COOKIE_MAX_AGE,
+    path: '/',
+  };
+}
+
 /* ------------------ routes ------------------ */
 
 router.post(
@@ -144,8 +157,11 @@ router.post(
         expiresIn: '1d',
       });
 
+      // Set HttpOnly cookie (do not return token in JSON)
+      res.cookie(COOKIE_NAME, token, cookieOptions());
+
       const user = normalizeUsername(toSafeUser(newUser));
-      return respondCompat(res, { token, user }, 201);
+      return respondCompat(res, { user }, 201);
     } catch (err) {
       console.error('Register error:', err && err.stack ? err.stack : err);
       if (err && err.name === 'SequelizeUniqueConstraintError') {
@@ -185,12 +201,31 @@ router.post(
   async (req, res) => {
     try {
       const { email, username, password } = req.body;
+
+      // Lookup user
       const userRec = await User.findOne({
         where: email ? { email } : { username },
       });
+
+      // Debug logging (safe) — helpful if login fails. Remove or lower log level in production.
+      console.info('LOGIN ATTEMPT', {
+        by: email ? 'email' : 'username',
+        identifier: email || username,
+        userFound: !!userRec,
+      });
+
       if (!userRec) return sendError(res, 'Invalid credentials', 401);
 
       const valid = await comparePassword(password, userRec.password);
+
+      // Debug logging for password match (DO NOT log the password or hash)
+      console.info('LOGIN CHECK', {
+        userId: userRec.id,
+        username: userRec.username,
+        email: userRec.email,
+        passwordMatch: !!valid,
+      });
+
       if (!valid) return sendError(res, 'Invalid credentials', 401);
 
       const signingSecret = getSigningSecret();
@@ -199,8 +234,11 @@ router.post(
         expiresIn: '1d',
       });
 
+      // Set HttpOnly cookie with token and return user only (no token in JSON)
+      res.cookie(COOKIE_NAME, token, cookieOptions());
+
       const user = normalizeUsername(toSafeUser(userRec));
-      return respondCompat(res, { token, user });
+      return respondCompat(res, { user });
     } catch (err) {
       console.error('Login error:', err && err.stack ? err.stack : err);
       if (err && err.name === 'SequelizeValidationError') {
@@ -215,6 +253,12 @@ router.post(
     }
   },
 );
+
+router.post('/logout', authenticateToken, (req, res) => {
+  // Clear the cookie
+  res.clearCookie(COOKIE_NAME, { path: '/' });
+  return respondCompat(res, { message: 'Logged out' });
+});
 
 router.get('/me', authenticateToken, async (req, res) => {
   try {
