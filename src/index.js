@@ -97,10 +97,36 @@ const limiter = rateLimit({
 app.use(limiter);
 
 /* ---------------------------- CORS setup ---------------------------- */
-const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+let allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
   .map((s) => s.trim())
   .filter(Boolean);
+
+// If no explicit CORS_ALLOWED_ORIGINS but FRONTEND_URL is provided, add it as a convenience.
+if (allowedOrigins.length === 0 && process.env.FRONTEND_URL) {
+  try {
+    const f = String(process.env.FRONTEND_URL || '').trim().replace(/\/+$/, '');
+    if (f) {
+      allowedOrigins.push(f);
+      console.info('No CORS_ALLOWED_ORIGINS configured — added FRONTEND_URL to allowedOrigins:', f);
+    }
+  } catch (e) {
+    /* ignore parse errors */
+  }
+}
+
+// In non-production, make local dev easier by allowing common localhost origins.
+// This is only a convenience for development/testing.
+if (process.env.NODE_ENV !== 'production') {
+  const locals = [
+    'http://localhost:3000',
+    'http://localhost:10000',
+    'http://127.0.0.1:3000',
+    'http://127.0.0.1:10000',
+  ];
+  allowedOrigins = [...new Set([...allowedOrigins, ...locals])]; // dedupe
+}
+
 console.info('CORS allowedOrigins:', allowedOrigins.length ? allowedOrigins : '[none configured]');
 
 if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
@@ -257,7 +283,7 @@ async function startServer() {
     return server;
   }
 
-  // When imported, return the app for tests or external servers.
+  // When imported, return the app for tests or external run.
   return app;
 }
 
