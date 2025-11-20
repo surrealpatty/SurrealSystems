@@ -1,7 +1,6 @@
 /* public/style.css
-   Polished / accessibility-forward version of the stylesheet.
-   Header made more visible: larger wordmark, stronger shadow/stroke,
-   and a subtle dark "pill" backdrop when the header sits over the blue gradient.
+   Text-only wordmark: white on blue gradient, brand colors on white card.
+   No heavy dark pill; subtle halo + shadows for legibility.
 */
 
 /* -------------------- Load UI font + Theme variables -------------------- */
@@ -96,7 +95,7 @@ body{
 .container>form{width:100%;max-width:920px;margin-left:auto;margin-right:auto;box-sizing:border-box;}
 .container--transparent{background:transparent;box-shadow:none;color:#fff;text-align:center;align-items:stretch;}
 
-/* -------------------- Header / Wordmark styles (more visible) -------------------- */
+/* -------------------- Header / Wordmark styles (white on blue) -------------------- */
 .site-header{padding-top:8px;padding-bottom:12px;}
 .header-inner{display:flex;align-items:center;justify-content:center;gap:28px;width:100%;}
 @media(max-width:900px){
@@ -117,107 +116,94 @@ body{
   justify-content:center;
   text-decoration:none;
   flex-shrink:0;
-  padding:10px 12px;
-  border-radius:12px;
-  position:relative; /* for pseudo-elements */
+  padding:8px 10px;
+  border-radius:10px;
+  position:relative; /* for subtle halo */
   transition:transform 180ms ease;
 }
-
-/* Make the wordmark slightly lift on hover */
 .site-logo:hover{ transform: translateY(-3px); }
 
-/* Dark pill backdrop (improves contrast for white text on bright gradient)
-   ::after sits behind the wordmark but above the page gradient */
-.site-logo::after{
-  content:"";
-  position:absolute;
-  left:50%;
-  top:50%;
-  transform:translate(-50%,-50%);
-  width:calc(100% + 84px);
-  height:calc(100% + 36px);
-  pointer-events:none;
-  border-radius:18px;
-  background: linear-gradient(180deg, rgba(0,0,0,0.34), rgba(0,0,0,0.14));
-  filter: blur(8px);
-  opacity:0.95;
-  z-index:-1;
-}
-
-/* subtle halo behind everything to give extra separation (kept subtle) */
+/* subtle halo behind the wordmark to increase perceived contrast */
 .site-logo::before{
   content:"";
   position:absolute;
   left:50%;
   top:50%;
   transform:translate(-50%,-50%);
-  width:calc(100% + 48px);
-  height:calc(100% + 24px);
+  width:calc(100% + 36px);
+  height:calc(100% + 18px);
   pointer-events:none;
   border-radius:14px;
-  background: radial-gradient(ellipse at center, rgba(0,0,0,0.08), rgba(0,0,0,0.04) 30%, transparent 50%);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.07), rgba(0,0,0,0.03) 30%, transparent 50%);
   filter: blur(6px);
   opacity:0.9;
-  z-index:-2;
+  z-index:-1;
 }
 
 /* brand wordmark (big and bold) */
 .brand-wordmark{display:inline-flex;align-items:baseline;gap:10px;text-decoration:none;line-height:1;margin:0;padding:0;}
 .brand-code,
-.brand-crowds{font-family:var(--font-sans);font-weight:900;display:inline-block;letter-spacing:-0.02em;line-height:1;margin:0;-webkit-font-smoothing:antialiased;}
+.brand-crowds{
+  font-family:var(--font-sans);
+  font-weight:900;
+  display:inline-block;
+  letter-spacing:-0.02em;
+  line-height:1;
+  margin:0;
+  -webkit-font-smoothing:antialiased;
+}
 
-/* Make the header / wordmark very visible on desktop */
+/* Desktop sizes (large presence) */
 .brand-code{
-  font-size:96px; /* bigger for stronger presence */
-  background: linear-gradient(90deg, #2740b2 0%, #00aaff 100%); /* deeper left stop for contrast */
+  font-size:96px;
+  /* default (for white card): gradient/dark look */
+  background: linear-gradient(90deg, #2740b2 0%, #00aaff 100%);
   -webkit-background-clip:text;
   background-clip:text;
   -webkit-text-fill-color:transparent;
-  color: transparent;
-  /* stronger shadow and stroke so it separates on bright backgrounds */
+  color: var(--brand-a); /* fallback */
   text-shadow: 0 10px 30px rgba(0,0,0,0.30);
   -webkit-text-stroke: 1px rgba(0,0,0,0.12);
   transition: text-shadow 160ms ease;
 }
 
-/* Crowds: big white text with stronger outline + shadow */
 .brand-crowds{
   font-size:96px;
-  color: #ffffff;
-  text-shadow: 0 12px 34px rgba(0,0,0,0.36);
-  -webkit-text-stroke: 1px rgba(0,0,0,0.10);
-  transition: text-shadow 160ms ease;
-}
-
-/* When the page is not the blue gradient (white card), show Crowds as brand blue,
-   and hide the dark pill so the wordmark still looks right on white. */
-.container:not(.container--transparent) .brand-crowds{
+  /* default (for white card): brand-blue */
   color: var(--brand-b);
   text-shadow: 0 6px 14px rgba(0,0,0,0.12);
   -webkit-text-stroke: 0;
+  transition: text-shadow 160ms ease;
 }
-.container:not(.container--transparent) .site-logo::after{
-  display:none; /* remove dark pill on white background */
+
+/* === IMPORTANT: when header sits on the blue gradient, make BOTH words white === */
+.container--transparent .brand-code{
+  /* make Code white on the gradient so it reads as a unified white wordmark */
+  background:none;
+  -webkit-text-fill-color: #ffffff;
+  color:#ffffff;
+  -webkit-text-stroke: 0.8px rgba(0,0,0,0.10); /* subtle outline */
+  text-shadow: 0 10px 30px rgba(0,0,0,0.36);
 }
-.container:not(.container--transparent) .site-logo::before{
-  display:none; /* also remove halo on white background for a cleaner look */
+
+.container--transparent .brand-crowds{
+  color:#ffffff;
+  -webkit-text-stroke: 0.8px rgba(0,0,0,0.10);
+  text-shadow: 0 12px 34px rgba(0,0,0,0.36);
 }
 
 /* Slightly smaller / tuned for tablet & phone */
 @media(max-width:1100px){
   .brand-code,.brand-crowds{ font-size:72px; }
-  .site-logo::after{ width:calc(100% + 64px); height:calc(100% + 28px); filter: blur(7px); }
-  .site-logo::before{ width:calc(100% + 40px); height:calc(100% + 20px); filter: blur(5px); }
+  .site-logo::before{ width:calc(100% + 48px); height:calc(100% + 24px); filter: blur(5px); }
 }
 @media(max-width:900px){
   .brand-code,.brand-crowds{ font-size:48px; }
-  .site-logo::after{ width:calc(100% + 48px); height:calc(100% + 22px); filter: blur(6px); }
-  .site-logo::before{ width:calc(100% + 32px); height:calc(100% + 18px); filter: blur(5px); }
+  .site-logo::before{ width:calc(100% + 40px); height:calc(100% + 20px); filter: blur(4px); }
 }
 @media(max-width:420px){
   .brand-code,.brand-crowds{ font-size:28px; }
-  .site-logo::after{ width:calc(100% + 20px); height:calc(100% + 14px); filter: blur(4px); }
-  .site-logo::before{ width:calc(100% + 16px); height:calc(100% + 12px); filter: blur(3px); }
+  .site-logo::before{ width:calc(100% + 20px); height:calc(100% + 14px); filter: blur(3px); }
 }
 
 /* Visually hidden */
