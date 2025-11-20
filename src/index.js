@@ -60,8 +60,6 @@ const helmet = require('helmet');
 const compression = require('compression');
 const rateLimit = require('express-rate-limit');
 
-const cookieParser = require('cookie-parser'); // <- ADDED
-
 const { sequelize, testConnection } = require('./config/database');
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
@@ -198,9 +196,6 @@ app.post(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/* ------------------------ Cookie parsing --------------------------- */
-app.use(cookieParser()); // <- Parse incoming cookies so req.cookies is available
-
 /* ----------------------------- Health ------------------------------ */
 app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: Date.now() });
@@ -227,10 +222,19 @@ app.get('*', (req, res, next) => {
 const PORT = process.env.PORT || 10000;
 
 /* ------------------------- App startup (exportable) ----------------------------- */
+/**
+ * startServer()
+ *  - authenticates DB
+ *  - optionally runs sequelize.sync in non-production if DB_ALTER=true (keeps prior behavior)
+ *  - when run directly (node src/index.js) it starts listening
+ *  - when imported, it performs DB init and returns the app (without starting listener)
+ */
 async function startServer() {
+  // Use the testConnection helper which does retries and provides better logs.
   await testConnection();
   console.log('✅ Database connected');
 
+  // Keep schema in sync during development only when explicitly enabled.
   if (process.env.NODE_ENV !== 'production') {
     const useAlter = process.env.DB_ALTER === 'true' || process.env.DB_SYNC_ALTER === 'true';
     if (useAlter) {
@@ -240,9 +244,12 @@ async function startServer() {
     }
     await sequelize.sync({ alter: useAlter });
   } else {
-    console.log('⚠️ Production mode: skipping sequelize.sync. Apply migrations before starting the app.');
+    console.log(
+      '⚠️ Production mode: skipping sequelize.sync. Apply migrations before starting the app.',
+    );
   }
 
+  // If the file was run directly, start listening.
   if (require.main === module) {
     const server = app.listen(PORT, () => {
       console.log(`🚀 Server running on http://localhost:${PORT}`);
@@ -250,9 +257,11 @@ async function startServer() {
     return server;
   }
 
+  // When imported, return the app for tests or external servers.
   return app;
 }
 
+/* -------------------- Global error / rejection handlers ------------------ */
 process.on('unhandledRejection', (reason) => {
   console.error('Unhandled Rejection:', reason);
 });
@@ -260,8 +269,10 @@ process.on('uncaughtException', (err) => {
   console.error('Uncaught Exception:', err);
 });
 
+// Export app & startServer for tests / external run
 module.exports = { app, startServer };
 
+// If run directly, call startServer and handle failures by exiting.
 if (require.main === module) {
   startServer().catch((err) => {
     console.error('❌ DB init error:', err && err.message ? err.message : err);
