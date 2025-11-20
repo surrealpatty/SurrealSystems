@@ -179,7 +179,14 @@ html,body{
   text-shadow: 0 6px 14px rgba(0,0,0,0.06);
 }
 
-/* Responsive scale-down */
+/* -------------------- Layout for main (features + login) -------------------- */
+main{display:grid;grid-template-columns:1fr 440px;gap:40px;align-items:start;padding-top:8px;}
+@media(max-width:900px){
+  main{grid-template-columns:1fr;gap:20px}
+  .login-container{width:100%}
+}
+
+/* Responsive scale-down for the wordmark */
 @media (max-width:1100px){ .brand-code,.brand-crowds{ font-size:84px; } }
 @media (max-width:900px){ .brand-code,.brand-crowds{ font-size:48px; } }
 @media (max-width:420px){ .brand-code,.brand-crowds{ font-size:28px; } }
@@ -211,7 +218,7 @@ button:focus-visible,.btn:focus-visible{outline:3px solid var(--focus-ring);outl
 #services-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;align-items:start;}
 #newServiceSection{display:none;flex-direction:column;gap:10px;margin-top:10px;}
 
-/* Action rail */
+/* Action rail (kept in CSS in case used on other pages) */
 .action-rail{position:fixed;right:20px;bottom:28px;display:flex;flex-direction:column;gap:12px;z-index:60;}
 .action-rail .btn{min-width:150px;border-radius:999px;background-image:var(--btn-gradient);color:var(--btn-text);box-shadow:0 10px 30px rgba(0,0,0,0.16);text-decoration:none;}
 .action-rail .btn.btn--primary,.action-rail .btn.btn--primary:hover{box-shadow:0 16px 40px rgba(78,84,200,0.18);}
