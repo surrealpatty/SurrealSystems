@@ -96,16 +96,22 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-/* ---------------------------- CORS setup ---------------------------- */
+/* ---------------------------- CORS setup (improved) ---------------------------- */
+function normalizeOriginString(o) {
+  if (!o || typeof o !== 'string') return '';
+  // trim whitespace, remove any trailing slashes, and lowercase for stable comparisons
+  return o.trim().replace(/\/+$/, '').toLowerCase();
+}
+
 let allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .split(',')
-  .map((s) => s.trim())
+  .map((s) => normalizeOriginString(s))
   .filter(Boolean);
 
 // If no explicit CORS_ALLOWED_ORIGINS but FRONTEND_URL is provided, add it as a convenience.
 if (allowedOrigins.length === 0 && process.env.FRONTEND_URL) {
   try {
-    const f = String(process.env.FRONTEND_URL || '').trim().replace(/\/+$/, '');
+    const f = normalizeOriginString(process.env.FRONTEND_URL || '');
     if (f) {
       allowedOrigins.push(f);
       console.info('No CORS_ALLOWED_ORIGINS configured — added FRONTEND_URL to allowedOrigins:', f);
@@ -124,7 +130,7 @@ if (process.env.NODE_ENV !== 'production') {
     'http://127.0.0.1:3000',
     'http://127.0.0.1:10000',
   ];
-  allowedOrigins = [...new Set([...allowedOrigins, ...locals])]; // dedupe
+  allowedOrigins = [...new Set([...allowedOrigins, ...locals.map(normalizeOriginString)])]; // dedupe
 }
 
 console.info('CORS allowedOrigins:', allowedOrigins.length ? allowedOrigins : '[none configured]');
@@ -138,10 +144,18 @@ if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
 app.use(
   cors({
     origin: function (origin, callback) {
+      // If there's no Origin header (e.g., curl from server), allow it
       if (!origin) return callback(null, true);
+
+      const normalizedOrigin = normalizeOriginString(origin);
+
+      // In non-production with no configured origins, allow any origin (existing behavior)
       if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production')
         return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+
+      if (allowedOrigins.includes(normalizedOrigin)) return callback(null, true);
+
+      // not allowed
       return callback(null, false);
     },
     credentials: true,
@@ -155,9 +169,10 @@ app.options(
   cors({
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
+      const normalizedOrigin = normalizeOriginString(origin);
       if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production')
         return callback(null, true);
-      if (allowedOrigins.includes(origin)) return callback(null, true);
+      if (allowedOrigins.includes(normalizedOrigin)) return callback(null, true);
       return callback(null, false);
     },
     credentials: true,
@@ -166,25 +181,31 @@ app.options(
   }),
 );
 
+// set Access-Control-Allow-* headers according to computed allowedOrigins.
+// we normalize the incoming origin before checking to ensure exact-match problems don't occur.
 app.use((req, res, next) => {
-  const origin = req.headers.origin;
+  const rawOrigin = req.headers.origin;
+  const origin = normalizeOriginString(rawOrigin);
   res.setHeader('Vary', 'Origin');
 
   let originAllowed = false;
 
-  if (!origin) {
+  if (!rawOrigin) {
+    // no Origin header — allow generic request (server-to-server or curl)
     res.setHeader('Access-Control-Allow-Origin', '*');
     originAllowed = true;
   } else if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production') {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+    // dev convenience
+    res.setHeader('Access-Control-Allow-Origin', rawOrigin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     originAllowed = true;
   } else if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
+    // allowed: set the header to the *original* raw origin string (preserve case and any port)
+    res.setHeader('Access-Control-Allow-Origin', rawOrigin);
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     originAllowed = true;
   } else {
-    if (origin) console.warn('Blocked origin by CORS:', origin);
+    if (rawOrigin) console.warn('Blocked origin by CORS:', rawOrigin);
   }
 
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
@@ -194,6 +215,15 @@ app.use((req, res, next) => {
     return originAllowed ? res.sendStatus(204) : res.sendStatus(403);
   }
 
+  next();
+});
+
+// TEMP DEBUG: log incoming origin & path so you can verify the browser-sent origin string.
+// Remove this in production once debugging is done.
+app.use((req, res, next) => {
+  if (req.headers && req.headers.origin) {
+    console.info('DEBUG incoming origin:', req.headers.origin, 'path:', req.path);
+  }
   next();
 });
 
