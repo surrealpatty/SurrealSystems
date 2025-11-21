@@ -194,7 +194,7 @@
       });
     }
 
-    // Client-side validation
+    // Client-side validation: require >=8 chars, but warn (don't block) on weak passwords
     function validate() {
       if (!usernameEl || !/^[A-Za-z0-9_]{3,32}$/.test(usernameEl.value.trim())) {
         setMsg("Username must be 3–32 characters and only letters, numbers, or underscores.", "error");
@@ -211,12 +211,21 @@
         passwordEl && passwordEl.focus();
         return false;
       }
+
+      // Compute strength score so we can warn but not block
       const score = passwordScore(passwordEl.value);
       if (score < 3) {
-        setMsg("Password is too weak. Try adding numbers, uppercase letters, and symbols.", "error");
-        passwordEl && passwordEl.focus();
-        return false;
+        // Show a non-blocking warning so users know they should improve it
+        setMsg(
+          "Password meets the minimum length but is weak — consider adding numbers, uppercase letters, or symbols to make it stronger.",
+          "info"
+        );
+        // Do NOT return false: allow submission
+      } else {
+        // Clear any previous warnings
+        setMsg("", "info");
       }
+
       return true;
     }
 
