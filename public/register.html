@@ -1,144 +1,189 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>CodeCrowds - Register</title>
-    <!-- Absolute path so assets load regardless of mount point -->
-    <!-- Load global site styles first so page-specific CSS can override as needed -->
-    <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="/register.css" />
-  </head>
-  <body>
-    <main class="auth-page">
-      <section class="card" aria-labelledby="registerTitle">
-        <header class="card-header">
-          <h1 id="registerTitle">Create your account</h1>
-          <p class="subtle">
-            Join CodeCrowds and start offering your services.
-          </p>
-        </header>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Create your account — CodeCrowds</title>
 
-        <form id="registerForm" novalidate>
-          <!-- Username -->
-          <div class="field">
-            <label for="registerUsername">Username</label>
+  <!-- Fonts are loaded by the CSS, but it's fine to include fallback -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <!-- Main stylesheet -->
+  <link rel="stylesheet" href="public/style.css">
+</head>
+<body>
+
+  <div class="container container--transparent" role="document">
+    <!-- header / wordmark -->
+    <header class="site-header" role="banner">
+      <div class="header-inner">
+        <a class="site-logo" href="/index.html" aria-label="CodeCrowds home">
+          <span class="brand-wordmark" aria-hidden="true">
+            <span class="brand-code">Code</span>
+            <span class="brand-crowds">Crowds</span>
+          </span>
+        </a>
+      </div>
+    </header>
+
+    <!-- main content: left features + right register -->
+    <main role="main" aria-labelledby="register-title">
+      <!-- Left: features / hero -->
+      <section class="features" aria-label="Platform benefits">
+        <article class="feature-card">
+          <h3>Offer Your Services</h3>
+          <p>Create posts to sell your coding skills and get noticed by clients worldwide.</p>
+        </article>
+
+        <article class="feature-card">
+          <h3>Connect &amp; Collaborate</h3>
+          <p>Rate and interact with other developers, build credibility, and grow your network.</p>
+        </article>
+
+        <article class="feature-card">
+          <h3>Ad-Free &amp; Premium</h3>
+          <p>Upgrade to premium for extra features like ad-free experience, lower fees, and more visibility.</p>
+        </article>
+      </section>
+
+      <!-- Right: register card -->
+      <aside class="login-container card register-card" role="region" aria-labelledby="register-title">
+        <h2 id="register-title">Create your account</h2>
+        <p class="lead">Join CodeCrowds and start offering your services.</p>
+
+        <form id="registerForm" class="register-form" autocomplete="off" novalidate>
+          <div class="form-group">
+            <label for="username">Username</label>
             <input
-              id="registerUsername"
+              id="username"
               name="username"
               type="text"
               placeholder="e.g. dev_ally"
-              autocomplete="username"
-              required
               minlength="3"
               maxlength="32"
-            />
-            <small class="hint"
-              >3-32 characters, letters/numbers/underscores.</small
-            >
-          </div>
-
-          <!-- Email -->
-          <div class="field">
-            <label for="registerEmail">Email</label>
-            <input
-              id="registerEmail"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              autocomplete="email"
               required
-              inputmode="email"
-            />
+              aria-describedby="username-help"
+              pattern="^[A-Za-z0-9_]{3,32}$"
+              class="input"
+            >
+            <div class="muted" id="username-help">3-32 characters. Letters, numbers, underscores.</div>
           </div>
 
-          <!-- Password with toggle + strength -->
-          <div class="field">
-            <label for="registerPassword">Password</label>
-            <div class="password-row">
-              <input
-                id="registerPassword"
-                name="password"
-                type="password"
-                placeholder="Create a strong password"
-                autocomplete="new-password"
-                required
-                minlength="8"
-              />
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" placeholder="you@example.com" required class="input">
+          </div>
+
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input
+              id="password"
+              name="password"
+              type="password"
+              placeholder="Create a strong password"
+              minlength="8"
+              required
+              aria-describedby="password-help"
+              class="input"
+            >
+            <div class="password-row" role="group" aria-label="password helper">
               <button
                 type="button"
-                class="btn-icon"
                 id="togglePassword"
-                aria-controls="registerPassword"
+                class="toggle-btn"
+                aria-controls="password"
                 aria-pressed="false"
-                title="Show password"
-              >
-                Show
-              </button>
+              >Show</button>
+              <div class="muted" id="password-help">Use at least 8 characters with a mix of letters, numbers, and symbols.</div>
             </div>
-            <div
-              class="strength"
-              aria-live="polite"
-              id="passwordStrength"
-              aria-describedby="strengthHelp"
-            ></div>
-            <small id="strengthHelp" class="hint"
-              >Use at least 8 characters with a mix of letters, numbers, and
-              symbols.</small
-            >
           </div>
 
-          <!-- Description / Bio -->
-          <div class="field">
-            <label for="registerDescription"
-              >Tell us about yourself (optional)</label
-            >
+          <div class="form-group">
+            <label for="about">Tell us about yourself <span class="optional">(optional)</span></label>
             <textarea
-              id="registerDescription"
-              name="description"
-              rows="4"
+              id="about"
+              name="about"
               placeholder="What do you offer? What are your skills?"
               maxlength="400"
+              aria-describedby="about-count"
             ></textarea>
-            <div class="meta-row">
-              <small class="hint" id="descCounter">0 / 400</small>
+            <div class="muted right" id="about-count">
+              <span id="charCount" aria-live="polite">0</span> / 400
             </div>
           </div>
 
-          <!-- Submit / message / switch (grouped) -->
-          <div class="form-actions">
-            <button type="submit" class="btn-primary" id="submitBtn">
-              Create account
-            </button>
+          <div class="form-group">
+            <button type="submit" class="btn-gradient" aria-label="Create account">Create account</button>
           </div>
-
-          <!-- Live message -->
-          <p
-            id="registerMessage"
-            class="message"
-            role="status"
-            aria-live="polite"
-          ></p>
-
-          <p class="switch">
-            Already have an account?
-            <a href="/index.html">Log in</a>
-          </p>
         </form>
-      </section>
+
+        <div class="foot-note" aria-hidden="false">
+          Already have an account? <a href="/login.html">Sign in</a>
+        </div>
+      </aside>
     </main>
 
-    <!-- If JS is disabled, show a short notice.
-       The <noscript> content appears only when scripting is disabled. -->
-    <noscript class="message error noscript-note">
-      <span class="noscript-icon" aria-hidden="true">⚠️</span>
-      <span class="noscript-text"
-        >JavaScript is required to register. Please enable JavaScript in your
-        browser.</span
-      >
-    </noscript>
+    <footer class="site-footer" role="contentinfo">
+      © 2025 Code Crowds. All rights reserved.
+    </footer>
+  </div>
 
-    <!-- External JS (deferred) -->
-    <script src="/register.js" defer></script>
-  </body>
+  <script>
+    // Register page JS: password toggle, char counter, client validation
+    document.addEventListener('DOMContentLoaded', () => {
+      const toggle = document.getElementById('togglePassword');
+      const pwd = document.getElementById('password');
+      const about = document.getElementById('about');
+      const charCount = document.getElementById('charCount');
+      const form = document.getElementById('registerForm');
+
+      // Safe guards if elements are missing
+      if (toggle && pwd) {
+        toggle.addEventListener('click', () => {
+          const isHidden = pwd.type === 'password';
+          pwd.type = isHidden ? 'text' : 'password';
+          toggle.textContent = isHidden ? 'Hide' : 'Show';
+          toggle.setAttribute('aria-pressed', String(isHidden));
+        });
+      }
+
+      if (about && charCount) {
+        // initialize
+        charCount.textContent = about.value ? about.value.length : 0;
+        about.addEventListener('input', () => {
+          charCount.textContent = about.value.length;
+        });
+      }
+
+      if (form) {
+        form.addEventListener('submit', (e) => {
+          e.preventDefault();
+
+          // Username pattern check
+          const usernameEl = document.getElementById('username');
+          const username = usernameEl ? usernameEl.value.trim() : '';
+          const usernamePattern = /^[A-Za-z0-9_]{3,32}$/;
+          if (!usernamePattern.test(username)) {
+            alert('Username must be 3-32 characters and contain only letters, numbers or underscores.');
+            usernameEl && usernameEl.focus();
+            return;
+          }
+
+          // Browser-level validation for email and password will run if elements use required/type/minlength.
+          // If you want to force the browser's validation report:
+          if (!form.checkValidity()) {
+            // Let the browser display the native validation UI:
+            form.reportValidity();
+            return;
+          }
+
+          // TODO: Replace with your real AJAX / fetch submission to the server.
+          // Example:
+          // fetch('/api/register', { method: 'POST', body: new FormData(form) }).then(...)
+          alert('Form validated locally — replace with real submission logic.');
+        });
+      }
+    });
+  </script>
+</body>
 </html>
