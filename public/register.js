@@ -27,13 +27,24 @@
     }
 
     // Helpers
-    function setMsg(text, type) {
+    function setMsg(text, type = "info", allowHtml = false) {
       if (!msg) {
         console[type === "error" ? "error" : "log"]("[register] " + text);
         return;
       }
-      msg.textContent = text || "";
+      if (allowHtml) msg.innerHTML = text || "";
+      else msg.textContent = text || "";
       msg.className = "message " + (type || "info");
+      msg.style.display = text ? "" : "none";
+    }
+
+    function escapeHtml(s) {
+      return String(s || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
     function passwordScore(pw) {
@@ -66,12 +77,14 @@
       return new URL("profile.html", window.location.href).toString();
     }
 
+    // POST JSON and include same-origin credentials so cookies are handled
     async function postJSON(url, body) {
       try {
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(body),
+          credentials: "same-origin", // <-- important for HttpOnly cookie
         });
         const text = await res.text();
         let data = {};
@@ -91,8 +104,7 @@
         try {
           localStorage.setItem("token", d.token);
           localStorage.setItem("userId", d.user.id);
-          if (d.user.username)
-            localStorage.setItem("username", d.user.username);
+          if (d.user.username) localStorage.setItem("username", d.user.username);
         } catch (e) {
           console.warn("Could not save auth to localStorage", e);
         }
@@ -111,71 +123,52 @@
 
     // New: robust error extractor
     function extractErrorText(resp) {
-      // resp is r.data (parsed JSON)
       if (!resp) return null;
-
-      // If server returned a plain string
       if (typeof resp === "string" && resp.trim()) return resp;
-
-      // If server used top-level message
-      if (typeof resp.message === "string" && resp.message.trim())
-        return resp.message;
-
-      // If server used "error" as a string
-      if (typeof resp.error === "string" && resp.error.trim())
-        return resp.error;
-
-      // If server used "error" as an object with .message
+      if (typeof resp.message === "string" && resp.message.trim()) return resp.message;
+      if (typeof resp.error === "string" && resp.error.trim()) return resp.error;
       if (typeof resp.error === "object" && resp.error !== null) {
         if (typeof resp.error.message === "string" && resp.error.message.trim())
           return resp.error.message;
-        // sometimes validation details are attached
         if (Array.isArray(resp.error.details) && resp.error.details.length) {
           try {
             return resp.error.details
-              .map((d) =>
-                typeof d === "string" ? d : d.message || JSON.stringify(d),
-              )
+              .map((d) => (typeof d === "string" ? d : d.message || JSON.stringify(d)))
               .join("; ");
-          } catch (e) {
-            /* fallthrough */
-          }
+          } catch (e) {}
         }
       }
-
-      // If server returned an "errors" array or "details"
       if (Array.isArray(resp.errors) && resp.errors.length) {
         try {
           return resp.errors
-            .map((e) =>
-              typeof e === "string" ? e : e.message || JSON.stringify(e),
-            )
+            .map((e) => (typeof e === "string" ? e : e.message || JSON.stringify(e)))
             .join("; ");
-        } catch (e) {
-          /* fallthrough */
-        }
+        } catch (e) {}
       }
       if (Array.isArray(resp.details) && resp.details.length) {
         try {
           return resp.details
-            .map((e) =>
-              typeof e === "string" ? e : e.message || JSON.stringify(e),
-            )
+            .map((e) => (typeof e === "string" ? e : e.message || JSON.stringify(e)))
             .join("; ");
-        } catch (e) {
-          /* fallthrough */
-        }
+        } catch (e) {}
       }
-
-      // Fallback to JSON string if object has content
       try {
         const s = JSON.stringify(resp);
         if (s && s !== "{}" && s !== "[]") return s;
-      } catch (e) {
-        /* ignore */
-      }
-
+      } catch (e) {}
       return null;
+    }
+
+    // Render list of validation items (if present)
+    function renderValidationDetails(resp) {
+      if (!resp || !resp.error) return null;
+      const details = resp.error.details || resp.errors || resp.details;
+      if (!Array.isArray(details) || !details.length) return null;
+      const items = details
+        .map((d) => (typeof d === "string" ? escapeHtml(d) : escapeHtml(d.message || JSON.stringify(d))))
+        .map((t) => `<li>${t}</li>`)
+        .join("");
+      return `<div class="validation-details"><strong>Problems:</strong><ul>${items}</ul></div>`;
     }
 
     // Event wiring (guard elements)
@@ -203,8 +196,8 @@
 
     // Client-side validation
     function validate() {
-      if (!usernameEl || usernameEl.value.trim().length < 3) {
-        setMsg("Username must be at least 3 characters.", "error");
+      if (!usernameEl || !/^[A-Za-z0-9_]{3,32}$/.test(usernameEl.value.trim())) {
+        setMsg("Username must be 3–32 characters and only letters, numbers, or underscores.", "error");
         usernameEl && usernameEl.focus();
         return false;
       }
@@ -218,13 +211,19 @@
         passwordEl && passwordEl.focus();
         return false;
       }
+      const score = passwordScore(passwordEl.value);
+      if (score < 3) {
+        setMsg("Password is too weak. Try adding numbers, uppercase letters, and symbols.", "error");
+        passwordEl && passwordEl.focus();
+        return false;
+      }
       return true;
     }
 
     // Submit handler
     form.addEventListener("submit", function (e) {
       e.preventDefault();
-      setMsg("");
+      setMsg("", "info");
       if (!validate()) return;
 
       const payload = {
@@ -274,16 +273,19 @@
                 return;
               }
             } catch (e) {
-              // swallow — will fall through to error message below
               console.warn("Post-registration login attempt failed", e);
             }
           }
 
-          // New: use extractErrorText to avoid showing [object Object]
+          // Show validation details if available
+          const validationHtml = renderValidationDetails(r.data);
           const extracted = extractErrorText(r.data);
-          const errText =
-            extracted || "Registration failed (HTTP " + r.status + ")";
-          setMsg(errText, "error");
+          if (validationHtml) {
+            setMsg(`<div class="register-error"><p>${escapeHtml(extracted || "Validation failed")}</p>${validationHtml}</div>`, "error", true);
+          } else {
+            const errText = extracted || "Registration failed (HTTP " + r.status + ")";
+            setMsg(errText, "error");
+          }
         })
         .catch(function (err) {
           console.error("[register] network error:", err);
