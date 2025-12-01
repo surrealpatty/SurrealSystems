@@ -1,304 +1,254 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Your Profile · CodeCrowds</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>CodeCrowds – Your Profile</title>
+    <meta name="description" content="Your CodeCrowds profile." />
 
-  <link
-    rel="stylesheet"
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
-  />
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@300;400;600&display=swap"
+      rel="stylesheet"
+    >
 
-  <style>
-    :root {
-      --bg: #020617;
-      --bg-card: #020617;
-      --border-subtle: #1f2937;
-      --accent: #3b82f6;
-      --accent-soft: rgba(59, 130, 246, 0.12);
-      --text-main: #e5e7eb;
-      --text-muted: #9ca3af;
-      --radius-xl: 1.25rem;
-    }
+    <!-- if style.css has your global layout, keep this -->
+    <link rel="stylesheet" href="style.css" />
 
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI',
-        sans-serif;
-      background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
-      color: var(--text-main);
-      display: flex;
-      justify-content: center;
-    }
-
-    .page {
-      width: 100%;
-      max-width: 1100px;
-      padding: 24px 16px 40px;
-    }
-
-    .topbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 24px;
-    }
-
-    .logo-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-weight: 600;
-      color: var(--text-main);
-      text-decoration: none;
-      font-size: 1.1rem;
-    }
-
-    .logo-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #22c55e, #3b82f6);
-    }
-
-    .avatar-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      background: #020617;
-      font-size: 0.85rem;
-    }
-
-    .avatar-circle {
-      width: 28px;
-      height: 28px;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #3b82f6, #22c55e);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 600;
-      font-size: 0.9rem;
-      color: #0b1120;
-    }
-
-    .layout {
-      display: grid;
-      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
-      gap: 24px;
-    }
-
-    @media (max-width: 900px) {
-      .layout {
-        grid-template-columns: minmax(0, 1fr);
+    <style>
+      /* lightweight profile-specific styles on top of your global ones */
+      body {
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
-    }
 
-    .card {
-      border-radius: var(--radius-xl);
-      border: 1px solid var(--border-subtle);
-      background: rgba(15, 23, 42, 0.96);
-      padding: 20px 18px 22px;
-      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.6);
-    }
+      .profile-wrapper {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 2rem 1rem 3rem;
+      }
 
-    .card h2 {
-      margin: 0 0 6px;
-      font-size: 1.3rem;
-    }
+      .profile-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+      }
 
-    .card p {
-      margin: 0 0 14px;
-      font-size: 0.9rem;
-      color: var(--text-muted);
-    }
+      .profile-brand {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        color: #ffffff;
+        font-weight: 600;
+      }
 
-    .profile-rows {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-      margin-top: 10px;
-    }
+      .profile-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #22c55e, #3b82f6);
+      }
 
-    .row-label {
-      font-size: 0.8rem;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
+      .profile-user-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.4rem 0.75rem;
+        border-radius: 999px;
+        border: 1px solid rgba(148, 163, 184, 0.5);
+        background: rgba(15, 23, 42, 0.9);
+        color: #e5e7eb;
+        font-size: 0.85rem;
+      }
 
-    .row-value {
-      font-size: 0.95rem;
-      font-weight: 500;
-    }
+      .profile-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 999px;
+        background: linear-gradient(135deg, #3b82f6, #22c55e);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        color: #020617;
+      }
 
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 4px 9px;
-      border-radius: 999px;
-      background: var(--accent-soft);
-      font-size: 0.78rem;
-      color: #bfdbfe;
-    }
+      .profile-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+        gap: 1.5rem;
+      }
 
-    .badge-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 999px;
-      background: var(--accent);
-    }
+      @media (max-width: 768px) {
+        .profile-layout {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
 
-    .services-list {
-      margin-top: 8px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
+      .profile-card,
+      .services-card {
+        border-radius: 1.25rem;
+        border: 1px solid rgba(51, 65, 85, 0.9);
+        background: rgba(15, 23, 42, 0.96);
+        padding: 1.25rem 1.1rem 1.4rem;
+      }
 
-    .service-item {
-      padding: 10px 10px;
-      border-radius: 0.9rem;
-      border: 1px solid #1f2937;
-      background: #020617;
-    }
+      .profile-card h2,
+      .services-card h2 {
+        margin: 0 0 0.4rem;
+        font-size: 1.3rem;
+      }
 
-    .service-item h3 {
-      margin: 0 0 4px;
-      font-size: 0.95rem;
-    }
+      .profile-card p,
+      .services-card p {
+        margin: 0 0 0.8rem;
+        font-size: 0.9rem;
+        color: #9ca3af;
+      }
 
-    .service-item p {
-      margin: 0;
-      font-size: 0.82rem;
-      color: var(--text-muted);
-    }
+      .profile-row {
+        margin-bottom: 0.75rem;
+      }
 
-    .primary-btn {
-      margin-top: 10px;
-      border: none;
-      border-radius: 999px;
-      padding: 9px 13px;
-      font-size: 0.9rem;
-      font-weight: 600;
-      background: linear-gradient(135deg, #3b82f6, #22c55e);
-      color: #0b1120;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
+      .profile-label {
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: #9ca3af;
+      }
 
-    .primary-btn:hover {
-      filter: brightness(1.05);
-    }
+      .profile-value {
+        font-size: 0.95rem;
+        font-weight: 500;
+        color: #e5e7eb;
+      }
 
-    footer {
-      margin-top: 20px;
-      font-size: 0.8rem;
-      color: #4b5563;
-      text-align: center;
-    }
-  </style>
-</head>
-<body>
-  <div class="page">
-    <header class="topbar">
-      <a href="/login.html" class="logo-link">
-        <span class="logo-dot"></span>
-        <span>CodeCrowds</span>
-      </a>
+      .btn-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.55rem 0.95rem;
+        border-radius: 999px;
+        border: none;
+        background: linear-gradient(135deg, #3b82f6, #22c55e);
+        color: #020617;
+        font-size: 0.9rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 0.75rem;
+      }
 
-      <div class="avatar-pill">
-        <div class="avatar-circle" id="avatarInitial">U</div>
-        <span id="profileEmail">you@example.com</span>
-      </div>
-    </header>
+      .btn-primary:hover {
+        filter: brightness(1.06);
+      }
 
-    <main class="layout">
-      <!-- Left: profile info -->
-      <section class="card">
-        <h2>Your profile</h2>
-        <p>Manage your public info and see how clients will see you.</p>
+      .services-empty {
+        margin-top: 0.4rem;
+        padding: 0.6rem 0.7rem;
+        border-radius: 0.9rem;
+        border: 1px solid rgba(55, 65, 81, 0.9);
+        background: #020617;
+        font-size: 0.85rem;
+        color: #9ca3af;
+      }
 
-        <div class="profile-rows">
-          <div>
-            <div class="row-label">Display name</div>
-            <div class="row-value" id="displayName">New developer</div>
-          </div>
-          <div>
-            <div class="row-label">Email</div>
-            <div class="row-value" id="emailField">you@example.com</div>
-          </div>
-          <div>
-            <div class="row-label">Account type</div>
-            <div class="row-value">
-              Free user
-              <span class="badge">
-                <span class="badge-dot"></span>
-                Upgrade to premium
-              </span>
-            </div>
-          </div>
+      .profile-footer {
+        text-align: center;
+        margin-top: 1.5rem;
+        font-size: 0.8rem;
+        color: #6b7280;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="profile-wrapper">
+      <header class="profile-header">
+        <a href="/" class="profile-brand">
+          <span class="profile-dot"></span>
+          <span>CodeCrowds</span>
+        </a>
+
+        <div class="profile-user-pill">
+          <div class="profile-avatar" id="profileAvatar">U</div>
+          <span id="profileEmail">you@example.com</span>
         </div>
+      </header>
 
-        <button class="primary-btn" type="button">
-          Edit profile (coming soon)
-        </button>
-      </section>
+      <main class="profile-layout">
+        <!-- Left: profile details -->
+        <section class="profile-card">
+          <h2>Your profile</h2>
+          <p>Here’s how clients will see you on CodeCrowds.</p>
 
-      <!-- Right: services / activity -->
-      <section class="card">
-        <h2>Your services</h2>
-        <p>Once you start posting, your services will appear here.</p>
+          <div class="profile-row">
+            <div class="profile-label">Display name</div>
+            <div class="profile-value" id="profileName">New developer</div>
+          </div>
 
-        <div class="services-list">
-          <article class="service-item">
-            <h3>No services yet</h3>
-            <p>Create your first service to start attracting clients.</p>
-          </article>
-        </div>
+          <div class="profile-row">
+            <div class="profile-label">Email</div>
+            <div class="profile-value" id="profileEmailMain">you@example.com</div>
+          </div>
 
-        <button class="primary-btn" type="button">
-          Create a new service
-        </button>
-      </section>
-    </main>
+          <div class="profile-row">
+            <div class="profile-label">Account type</div>
+            <div class="profile-value">Free user</div>
+          </div>
 
-    <footer>© 2025 CodeCrowds. All rights reserved.</footer>
-  </div>
+          <button class="btn-primary" type="button">Edit profile (coming soon)</button>
+        </section>
 
-  <script>
-    // Read email from query string (?email=...)
-    const params = new URLSearchParams(window.location.search);
-    const email = params.get('email');
+        <!-- Right: services / activity -->
+        <section class="services-card">
+          <h2>Your services</h2>
+          <p>Once you start posting, your services will appear here.</p>
 
-    if (email) {
-      const emailField = document.getElementById('emailField');
-      const profileEmail = document.getElementById('profileEmail');
-      const avatarInitial = document.getElementById('avatarInitial');
-      const displayName = document.getElementById('displayName');
+          <div class="services-empty">
+            You don’t have any services yet. Create one to start attracting clients.
+          </div>
 
-      emailField.textContent = email;
-      profileEmail.textContent = email;
+          <button class="btn-primary" type="button">
+            Create a service
+          </button>
+        </section>
+      </main>
 
-      const initial = email.trim()[0] || 'U';
-      avatarInitial.textContent = initial.toUpperCase();
+      <footer class="profile-footer">
+        © 2025 CodeCrowds. All rights reserved.
+      </footer>
+    </div>
 
-      // Very simple display name guess: part before @
-      const namePart = email.split('@')[0];
-      displayName.textContent = namePart || 'New developer';
-    }
-  </script>
-</body>
+    <script>
+      // Read query parameters from URL (e.g. ?username=dev_ally&email=x@y.com)
+      const params = new URLSearchParams(window.location.search);
+      const username = params.get("username") || "";
+      const email = params.get("email") || "";
+
+      const avatarEl = document.getElementById("profileAvatar");
+      const emailBadge = document.getElementById("profileEmail");
+      const emailMain = document.getElementById("profileEmailMain");
+      const nameEl = document.getElementById("profileName");
+
+      if (email) {
+        emailBadge.textContent = email;
+        emailMain.textContent = email;
+      }
+
+      let displayName = username;
+      if (!displayName && email) {
+        displayName = email.split("@")[0];
+      }
+      if (displayName) {
+        nameEl.textContent = displayName;
+      }
+
+      const initialSource = displayName || email;
+      if (initialSource) {
+        avatarEl.textContent = initialSource.trim()[0].toUpperCase();
+      }
+    </script>
+  </body>
 </html>
