@@ -2,6 +2,9 @@
 // Simple profile page logic: load name/email/description + edit & save using localStorage.
 
 document.addEventListener("DOMContentLoaded", () => {
+  const DEFAULT_DESCRIPTION =
+    "Write a short bio so clients know what you do.";
+
   // ---- Load profile from localStorage or URL ----
   const storedUsername = localStorage.getItem("username") || "";
   const storedEmail = localStorage.getItem("email") || "";
@@ -10,14 +13,10 @@ document.addEventListener("DOMContentLoaded", () => {
   const params = new URLSearchParams(window.location.search);
   const paramUsername = params.get("username") || "";
   const paramEmail = params.get("email") || "";
-  const paramDescription = params.get("description") || "";
 
   const username = storedUsername || paramUsername || "";
   const email = storedEmail || paramEmail || "";
-  const description =
-    storedDescription ||
-    paramDescription ||
-    "Write a short bio so clients know what you do.";
+  const description = storedDescription || "";
 
   const avatarEl = document.getElementById("profileAvatar");
   const emailBadge = document.getElementById("profileEmail");
@@ -25,6 +24,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const nameEl = document.getElementById("profileName");
   const descEl = document.getElementById("profileDescription");
 
+  // --- Fill view mode ---
   if (email && emailBadge && emailMain) {
     emailBadge.textContent = email;
     emailMain.textContent = email;
@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   if (descEl) {
-    descEl.textContent = description;
+    descEl.textContent = description || DEFAULT_DESCRIPTION;
   }
 
   const initialSource = displayName || email || "U";
@@ -66,7 +66,9 @@ document.addEventListener("DOMContentLoaded", () => {
       editEmailInput.value = emailMain.textContent.trim();
     }
     if (editDescriptionInput && descEl) {
-      editDescriptionInput.value = descEl.textContent.trim();
+      const current = descEl.textContent.trim();
+      editDescriptionInput.value =
+        current === DEFAULT_DESCRIPTION ? "" : current;
     }
 
     profileView.classList.add("is-hidden");
@@ -93,11 +95,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!editEmailInput) return;
 
-      const newName =
-        editDisplayNameInput ? editDisplayNameInput.value.trim() : "";
+      const newName = editDisplayNameInput
+        ? editDisplayNameInput.value.trim()
+        : "";
       const newEmail = editEmailInput.value.trim();
-      const newDesc =
-        editDescriptionInput ? editDescriptionInput.value.trim() : "";
+      const newDescription = editDescriptionInput
+        ? editDescriptionInput.value.trim()
+        : "";
 
       if (!newEmail) {
         alert("Email is required.");
@@ -116,8 +120,7 @@ document.addEventListener("DOMContentLoaded", () => {
         emailMain.textContent = newEmail;
       }
       if (descEl) {
-        descEl.textContent =
-          newDesc || "Write a short bio so clients know what you do.";
+        descEl.textContent = newDescription || DEFAULT_DESCRIPTION;
       }
 
       // Update avatar initial
@@ -131,7 +134,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("email", newEmail);
         const usernameToStore = newName || newEmail.split("@")[0];
         localStorage.setItem("username", usernameToStore);
-        localStorage.setItem("description", newDesc);
+        localStorage.setItem("description", newDescription);
       } catch (err) {
         console.warn("Could not save updated profile to localStorage", err);
       }
