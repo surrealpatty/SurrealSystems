@@ -288,7 +288,8 @@
         color: var(--text-muted);
       }
 
-      .profile-edit-input {
+      .profile-edit-input,
+      .profile-edit-textarea {
         width: 100%;
         box-sizing: border-box;
         padding: 8px 10px;
@@ -296,12 +297,21 @@
         border: 1px solid #374151;
         background: #020617;
         color: var(--text-main);
+        font-family: inherit;
+        font-size: 0.95rem;
       }
 
-      .profile-edit-input:focus {
+      .profile-edit-input:focus,
+      .profile-edit-textarea:focus {
         outline: none;
         border-color: var(--accent);
         box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
+      }
+
+      .profile-edit-hint {
+        margin: 0;
+        font-size: 0.8rem;
+        color: var(--text-muted);
       }
 
       .profile-edit-actions {
@@ -383,6 +393,13 @@
               </div>
 
               <div class="profile-row">
+                <div class="profile-label">Description</div>
+                <div class="profile-value" id="profileDescription">
+                  Write a short bio so clients know what you do.
+                </div>
+              </div>
+
+              <div class="profile-row">
                 <div class="profile-label">Account type</div>
                 <div class="profile-value">Free user</div>
               </div>
@@ -421,6 +438,19 @@
                 />
               </div>
 
+              <div class="profile-edit-row">
+                <label for="editDescription" class="profile-edit-label">Description</label>
+                <textarea
+                  id="editDescription"
+                  class="profile-edit-textarea"
+                  rows="4"
+                  placeholder="Tell clients what you do, your skills, and what makes you great to work with."
+                ></textarea>
+                <p class="profile-edit-hint">
+                  This appears on your public profile. Keep it short and clear.
+                </p>
+              </div>
+
               <div class="profile-edit-actions">
                 <button type="submit" class="btn btn-primary">Save changes</button>
                 <button type="button" class="btn btn-muted" id="cancelEditBtn">
@@ -456,7 +486,7 @@
       </footer>
     </div>
 
-    <!-- IMPORTANT: external script only; no inline JS -->
+    <!-- External script only (CSP-safe) -->
     <script src="profile.js" defer></script>
   </body>
 </html>

@@ -1,22 +1,29 @@
 // public/profile.js
-// Simple profile page logic: load name/email + edit & save using localStorage.
+// Simple profile page logic: load name/email/description + edit & save using localStorage.
 
 document.addEventListener("DOMContentLoaded", () => {
   // ---- Load profile from localStorage or URL ----
   const storedUsername = localStorage.getItem("username") || "";
   const storedEmail = localStorage.getItem("email") || "";
+  const storedDescription = localStorage.getItem("description") || "";
 
   const params = new URLSearchParams(window.location.search);
   const paramUsername = params.get("username") || "";
   const paramEmail = params.get("email") || "";
+  const paramDescription = params.get("description") || "";
 
   const username = storedUsername || paramUsername || "";
   const email = storedEmail || paramEmail || "";
+  const description =
+    storedDescription ||
+    paramDescription ||
+    "Write a short bio so clients know what you do.";
 
   const avatarEl = document.getElementById("profileAvatar");
   const emailBadge = document.getElementById("profileEmail");
   const emailMain = document.getElementById("profileEmailMain");
   const nameEl = document.getElementById("profileName");
+  const descEl = document.getElementById("profileDescription");
 
   if (email && emailBadge && emailMain) {
     emailBadge.textContent = email;
@@ -31,6 +38,10 @@ document.addEventListener("DOMContentLoaded", () => {
     nameEl.textContent = displayName;
   }
 
+  if (descEl) {
+    descEl.textContent = description;
+  }
+
   const initialSource = displayName || email || "U";
   if (avatarEl && initialSource) {
     avatarEl.textContent = initialSource.trim()[0].toUpperCase();
@@ -43,6 +54,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const cancelEditBtn = document.getElementById("cancelEditBtn");
   const editDisplayNameInput = document.getElementById("editDisplayName");
   const editEmailInput = document.getElementById("editEmail");
+  const editDescriptionInput = document.getElementById("editDescription");
 
   function enterEditMode() {
     if (!profileView || !profileEditForm) return;
@@ -52,6 +64,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
     if (editEmailInput && emailMain) {
       editEmailInput.value = emailMain.textContent.trim();
+    }
+    if (editDescriptionInput && descEl) {
+      editDescriptionInput.value = descEl.textContent.trim();
     }
 
     profileView.classList.add("is-hidden");
@@ -81,6 +96,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const newName =
         editDisplayNameInput ? editDisplayNameInput.value.trim() : "";
       const newEmail = editEmailInput.value.trim();
+      const newDesc =
+        editDescriptionInput ? editDescriptionInput.value.trim() : "";
 
       if (!newEmail) {
         alert("Email is required.");
@@ -98,6 +115,10 @@ document.addEventListener("DOMContentLoaded", () => {
       if (emailMain) {
         emailMain.textContent = newEmail;
       }
+      if (descEl) {
+        descEl.textContent =
+          newDesc || "Write a short bio so clients know what you do.";
+      }
 
       // Update avatar initial
       if (avatarEl) {
@@ -110,6 +131,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("email", newEmail);
         const usernameToStore = newName || newEmail.split("@")[0];
         localStorage.setItem("username", usernameToStore);
+        localStorage.setItem("description", newDesc);
       } catch (err) {
         console.warn("Could not save updated profile to localStorage", err);
       }
