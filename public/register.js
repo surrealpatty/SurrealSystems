@@ -1,10 +1,31 @@
 // public/register.js
-// Registration form logic (deferred script)
+// Shared logic for:
+//  - Login page: show/hide password
+//  - Register page: form, validation, show/hide, strength, API calls
 
 (function () {
   "use strict";
 
   document.addEventListener("DOMContentLoaded", function () {
+    // -----------------------------
+    // LOGIN PAGE: show/hide password
+    // -----------------------------
+    const loginPasswordInput = document.getElementById("password");
+    const loginTogglePassword = document.getElementById("togglePassword");
+
+    if (loginPasswordInput && loginTogglePassword) {
+      loginTogglePassword.addEventListener("click", function () {
+        const isHidden = loginPasswordInput.type === "password";
+        loginPasswordInput.type = isHidden ? "text" : "password";
+        loginTogglePassword.textContent = isHidden ? "Hide" : "Show";
+        loginTogglePassword.setAttribute("aria-pressed", String(isHidden));
+        loginTogglePassword.title = isHidden ? "Hide password" : "Show password";
+      });
+    }
+
+    // -----------------------------
+    // REGISTER PAGE: full logic
+    // -----------------------------
     // Config
     const API_URL = "/api"; // adjust if your server is mounted elsewhere
     const USERS = API_URL + "/users";
@@ -21,8 +42,9 @@
     const togglePasswordBtn = document.getElementById("togglePassword");
     const strengthEl = document.getElementById("passwordStrength");
 
+    // If there's no register form on this page (e.g. login page), stop register logic
     if (!form) {
-      console.warn("register.js: registerForm not found, aborting script.");
+      console.warn("register.js: registerForm not found, skipping register wiring (probably login page).");
       return;
     }
 
@@ -165,7 +187,11 @@
       const details = resp.error.details || resp.errors || resp.details;
       if (!Array.isArray(details) || !details.length) return null;
       const items = details
-        .map((d) => (typeof d === "string" ? escapeHtml(d) : escapeHtml(d.message || JSON.stringify(d))))
+        .map((d) =>
+          typeof d === "string"
+            ? escapeHtml(d)
+            : escapeHtml(d.message || JSON.stringify(d))
+        )
         .map((t) => `<li>${t}</li>`)
         .join("");
       return `<div class="validation-details"><strong>Problems:</strong><ul>${items}</ul></div>`;
@@ -178,7 +204,7 @@
       });
     }
 
-    // SHOW / HIDE PASSWORD for register page
+    // Register page: show/hide password
     if (togglePasswordBtn && passwordEl) {
       togglePasswordBtn.addEventListener("click", function () {
         const isPwd = passwordEl.type === "password";
@@ -198,7 +224,10 @@
     // Client-side validation: require >=8 chars, but warn (don't block) on weak passwords
     function validate() {
       if (!usernameEl || !/^[A-Za-z0-9_]{3,32}$/.test(usernameEl.value.trim())) {
-        setMsg("Username must be 3–32 characters and only letters, numbers, or underscores.", "error");
+        setMsg(
+          "Username must be 3–32 characters and only letters, numbers, or underscores.",
+          "error"
+        );
         usernameEl && usernameEl.focus();
         return false;
       }
@@ -250,8 +279,10 @@
 
           if (r.ok && r.data && r.data.user) {
             try {
-              if (r.data.user.id != null) localStorage.setItem("userId", String(r.data.user.id));
-              if (r.data.user.username) localStorage.setItem("username", r.data.user.username);
+              if (r.data.user.id != null)
+                localStorage.setItem("userId", String(r.data.user.id));
+              if (r.data.user.username)
+                localStorage.setItem("username", r.data.user.username);
             } catch (e) {
               console.warn("Could not save user info locally", e);
             }
@@ -298,12 +329,15 @@
           const extracted = extractErrorText(r.data);
           if (validationHtml) {
             setMsg(
-              `<div class="register-error"><p>${escapeHtml(extracted || "Validation failed")}</p>${validationHtml}</div>`,
+              `<div class="register-error"><p>${escapeHtml(
+                extracted || "Validation failed"
+              )}</p>${validationHtml}</div>`,
               "error",
               true
             );
           } else {
-            const errText = extracted || "Registration failed (HTTP " + r.status + ")";
+            const errText =
+              extracted || "Registration failed (HTTP " + r.status + ")";
             setMsg(errText, "error");
           }
         })
