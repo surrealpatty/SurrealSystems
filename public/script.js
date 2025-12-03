@@ -219,19 +219,41 @@ function getDescription(u = {}) {
 /* ============================== Login wiring ============================= */
 function initLoginPage() {
   const form = document.getElementById("loginForm");
-  if (!form) return;
+  if (!form) return; // not on this page
+
+  const emailInput = document.getElementById("email");
+  const passwordInput = document.getElementById("password");
+  const togglePassword = document.getElementById("togglePassword");
   const msg = document.getElementById("loginMessage");
+
+  // Show/hide password toggle
+  if (passwordInput && togglePassword) {
+    togglePassword.addEventListener("click", () => {
+      const isHidden = passwordInput.type === "password";
+      passwordInput.type = isHidden ? "text" : "password";
+      togglePassword.textContent = isHidden ? "Hide" : "Show";
+      togglePassword.setAttribute("aria-pressed", String(isHidden));
+    });
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    hide(msg);
-    setText(msg, "");
 
-    const email = document.getElementById("loginEmail")?.value?.trim();
-    const password = document.getElementById("loginPassword")?.value;
+    if (msg) {
+      hide(msg);
+      setText(msg, "");
+    }
+
+    const email = emailInput?.value?.trim();
+    const password = passwordInput?.value || "";
+
     if (!email || !password) {
-      show(msg);
-      setText(msg, "Email and password required");
+      if (msg) {
+        show(msg);
+        setText(msg, "Email and password required");
+      } else {
+        alert("Email and password required");
+      }
       return;
     }
 
@@ -255,28 +277,27 @@ function initLoginPage() {
           const dn = getDisplayName(user);
           if (dn) localStorage.setItem("username", dn);
         } catch {}
-        location.replace("profile.html");
-        return;
       }
 
-      // No token returned but API call was successful. Assume server set an HttpOnly cookie.
-      // Redirect to profile page.
+      // Redirect to profile page (token may also be in cookie)
       location.replace("profile.html");
     } catch (err) {
-      show(msg);
-      // Provide clearer guidance for 405 and other specific statuses
-      const status = err && err.status ? err.status : null;
-      if (status === 405) {
-        setText(
-          msg,
-          "Login failed: server returned 'Method Not Allowed' (405). " +
-          "This indicates the backend rejected the POST. Check the API URL, server routing, and allowed methods. " +
-          "Open DevTools Network to inspect the request/response."
-        );
-      } else if (status === 401 || status === 403) {
-        setText(msg, "Login failed: invalid credentials or access denied.");
+      if (msg) {
+        show(msg);
+        const status = err && err.status ? err.status : null;
+        if (status === 401 || status === 403) {
+          setText(msg, "Login failed: invalid credentials or access denied.");
+        } else if (status === 405) {
+          setText(
+            msg,
+            "Login failed: server returned 'Method Not Allowed' (405). " +
+              "Check the API URL, server routing, and allowed methods."
+          );
+        } else {
+          setText(msg, err && err.message ? err.message : "Login failed");
+        }
       } else {
-        setText(msg, err && err.message ? err.message : "Login failed");
+        alert(err && err.message ? err.message : "Login failed");
       }
     }
   });
@@ -287,11 +308,15 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hide action rail by default if user not logged in (extra safety for public pages)
   try {
     if (!isLoggedIn()) {
-      document.querySelectorAll('.action-rail, .mobile-button-row').forEach(el => el && el.classList.add('hidden'));
+      document
+        .querySelectorAll(".action-rail, .mobile-button-row")
+        .forEach((el) => el && el.classList.add("hidden"));
     } else {
-      document.body.classList.add('logged-in');
+      document.body.classList.add("logged-in");
     }
-  } catch (e) { /* ignore */ }
+  } catch (e) {
+    /* ignore */
+  }
 
   initLoginPage();
 });
