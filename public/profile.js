@@ -6,6 +6,25 @@ document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_DESCRIPTION =
     "Write a short bio so clients know what you do.";
 
+  // Small helper to find an auth token in localStorage
+  function findAuthToken() {
+    const possibleKeys = ["token", "authToken", "jwt", "accessToken", "userToken"];
+
+    for (const key of possibleKeys) {
+      const value = localStorage.getItem(key);
+      if (value) {
+        console.log("Using auth token from localStorage key:", key);
+        return value;
+      }
+    }
+
+    console.warn(
+      "No auth token found in localStorage. Keys present:",
+      Object.keys(localStorage)
+    );
+    return null;
+  }
+
   // ---- Load profile from localStorage or URL ----
   const storedUsername = localStorage.getItem("username") || "";
   const storedEmail = localStorage.getItem("email") || "";
@@ -170,8 +189,8 @@ document.addEventListener("DOMContentLoaded", () => {
     createServiceForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      // ✅ REQUIRE the same token key used on login/services page
-      const token = localStorage.getItem("token");
+      // ✅ Look for token under several keys
+      const token = findAuthToken();
       if (!token) {
         alert("Please log in again to create a service.");
         window.location.href = "index.html";
