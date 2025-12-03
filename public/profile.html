@@ -388,7 +388,7 @@
                 <div class="profile-value">Free user</div>
               </div>
 
-              <!-- ✅ TOP BUTTONS: Edit + My Services -->
+              <!-- TOP BUTTONS: Edit + My Services -->
               <div class="btn-row">
                 <button type="button" class="btn btn-primary" id="editProfileBtn">
                   Edit Profile
@@ -454,27 +454,18 @@
               You don’t have any services yet. Create one to start attracting clients.
             </div>
 
-            <!-- ✅ BOTTOM BUTTONS: Create dropdown + View services -->
+            <!-- BOTTOM BUTTONS: Create dropdown + View services -->
             <div class="btn-row">
-              <button
-                type="button"
-                class="btn btn-primary"
-                onclick="document.getElementById('createServicePanel').classList.toggle('is-hidden')"
-              >
+              <button type="button" class="btn btn-primary" id="createServiceBtn">
                 Create Service
               </button>
-
               <a href="services.html" class="btn btn-secondary">
                 View My Services
               </a>
             </div>
 
-            <!-- ✅ DROPDOWN / SLIDE-DOWN CREATE-SERVICE PANEL -->
-            <form
-              id="createServicePanel"
-              class="service-panel is-hidden"
-              onsubmit="event.preventDefault(); alert('Service form submitted – wire this up to your backend when ready.'); this.reset(); this.classList.add('is-hidden');"
-            >
+            <!-- DROPDOWN CREATE-SERVICE PANEL -->
+            <form id="createServiceForm" class="service-panel is-hidden">
               <div class="profile-edit-row">
                 <label for="serviceTitle" class="profile-edit-label">Service title</label>
                 <input
@@ -518,11 +509,7 @@
                 <button type="submit" class="btn btn-primary">
                   Save service
                 </button>
-                <button
-                  type="button"
-                  class="btn btn-muted"
-                  onclick="document.getElementById('createServicePanel').classList.add('is-hidden')"
-                >
+                <button type="button" class="btn btn-muted" id="cancelCreateServiceBtn">
                   Cancel
                 </button>
               </div>
@@ -536,7 +523,6 @@
       </footer>
     </div>
 
-    <!-- External profile script if you already use one -->
     <script src="profile.js" defer></script>
   </body>
 </html>

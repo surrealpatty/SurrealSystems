@@ -1,5 +1,6 @@
 // public/profile.js
-// Simple profile page logic: load name/email/description + edit & save using localStorage.
+// Profile page logic: load name/email/description + edit & save using localStorage.
+// Also handles the "Create Service" dropdown form.
 
 document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_DESCRIPTION =
@@ -140,6 +141,87 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       exitEditMode();
+    });
+  }
+
+  // ---- Create Service dropdown + submit ----
+  const createServiceBtn = document.getElementById("createServiceBtn");
+  const createServiceForm = document.getElementById("createServiceForm");
+  const cancelCreateServiceBtn = document.getElementById(
+    "cancelCreateServiceBtn"
+  );
+
+  if (createServiceBtn && createServiceForm) {
+    createServiceBtn.addEventListener("click", () => {
+      createServiceForm.classList.toggle("is-hidden");
+    });
+  }
+
+  if (cancelCreateServiceBtn && createServiceForm) {
+    cancelCreateServiceBtn.addEventListener("click", () => {
+      createServiceForm.classList.add("is-hidden");
+    });
+  }
+
+  if (createServiceForm) {
+    createServiceForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const titleEl = document.getElementById("serviceTitle");
+      const priceEl = document.getElementById("servicePrice");
+      const descElService = document.getElementById("serviceDescription");
+
+      const title = titleEl ? titleEl.value.trim() : "";
+      const priceValue = priceEl ? priceEl.value.trim() : "";
+      const descriptionService = descElService
+        ? descElService.value.trim()
+        : "";
+
+      if (!title || !priceValue || !descriptionService) {
+        alert("Please fill in all service fields.");
+        return;
+      }
+
+      const price = Number(priceValue);
+      if (Number.isNaN(price) || price <= 0) {
+        alert("Please enter a valid price.");
+        return;
+      }
+
+      // You probably store the JWT token already from login
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("You must be logged in to create a service.");
+        return;
+      }
+
+      try {
+        const baseUrl = window.API_URL || ""; // if you use init.js it sets API_URL
+        const res = await fetch(baseUrl + "/services", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + token,
+          },
+          body: JSON.stringify({
+            title,
+            price,
+            description: descriptionService,
+          }),
+        });
+
+        if (!res.ok) {
+          const errJson = await res.json().catch(() => ({}));
+          const msg = errJson.message || "Failed to create service.";
+          throw new Error(msg);
+        }
+
+        // Success: redirect to Services page so user sees it
+        window.location.href = "services.html";
+      } catch (err) {
+        console.error(err);
+        alert(err.message || "Something went wrong creating the service.");
+      }
     });
   }
 });
