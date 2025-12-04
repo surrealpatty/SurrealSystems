@@ -1,8 +1,8 @@
 // public/profile.js
-// Profile page logic: load name/email/description + edit & save using localStorage.
-// Also handles the "Create Service" dropdown form and shows THIS user's services.
+// Profile page logic: profile info + edit, create service dropdown,
+// and show services (for now: show all services from /services).
 
-/** Small helper: safely read from localStorage */
+// Safe localStorage helpers
 function safeGet(key) {
   try {
     return localStorage.getItem(key);
@@ -11,7 +11,6 @@ function safeGet(key) {
   }
 }
 
-/** Small helper: safely set localStorage */
 function safeSet(key, value) {
   try {
     localStorage.setItem(key, value);
@@ -20,59 +19,11 @@ function safeSet(key, value) {
   }
 }
 
-/**
- * Ensure we know who the current user is.
- * We read:
- *   - userId from window.getUserId() (set by script.js at login)
- *   - canonical username from localStorage.cc_me (the raw user from login)
- *
- * We return:
- *   { myUserId: "3", matchUsername: "qaz" }
- */
-function ensureUserIdentity() {
-  let myUserId = "";
-  let matchUsername = "";
-
-  try {
-    if (typeof window.getUserId === "function") {
-      myUserId = window.getUserId() || "";
-    }
-  } catch {
-    /* ignore */
-  }
-
-  // This is the raw user JSON we saved at login in script.js
-  const rawMe = safeGet("cc_me");
-  if (rawMe) {
-    try {
-      const me = JSON.parse(rawMe);
-      if (!myUserId && me && me.id != null) {
-        myUserId = String(me.id);
-        if (typeof window.setUserId === "function") {
-          window.setUserId(myUserId);
-        }
-      }
-      // canonical username for matching (does NOT overwrite the display name)
-      if (me && me.username) {
-        matchUsername = String(me.username);
-      }
-      // if email wasn't stored, store it for the profile view
-      if (!safeGet("email") && me && me.email) {
-        safeSet("email", me.email);
-      }
-    } catch (e) {
-      console.warn("[profile] could not parse cc_me:", e);
-    }
-  }
-
-  return { myUserId, matchUsername };
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_DESCRIPTION =
     "Write a short bio so clients know what you do.";
 
-  // ---- Load profile from localStorage or URL for display ----
+  // ---------------- Profile display (top card) ----------------
   const storedUsername = safeGet("username") || "";
   const storedEmail = safeGet("email") || "";
   const storedDescription = safeGet("description") || "";
@@ -91,7 +42,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const nameEl = document.getElementById("profileName");
   const descEl = document.getElementById("profileDescription");
 
-  // --- Fill view mode ---
+  // Fill view mode
   if (email && emailBadge && emailMain) {
     emailBadge.textContent = email;
     emailMain.textContent = email;
@@ -114,7 +65,7 @@ document.addEventListener("DOMContentLoaded", () => {
     avatarEl.textContent = initialSource.trim()[0].toUpperCase();
   }
 
-  // ---- Edit Profile behaviour ----
+  // ---------------- Edit profile behaviour ----------------
   const profileView = document.getElementById("profileView");
   const profileEditForm = document.getElementById("profileEditForm");
   const editBtn = document.getElementById("editProfileBtn");
@@ -159,7 +110,6 @@ document.addEventListener("DOMContentLoaded", () => {
   if (profileEditForm) {
     profileEditForm.addEventListener("submit", (e) => {
       e.preventDefault();
-
       if (!editEmailInput) return;
 
       const newName = editDisplayNameInput
@@ -190,13 +140,13 @@ document.addEventListener("DOMContentLoaded", () => {
         descEl.textContent = newDescription || DEFAULT_DESCRIPTION;
       }
 
-      // Update avatar initial
+      // Avatar
       if (avatarEl) {
         const source = (newName || newEmail || "U").trim();
         avatarEl.textContent = source[0].toUpperCase();
       }
 
-      // Persist to localStorage (for UI only)
+      // Persist (UI only)
       safeSet("email", newEmail);
       const usernameToStore = newName || newEmail.split("@")[0];
       safeSet("username", usernameToStore);
@@ -206,7 +156,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---- Create Service dropdown + submit ----
+  // ---------------- Create Service dropdown + submit ----------------
   const createServiceBtn = document.getElementById("createServiceBtn");
   const createServiceForm = document.getElementById("createServiceForm");
   const cancelCreateServiceBtn = document.getElementById(
@@ -220,14 +170,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Cancel button hides dropdown
+  // Cancel hides dropdown
   if (cancelCreateServiceBtn && createServiceForm) {
     cancelCreateServiceBtn.addEventListener("click", () => {
       createServiceForm.classList.add("is-hidden");
     });
   }
 
-  // Submit service
+  // Create service submit
   if (createServiceForm) {
     createServiceForm.addEventListener("submit", async (e) => {
       e.preventDefault();
@@ -256,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const baseUrl = window.API_URL || "";
       const headers = { "Content-Type": "application/json" };
 
-      // Try to attach token if present (cookie also works server-side)
+      // Try to attach token if it exists
       const token =
         safeGet("token") ||
         safeGet("authToken") ||
@@ -289,8 +239,8 @@ document.addEventListener("DOMContentLoaded", () => {
         createServiceForm.reset();
         createServiceForm.classList.add("is-hidden");
 
-        // After creating, reload the list of my services
-        loadMyServices();
+        // Reload list so the new service shows under "Your services"
+        loadServicesForProfile();
       } catch (err) {
         console.error(err);
         alert(err.message || "Something went wrong creating the service.");
@@ -298,118 +248,82 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // ---- Load THIS user's services and show them under "Your services" ----
-  async function loadMyServices() {
+  // ---------------- Load services for profile (show ALL for now) ----------------
+  async function loadServicesForProfile() {
     const listEl = document.getElementById("profileServicesList");
     const emptyEl = document.getElementById("profileServicesEmpty");
-
     if (!listEl || !emptyEl) return;
 
-    if (typeof window.apiFetch !== "function") {
-      console.warn("apiFetch is not available on profile page.");
+    listEl.innerHTML = ""; // clear any previous content
+
+    let services = [];
+    try {
+      if (typeof window.apiFetch === "function") {
+        // Use shared helper from script.js if available
+        const response = await window.apiFetch("services");
+        if (Array.isArray(response)) {
+          services = response;
+        } else if (response && Array.isArray(response.data)) {
+          services = response.data;
+        }
+      } else {
+        // Fallback: plain fetch
+        const baseUrl = window.API_URL || "";
+        const res = await fetch(baseUrl + "/services");
+        const json = await res.json();
+        if (Array.isArray(json)) {
+          services = json;
+        } else if (json && Array.isArray(json.data)) {
+          services = json.data;
+        }
+      }
+    } catch (err) {
+      console.error("Failed to load services on profile page:", err);
+      emptyEl.classList.remove("is-hidden");
       return;
     }
 
-    const { myUserId, matchUsername } = ensureUserIdentity();
-    const myUserIdStr = myUserId ? String(myUserId) : "";
-    const myMatchUsername = matchUsername || "";
+    if (!services.length) {
+      // No services at all
+      emptyEl.classList.remove("is-hidden");
+      return;
+    }
 
-    console.log("[profile] identity for services:", {
-      myUserIdStr,
-      myMatchUsername,
-    });
+    // We have services – hide the empty text
+    emptyEl.classList.add("is-hidden");
 
-    // Clear current list
-    listEl.innerHTML = "";
+    // For now: show ALL services (same as services.html),
+    // we can tighten this to "only my services" later.
+    services.forEach((svc) => {
+      const card = document.createElement("div");
+      card.className = "profile-service-card";
 
-    try {
-      const allServices = await window.apiFetch("services");
-      const servicesArray = Array.isArray(allServices) ? allServices : [];
+      const titleDiv = document.createElement("div");
+      titleDiv.className = "profile-service-title";
+      titleDiv.textContent = svc.title || "Untitled service";
+      card.appendChild(titleDiv);
 
-      console.log("[profile] services from API:", servicesArray);
+      const metaDiv = document.createElement("div");
+      metaDiv.className = "profile-service-meta";
 
-      const mine = servicesArray.filter((svc) => {
-        if (!svc || typeof svc !== "object") return false;
+      // Price
+      const price = Number(svc.price || 0);
+      const priceSpan = document.createElement("span");
+      priceSpan.textContent = `Price: $${price.toLocaleString()}`;
+      metaDiv.appendChild(priceSpan);
 
-        // Possible id fields
-        const idCandidatesRaw = [
-          svc.userId,
-          svc.UserId,
-          svc.user_id,
-          svc.ownerId,
-          svc.owner_id,
-          svc.user && (svc.user.id || svc.user.userId || svc.user.user_id),
-          svc.User && (svc.User.id || svc.User.userId || svc.User.user_id),
-        ];
-
-        const idCandidates = idCandidatesRaw
-          .filter((v) => v !== undefined && v !== null)
-          .map((v) => String(v));
-
-        // Possible username fields
-        const usernameCandidates = [
-          svc.username,
-          svc.user && svc.user.username,
-          svc.User && svc.User.username,
-          svc.owner && svc.owner.username,
-        ].filter(Boolean);
-
-        const matchId =
-          myUserIdStr &&
-          idCandidates.length > 0 &&
-          idCandidates.includes(myUserIdStr);
-
-        const matchName =
-          myMatchUsername &&
-          usernameCandidates.length > 0 &&
-          usernameCandidates.some((u) => u === myMatchUsername);
-
-        return matchId || matchName;
-      });
-
-      console.log("[profile] mine after filtering:", mine);
-
-      if (!mine.length) {
-        // No services for this user – show empty message
-        emptyEl.classList.remove("is-hidden");
-        return;
+      // Optional description
+      if (svc.description) {
+        const descSpan = document.createElement("span");
+        descSpan.textContent = `  •  ${svc.description}`;
+        metaDiv.appendChild(descSpan);
       }
 
-      // Hide empty message and render each service
-      emptyEl.classList.add("is-hidden");
-
-      mine.forEach((svc) => {
-        const card = document.createElement("div");
-        card.className = "profile-service-card";
-
-        const titleDiv = document.createElement("div");
-        titleDiv.className = "profile-service-title";
-        titleDiv.textContent = svc.title || "Untitled service";
-        card.appendChild(titleDiv);
-
-        const metaDiv = document.createElement("div");
-        metaDiv.className = "profile-service-meta";
-
-        const price = Number(svc.price || 0);
-        const priceSpan = document.createElement("span");
-        priceSpan.textContent = `Price: $${price.toLocaleString()}`;
-        metaDiv.appendChild(priceSpan);
-
-        if (svc.description) {
-          const descSpan = document.createElement("span");
-          descSpan.textContent = `  •  ${svc.description}`;
-          metaDiv.appendChild(descSpan);
-        }
-
-        card.appendChild(metaDiv);
-        listEl.appendChild(card);
-      });
-    } catch (err) {
-      console.error("Failed to load services for profile page:", err);
-      emptyEl.classList.remove("is-hidden");
-    }
+      card.appendChild(metaDiv);
+      listEl.appendChild(card);
+    });
   }
 
-  // Initial load of my services when the page opens
-  loadMyServices();
+  // Initial load
+  loadServicesForProfile();
 });
