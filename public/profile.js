@@ -1,6 +1,8 @@
 // public/profile.js
 // Profile page logic: profile info + edit + create service dropdown + show services.
 
+console.log("[profile] loaded profile.js v3");
+
 // Safe localStorage helpers
 function safeGet(key) {
   try {
@@ -18,11 +20,40 @@ function safeSet(key, value) {
   }
 }
 
+// Simple JWT decoder (no verification, just reading payload)
+function decodeJwt(token) {
+  if (!token || typeof token !== "string") return null;
+  const parts = token.split(".");
+  if (parts.length !== 3) return null;
+  try {
+    const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join("")
+    );
+    return JSON.parse(json);
+  } catch (e) {
+    console.warn("[profile] Failed to decode JWT", e);
+    return null;
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_DESCRIPTION =
     "Write a short bio so clients know what you do.";
 
-  // ---------------- Load "me" from localStorage (authoritative for current user) ----------------
+  // ---------------- Read token & cc_me, reconcile current user ----------------
+  const token =
+    safeGet("token") ||
+    safeGet("authToken") ||
+    safeGet("jwt") ||
+    safeGet("accessToken") ||
+    "";
+
+  const tokenPayload = decodeJwt(token) || null; // may contain id, email, username, etc.
+
   let meUser = null;
   try {
     const raw = safeGet("cc_me");
@@ -31,12 +62,20 @@ document.addEventListener("DOMContentLoaded", () => {
     meUser = null;
   }
 
-  const meUsername =
-    (meUser &&
-      (meUser.username || meUser.name || meUser.displayName || "")) ||
-    "";
-  const meEmail = (meUser && meUser.email) || "";
-  const meDescription = (meUser && meUser.description) || "";
+  // If cc_me.id and tokenPayload.id disagree, cc_me is for a different user → discard it
+  if (
+    meUser &&
+    tokenPayload &&
+    meUser.id != null &&
+    tokenPayload.id != null &&
+    String(meUser.id) !== String(tokenPayload.id)
+  ) {
+    console.warn(
+      "[profile] cc_me user id does not match token id. Clearing stale cc_me."
+    );
+    meUser = null;
+    safeSet("cc_me", ""); // wipe old one
+  }
 
   // ---------------- Profile display (top card) ----------------
   const storedUsername = safeGet("username") || "";
@@ -47,17 +86,58 @@ document.addEventListener("DOMContentLoaded", () => {
   const paramUsername = params.get("username") || "";
   const paramEmail = params.get("email") || "";
 
-  // Prefer cc_me → then old storage → then URL params
-  const username = meUsername || storedUsername || paramUsername || "";
-  const email = meEmail || storedEmail || paramEmail || "";
-  const description =
-    meDescription || storedDescription || "" || DEFAULT_DESCRIPTION;
+  const fromMeUsername =
+    (meUser &&
+      (meUser.username || meUser.name || meUser.displayName || "")) ||
+    "";
+  const fromMeEmail = (meUser && meUser.email) || "";
+  const fromMeDescription = (meUser && meUser.description) || "";
 
-  // If we have a "me" object, keep the simple keys in sync so they don't get stale
-  if (meUser) {
-    if (username) safeSet("username", username);
-    if (email) safeSet("email", email);
-    if (meDescription) safeSet("description", meDescription);
+  const fromTokenUsername =
+    (tokenPayload &&
+      (tokenPayload.username ||
+        tokenPayload.name ||
+        tokenPayload.displayName ||
+        "")) ||
+    "";
+  const fromTokenEmail = (tokenPayload && tokenPayload.email) || "";
+  const fromTokenDescription =
+    (tokenPayload && tokenPayload.description) || "";
+
+  // Prefer: cc_me → token → old storage → URL
+  const username =
+    fromMeUsername ||
+    fromTokenUsername ||
+    storedUsername ||
+    paramUsername ||
+    "";
+  const email =
+    fromMeEmail || fromTokenEmail || storedEmail || paramEmail || "";
+  const description =
+    fromMeDescription ||
+    fromTokenDescription ||
+    storedDescription ||
+    "" ||
+    DEFAULT_DESCRIPTION;
+
+  // Keep simple keys in sync with whichever user we decided is "current"
+  if (username) safeSet("username", username);
+  if (email) safeSet("email", email);
+  if (description && description !== DEFAULT_DESCRIPTION) {
+    safeSet("description", description);
+  }
+
+  // Also rebuild cc_me from token + existing data if we don't have it
+  if (!meUser) {
+    const newMe = {};
+    if (tokenPayload && tokenPayload.id != null) newMe.id = tokenPayload.id;
+    if (username) newMe.username = username;
+    if (email) newMe.email = email;
+    if (description) newMe.description = description;
+    if (Object.keys(newMe).length) {
+      safeSet("cc_me", JSON.stringify(newMe));
+      meUser = newMe;
+    }
   }
 
   const avatarEl = document.getElementById("profileAvatar");
@@ -284,13 +364,13 @@ document.addEventListener("DOMContentLoaded", () => {
           const baseUrl = window.API_URL || "";
           const headers = { "Content-Type": "application/json" };
 
-          const token =
+          const tokenInner =
             safeGet("token") ||
             safeGet("authToken") ||
             safeGet("jwt") ||
             safeGet("accessToken");
-          if (token) {
-            headers.Authorization = "Bearer " + token;
+          if (tokenInner) {
+            headers.Authorization = "Bearer " + tokenInner;
           }
 
           const res = await fetch(baseUrl + "/services", {
