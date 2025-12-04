@@ -26,8 +26,9 @@ function clearUserId() {
   localStorage.removeItem(USER_ID_KEY);
 }
 
+// ✅ We’re cookie-based now, so just check for a userId
 function isLoggedIn() {
-  return !!getToken() && !!getUserId();
+  return !!getUserId();
 }
 
 /* ============================ API base + URLs ============================ */
@@ -37,13 +38,10 @@ const API_BASE = (() => {
     if (typeof window !== "undefined" && window.API_URL)
       return String(window.API_URL).replace(/\/+$/, "");
   } catch {}
-  // If window.API_BASE or window.API_URL are set to '/api' by the page, we still want
-  // to treat them as relative roots. So normalize '/api' -> '/api' (no trailing slash)
   try {
     if (typeof window !== "undefined" && window.API_BASE)
       return String(window.API_BASE).replace(/\/+$/, "");
   } catch {}
-  // Default to origin + '/api'
   try {
     return window.location.origin.replace(/\/$/, "") + "/api";
   } catch {
@@ -265,21 +263,23 @@ function initLoginPage() {
         withCredentials: true,
       });
 
-      const token = out?.token;
-      const user = out?.user || {};
+      // Because apiFetch unwraps .data, `out` is usually { user: {...} }
+      const user = out?.user || out || {};
+      const token = out?.token; // probably undefined, cookie is main auth
       const userId = String(user?.id || "");
 
-      if (token && userId) {
-        setToken(token);
+      if (userId) {
+        if (token) setToken(token); // optional, if backend ever sends it
         setUserId(userId);
         try {
           localStorage.setItem("cc_me", JSON.stringify(user));
           const dn = getDisplayName(user);
           if (dn) localStorage.setItem("username", dn);
+          if (user.email) localStorage.setItem("email", user.email);
         } catch {}
       }
 
-      // Redirect to profile page (token may also be in cookie)
+      // Redirect to profile page (cookie session is active)
       location.replace("profile.html");
     } catch (err) {
       if (msg) {
@@ -342,11 +342,12 @@ try {
   window.getDisplayName = getDisplayName;
   window.getDescription = getDescription;
 } catch {}
-// -----------------------------------------------------
-// Top-right user chip: show username instead of email
-// -----------------------------------------------------
 
-// Read current user from localStorage / cc_me
+/* =======================================================================
+   Top-right user chip: show username instead of email (all pages)
+======================================================================= */
+
+// Read current user from localStorage / cc_me or /users/me
 async function ccGetCurrentUser() {
   // Try cc_me first
   let me = null;
@@ -358,16 +359,12 @@ async function ccGetCurrentUser() {
   }
 
   let id =
-    (me && (me.id ?? me.userId)) ||
-    localStorage.getItem("userId") ||
-    null;
+    (me && (me.id ?? me.userId)) || localStorage.getItem("userId") || null;
   let username =
-    (me &&
-      (me.username || me.name || me.displayName)) ||
+    (me && (me.username || me.name || me.displayName)) ||
     localStorage.getItem("username") ||
     "";
-  let email =
-    (me && me.email) || localStorage.getItem("email") || "";
+  let email = (me && me.email) || localStorage.getItem("email") || "";
 
   // If we already have a username or email, just return it
   if (username || email) {
@@ -375,9 +372,9 @@ async function ccGetCurrentUser() {
   }
 
   // Otherwise, try to load from backend /users/me (if logged in)
-  const baseUrl = window.API_URL || "";
+  const baseUrl = window.API_URL || API_BASE || "";
   try {
-    const res = await fetch(baseUrl + "/users/me", {
+    const res = await fetch(baseUrl.replace(/\/+$/, "") + "/users/me", {
       method: "GET",
       credentials: "include",
       headers: { Accept: "application/json" },
@@ -387,8 +384,7 @@ async function ccGetCurrentUser() {
     }
     const data = await res.json();
     const u =
-      (data && data.user) ||
-      (data && data.data && data.data.user);
+      (data && data.user) || (data && data.data && data.data.user);
     if (!u) return { id, username, email };
 
     const uname =
@@ -437,8 +433,7 @@ async function ccInitTopUserChip() {
     labelEl.textContent = displayName;
   }
   if (avatarEl && displayName) {
-    avatarEl.textContent =
-      displayName.trim()[0].toUpperCase();
+    avatarEl.textContent = displayName.trim()[0].toUpperCase();
   }
 }
 
