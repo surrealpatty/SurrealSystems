@@ -22,6 +22,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_DESCRIPTION =
     "Write a short bio so clients know what you do.";
 
+  // ---------------- Load "me" from localStorage (authoritative for current user) ----------------
+  let meUser = null;
+  try {
+    const raw = safeGet("cc_me");
+    if (raw) meUser = JSON.parse(raw);
+  } catch {
+    meUser = null;
+  }
+
+  const meUsername =
+    (meUser &&
+      (meUser.username || meUser.name || meUser.displayName || "")) ||
+    "";
+  const meEmail = (meUser && meUser.email) || "";
+  const meDescription = (meUser && meUser.description) || "";
+
   // ---------------- Profile display (top card) ----------------
   const storedUsername = safeGet("username") || "";
   const storedEmail = safeGet("email") || "";
@@ -31,9 +47,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const paramUsername = params.get("username") || "";
   const paramEmail = params.get("email") || "";
 
-  const username = storedUsername || paramUsername || "";
-  const email = storedEmail || paramEmail || "";
-  const description = storedDescription || "";
+  // Prefer cc_me → then old storage → then URL params
+  const username = meUsername || storedUsername || paramUsername || "";
+  const email = meEmail || storedEmail || paramEmail || "";
+  const description =
+    meDescription || storedDescription || "" || DEFAULT_DESCRIPTION;
+
+  // If we have a "me" object, keep the simple keys in sync so they don't get stale
+  if (meUser) {
+    if (username) safeSet("username", username);
+    if (email) safeSet("email", email);
+    if (meDescription) safeSet("description", meDescription);
+  }
 
   const avatarEl = document.getElementById("profileAvatar");
   const emailBadge = document.getElementById("profileEmail");
@@ -146,10 +171,22 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       // Persist (UI only)
-      safeSet("email", newEmail);
       const usernameToStore = newName || newEmail.split("@")[0];
+      safeSet("email", newEmail);
       safeSet("username", usernameToStore);
       safeSet("description", newDescription);
+
+      // Keep cc_me in sync so current user stays correct
+      try {
+        const raw = safeGet("cc_me");
+        const me = raw ? JSON.parse(raw) : {};
+        me.username = usernameToStore;
+        me.email = newEmail;
+        me.description = newDescription;
+        safeSet("cc_me", JSON.stringify(me));
+      } catch {
+        // ignore
+      }
 
       exitEditMode();
     });
@@ -305,18 +342,21 @@ document.addEventListener("DOMContentLoaded", () => {
     // Determine the current user ID and username from shared helpers/localStorage
     const hasGetUserId = typeof window.getUserId === "function";
     const userId = hasGetUserId ? window.getUserId() : "";
-    const storedUsername = safeGet("username") || "";
-    let meUser = null;
+    const storedUsernameInner = safeGet("username") || "";
+    let meUserInner = null;
     try {
       const raw = safeGet("cc_me");
-      if (raw) meUser = JSON.parse(raw);
+      if (raw) meUserInner = JSON.parse(raw);
     } catch {
-      meUser = null;
+      meUserInner = null;
     }
     const myUsername =
-      (meUser &&
-        (meUser.username || meUser.name || meUser.displayName || "")) ||
-      storedUsername;
+      (meUserInner &&
+        (meUserInner.username ||
+          meUserInner.name ||
+          meUserInner.displayName ||
+          "")) ||
+      storedUsernameInner;
 
     if (!userId && !myUsername) {
       // We don’t know who this is – don’t hit the API
@@ -354,7 +394,11 @@ document.addEventListener("DOMContentLoaded", () => {
         services = payload.data;
       } else if (payload && Array.isArray(payload.services)) {
         services = payload.services;
-      } else if (payload && payload.data && Array.isArray(payload.data.services)) {
+      } else if (
+        payload &&
+        payload.data &&
+        Array.isArray(payload.data.services)
+      ) {
         services = payload.data.services;
       }
 
