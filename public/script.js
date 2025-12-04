@@ -342,3 +342,107 @@ try {
   window.getDisplayName = getDisplayName;
   window.getDescription = getDescription;
 } catch {}
+// -----------------------------------------------------
+// Top-right user chip: show username instead of email
+// -----------------------------------------------------
+
+// Read current user from localStorage / cc_me
+async function ccGetCurrentUser() {
+  // Try cc_me first
+  let me = null;
+  try {
+    const raw = localStorage.getItem("cc_me");
+    if (raw) me = JSON.parse(raw);
+  } catch (e) {
+    me = null;
+  }
+
+  let id =
+    (me && (me.id ?? me.userId)) ||
+    localStorage.getItem("userId") ||
+    null;
+  let username =
+    (me &&
+      (me.username || me.name || me.displayName)) ||
+    localStorage.getItem("username") ||
+    "";
+  let email =
+    (me && me.email) || localStorage.getItem("email") || "";
+
+  // If we already have a username or email, just return it
+  if (username || email) {
+    return { id, username, email };
+  }
+
+  // Otherwise, try to load from backend /users/me (if logged in)
+  const baseUrl = window.API_URL || "";
+  try {
+    const res = await fetch(baseUrl + "/users/me", {
+      method: "GET",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    });
+    if (!res.ok) {
+      return { id, username, email };
+    }
+    const data = await res.json();
+    const u =
+      (data && data.user) ||
+      (data && data.data && data.data.user);
+    if (!u) return { id, username, email };
+
+    const uname =
+      u.username ||
+      u.name ||
+      u.displayName ||
+      (u.email ? u.email.split("@")[0] : "User");
+    const uemail = u.email || "";
+
+    // Persist for next time
+    try {
+      localStorage.setItem("userId", String(u.id));
+      localStorage.setItem("username", uname);
+      localStorage.setItem("email", uemail);
+      localStorage.setItem("cc_me", JSON.stringify(u));
+    } catch (e) {
+      // ignore storage errors
+    }
+
+    return { id: u.id, username: uname, email: uemail };
+  } catch (e) {
+    console.warn("[nav] failed to fetch /users/me", e);
+    return { id, username, email };
+  }
+}
+
+// Update the pill in the header on all pages
+async function ccInitTopUserChip() {
+  const avatarEl = document.getElementById("topUserAvatar");
+  const labelEl =
+    document.getElementById("topUserEmail") ||
+    document.getElementById("topUserLabel");
+
+  // If there is no top-right chip on this page, do nothing
+  if (!avatarEl && !labelEl) return;
+
+  const user = await ccGetCurrentUser();
+  if (!user) return;
+
+  const displayName =
+    user.username ||
+    (user.email ? user.email.split("@")[0] : "") ||
+    "User";
+
+  if (labelEl) {
+    labelEl.textContent = displayName;
+  }
+  if (avatarEl && displayName) {
+    avatarEl.textContent =
+      displayName.trim()[0].toUpperCase();
+  }
+}
+
+// Run this on every page that includes script.js
+document.addEventListener("DOMContentLoaded", () => {
+  ccInitTopUserChip();
+});
