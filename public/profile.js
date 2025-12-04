@@ -1,7 +1,7 @@
 // public/profile.js
 // Profile page logic: profile info + edit + create service dropdown + show services.
 
-console.log("[profile] loaded profile.js v3");
+console.log("[profile] loaded profile.js v4");
 
 // Safe localStorage helpers
 function safeGet(key) {
@@ -21,6 +21,7 @@ function safeSet(key, value) {
 }
 
 // Simple JWT decoder (no verification, just reading payload)
+// (kept for compatibility, but backend auth is cookie-based now)
 function decodeJwt(token) {
   if (!token || typeof token !== "string") return null;
   const parts = token.split(".");
@@ -44,7 +45,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const DEFAULT_DESCRIPTION =
     "Write a short bio so clients know what you do.";
 
-  // ---------------- Read token & cc_me, reconcile current user ----------------
+  // These will be filled from /api/users/me
+  let currentUserId = null;
+  let currentUsername = "";
+
+  // ---------------- Read token & cc_me, reconcile current user (fallback only) ----------------
   const token =
     safeGet("token") ||
     safeGet("authToken") ||
@@ -77,7 +82,7 @@ document.addEventListener("DOMContentLoaded", () => {
     safeSet("cc_me", ""); // wipe old one
   }
 
-  // ---------------- Profile display (top card) ----------------
+  // ---------------- Profile display (initial, from storage) ----------------
   const storedUsername = safeGet("username") || "";
   const storedEmail = safeGet("email") || "";
   const storedDescription = safeGet("description") || "";
@@ -140,13 +145,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  if (meUser && meUser.id != null) {
+    currentUserId = meUser.id;
+  }
+  currentUsername = username || currentUsername;
+
   const avatarEl = document.getElementById("profileAvatar");
   const emailBadge = document.getElementById("profileEmail");
   const emailMain = document.getElementById("profileEmailMain");
   const nameEl = document.getElementById("profileName");
   const descEl = document.getElementById("profileDescription");
 
-  // Fill view mode
+  // Initial fill from storage (will be overwritten by /users/me)
   if (email && emailBadge && emailMain) {
     emailBadge.textContent = email;
     emailMain.textContent = email;
@@ -167,6 +177,64 @@ document.addEventListener("DOMContentLoaded", () => {
   const initialSource = displayName || email || "U";
   if (avatarEl && initialSource) {
     avatarEl.textContent = initialSource.trim()[0].toUpperCase();
+  }
+
+  // ---------------- Fetch real user from backend: /api/users/me ----------------
+  async function loadUserFromBackend() {
+    const baseUrl = window.API_URL || "";
+    try {
+      const res = await fetch(baseUrl + "/users/me", {
+        method: "GET",
+        credentials: "include", // send cookie with token
+        headers: { Accept: "application/json" },
+      });
+
+      if (!res.ok) {
+        console.warn("[profile] /users/me returned status", res.status);
+        return;
+      }
+
+      const payload = await res.json();
+      const u =
+        (payload && payload.user) ||
+        (payload && payload.data && payload.data.user);
+
+      if (!u) {
+        console.warn("[profile] /users/me payload has no user");
+        return;
+      }
+
+      const uname =
+        u.username ||
+        u.name ||
+        u.displayName ||
+        (u.email ? u.email.split("@")[0] : "User");
+      const uemail = u.email || "";
+      const udesc = u.description || "";
+
+      currentUserId = u.id;
+      currentUsername = uname;
+
+      // Update UI with real user
+      if (nameEl) nameEl.textContent = uname;
+      if (emailBadge) emailBadge.textContent = uemail;
+      if (emailMain) emailMain.textContent = uemail;
+      if (descEl) descEl.textContent = udesc || DEFAULT_DESCRIPTION;
+
+      const source = uname || uemail || "U";
+      if (avatarEl && source) {
+        avatarEl.textContent = source.trim()[0].toUpperCase();
+      }
+
+      // Persist for next visit
+      safeSet("userId", String(u.id));
+      safeSet("username", uname);
+      safeSet("email", uemail);
+      safeSet("description", udesc);
+      safeSet("cc_me", JSON.stringify(u));
+    } catch (err) {
+      console.error("[profile] Failed to load /users/me", err);
+    }
   }
 
   // ---------------- Edit profile behaviour ----------------
@@ -419,10 +487,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     listEl.innerHTML = "";
 
-    // Determine the current user ID and username from shared helpers/localStorage
+    // Determine the current user ID and username
     const hasGetUserId = typeof window.getUserId === "function";
-    const userId = hasGetUserId ? window.getUserId() : "";
+    const fallbackUserId = hasGetUserId ? window.getUserId() : "";
     const storedUsernameInner = safeGet("username") || "";
+
     let meUserInner = null;
     try {
       const raw = safeGet("cc_me");
@@ -430,7 +499,15 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {
       meUserInner = null;
     }
+
+    const userId =
+      currentUserId ||
+      (meUserInner && meUserInner.id) ||
+      fallbackUserId ||
+      "";
+
     const myUsername =
+      currentUsername ||
       (meUserInner &&
         (meUserInner.username ||
           meUserInner.name ||
@@ -575,6 +652,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Initial load
-  loadServicesForProfile();
+  // --- Final initialisation: load real user THEN services ---
+  loadUserFromBackend().then(() => {
+    loadServicesForProfile();
+  });
 });
