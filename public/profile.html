@@ -556,42 +556,7 @@
     <!-- Shared helpers: apiFetch, getUserId, etc. -->
     <script src="script.js" defer></script>
 
-    <!-- Existing profile logic (name/email/etc.) -->
+    <!-- Profile page logic -->
     <script src="profile.js" defer></script>
-
-    <!-- Only responsible for showing user's services -->
-    <script src="profile-services.js" defer></script>
-
-    <!-- Local inline script JUST for the Create Service dropdown -->
-    <script>
-      // This runs immediately after the page HTML is parsed
-      const createServiceBtn = document.getElementById("createServiceBtn");
-      const createServiceForm = document.getElementById("createServiceForm");
-      const cancelCreateServiceBtn = document.getElementById("cancelCreateServiceBtn");
-
-      if (createServiceBtn && createServiceForm) {
-        // Toggle show/hide when clicking the main button
-        createServiceBtn.addEventListener("click", function () {
-          const isHidden = createServiceForm.classList.contains("is-hidden");
-
-          if (isHidden) {
-            createServiceForm.classList.remove("is-hidden");
-            createServiceBtn.textContent = "Hide form";
-          } else {
-            createServiceForm.classList.add("is-hidden");
-            createServiceBtn.textContent = "Create Service";
-          }
-        });
-      }
-
-      if (cancelCreateServiceBtn && createServiceForm && createServiceBtn) {
-        // Hide + reset when clicking "Cancel"
-        cancelCreateServiceBtn.addEventListener("click", function () {
-          createServiceForm.classList.add("is-hidden");
-          createServiceBtn.textContent = "Create Service";
-          createServiceForm.reset();
-        });
-      }
-    </script>
   </body>
 </html>
