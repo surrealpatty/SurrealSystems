@@ -184,6 +184,10 @@ document.addEventListener("DOMContentLoaded", () => {
       const isHidden = createServiceForm.classList.contains("is-hidden");
       console.log("[profile] Create Service clicked, isHidden =", isHidden);
       if (isHidden) {
+        if (typeof window.isLoggedIn === "function" && !window.isLoggedIn()) {
+          alert("Please log in again before creating a service.");
+          return;
+        }
         showCreateForm();
       } else {
         hideCreateForm();
@@ -202,6 +206,11 @@ document.addEventListener("DOMContentLoaded", () => {
     // Handle create service submit
     createServiceForm.addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      if (typeof window.isLoggedIn === "function" && !window.isLoggedIn()) {
+        alert("Your session looks expired. Please log in again.");
+        return;
+      }
 
       const titleEl = document.getElementById("serviceTitle");
       const priceEl = document.getElementById("servicePrice");
@@ -225,11 +234,9 @@ document.addEventListener("DOMContentLoaded", () => {
       }
 
       try {
-        // Use shared apiFetch from script.js if available
         if (typeof window.apiFetch === "function") {
-          await window.apiFetch("/services", {
+          await window.apiFetch("services", {
             method: "POST",
-            auth: true,
             body: {
               title,
               price,
@@ -237,7 +244,6 @@ document.addEventListener("DOMContentLoaded", () => {
             },
           });
         } else {
-          // Fallback: plain fetch with token
           const baseUrl = window.API_URL || "";
           const headers = { "Content-Type": "application/json" };
 
@@ -294,56 +300,121 @@ document.addEventListener("DOMContentLoaded", () => {
     const emptyEl = document.getElementById("profileServicesEmpty");
     if (!listEl || !emptyEl) return;
 
-    listEl.innerHTML = ""; // clear any previous content
+    listEl.innerHTML = "";
+
+    // Determine the current user ID and username from shared helpers/localStorage
+    const hasGetUserId = typeof window.getUserId === "function";
+    const userId = hasGetUserId ? window.getUserId() : "";
+    const storedUsername = safeGet("username") || "";
+    let meUser = null;
+    try {
+      const raw = safeGet("cc_me");
+      if (raw) meUser = JSON.parse(raw);
+    } catch {
+      meUser = null;
+    }
+    const myUsername =
+      (meUser &&
+        (meUser.username || meUser.name || meUser.displayName || "")) ||
+      storedUsername;
+
+    if (!userId && !myUsername) {
+      // We don’t know who this is – don’t hit the API
+      emptyEl.classList.remove("is-hidden");
+      emptyEl.textContent =
+        "Could not determine your account. Please log in again.";
+      return;
+    }
+
+    // Show a small “loading” message while we fetch
+    emptyEl.classList.remove("is-hidden");
+    emptyEl.textContent = "Loading your services…";
 
     let services = [];
     try {
-      const hasApiFetch = typeof window.apiFetch === "function";
-      const hasGetUserId = typeof window.getUserId === "function";
+      let payload;
 
-      let path = "services";
-
-      if (hasGetUserId) {
-        const uid = window.getUserId();
-        if (uid) {
-          path = `services?userId=${encodeURIComponent(uid)}&limit=50`;
-        }
-      }
-
-      if (hasApiFetch) {
-        const response = await window.apiFetch(path);
-        if (Array.isArray(response)) {
-          services = response;
-        } else if (response && Array.isArray(response.data)) {
-          services = response.data;
-        } else if (response && Array.isArray(response.services)) {
-          services = response.services;
-        }
+      const queryId = userId ? `userId=${encodeURIComponent(userId)}&` : "";
+      if (typeof window.apiFetch === "function") {
+        payload = await window.apiFetch(
+          `services?${queryId}limit=50&sort=newest`
+        );
       } else {
         const baseUrl = window.API_URL || "";
         const res = await fetch(
-          baseUrl + (path.startsWith("/") ? path : "/" + path)
+          baseUrl + `/services?${queryId}limit=50&sort=newest`
         );
-        const json = await res.json();
-        if (Array.isArray(json)) {
-          services = json;
-        } else if (json && Array.isArray(json.data)) {
-          services = json.data;
-        } else if (json && Array.isArray(json.services)) {
-          services = json.services;
-        }
+        payload = await res.json();
       }
+
+      // Normalise API shapes
+      if (Array.isArray(payload)) {
+        services = payload;
+      } else if (payload && Array.isArray(payload.data)) {
+        services = payload.data;
+      } else if (payload && Array.isArray(payload.services)) {
+        services = payload.services;
+      } else if (payload && payload.data && Array.isArray(payload.data.services)) {
+        services = payload.data.services;
+      }
+
+      // --- STRICT client-side filter so ONLY my stuff is kept ---
+      const uidStr = userId ? String(userId) : "";
+      const myNameLower = myUsername ? myUsername.toLowerCase() : "";
+
+      services = services.filter((svc) => {
+        const svcUserId =
+          svc.userId ??
+          svc.UserId ??
+          (svc.user && (svc.user.id ?? svc.user.userId));
+        const svcUsername =
+          (svc.user &&
+            (svc.user.username ||
+              svc.user.name ||
+              svc.user.displayName ||
+              "")) ||
+          "";
+
+        let match = false;
+
+        // First try by numeric/string ID
+        if (uidStr && svcUserId !== undefined && svcUserId !== null) {
+          match = String(svcUserId) === uidStr;
+        }
+
+        // If ID didn’t match, fall back to username comparison
+        if (!match && myNameLower && svcUsername) {
+          match = svcUsername.toLowerCase() === myNameLower;
+        }
+
+        return match;
+      });
     } catch (err) {
       console.error("Failed to load services on profile page:", err);
-      emptyEl.classList.remove("is-hidden");
-      emptyEl.textContent =
-        "Could not load your services right now. Please try again.";
+
+      const status = err && err.status ? err.status : null;
+      if (status === 401 || status === 403) {
+        try {
+          if (typeof window.clearToken === "function") window.clearToken();
+          if (typeof window.clearUserId === "function") window.clearUserId();
+        } catch {}
+
+        emptyEl.classList.remove("is-hidden");
+        emptyEl.textContent =
+          "Your session has expired. Please log in again to see your services.";
+      } else {
+        emptyEl.classList.remove("is-hidden");
+        emptyEl.textContent =
+          "Could not load your services right now. Please try again.";
+      }
       return;
     }
 
     if (!services.length) {
-      // No services at all
+      // No services for this account yet
       emptyEl.classList.remove("is-hidden");
+      emptyEl.textContent =
+        "You don’t have any services yet. Create one to start attracting clients.";
       listEl.innerHTML = "";
       return;
     }
@@ -368,8 +439,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const metaPrice = document.createElement("div");
       metaPrice.className = "profile-service-meta";
-      const priceNum = Number(svc.price || 0);
-      metaPrice.textContent = `Price: $${priceNum.toLocaleString()}`;
+      const rawPrice = svc.price ?? 0;
+      const priceNum = Number(rawPrice);
+      const priceText = Number.isFinite(priceNum)
+        ? priceNum.toLocaleString()
+        : String(rawPrice);
+      metaPrice.textContent = `Price: $${priceText}`;
       card.appendChild(metaPrice);
 
       listEl.appendChild(card);
