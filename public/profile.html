@@ -550,7 +550,7 @@
       </footer>
     </div>
 
-       <!-- Sets window.API_URL -->
+           <!-- Sets window.API_URL -->
     <script src="init.js" defer></script>
 
     <!-- Shared helpers: apiFetch, getUserId, etc. -->
@@ -561,5 +561,38 @@
 
     <!-- NEW: only responsible for showing user's services -->
     <script src="profile-services.js" defer></script>
+
+    <!-- NEW: toggle Create Service dropdown -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const createServiceBtn = document.getElementById("createServiceBtn");
+        const createServiceForm = document.getElementById("createServiceForm");
+        const cancelCreateServiceBtn = document.getElementById("cancelCreateServiceBtn");
+
+        if (!createServiceBtn || !createServiceForm) return;
+
+        // Show/hide the dropdown panel
+        createServiceBtn.addEventListener("click", function () {
+          const isHidden = createServiceForm.classList.contains("is-hidden");
+
+          if (isHidden) {
+            createServiceForm.classList.remove("is-hidden");
+            createServiceBtn.textContent = "Hide form";
+          } else {
+            createServiceForm.classList.add("is-hidden");
+            createServiceBtn.textContent = "Create Service";
+          }
+        });
+
+        // Cancel button hides the dropdown and resets the form
+        if (cancelCreateServiceBtn) {
+          cancelCreateServiceBtn.addEventListener("click", function () {
+            createServiceForm.classList.add("is-hidden");
+            createServiceBtn.textContent = "Create Service";
+            createServiceForm.reset();
+          });
+        }
+      });
+    </script>
   </body>
 </html>
