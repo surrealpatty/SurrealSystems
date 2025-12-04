@@ -254,18 +254,16 @@
         color: #6b7280;
       }
 
-      /* reuse your existing input/spinner styles from style.css;
-         this just ensures dark background works nicely */
       #services-list {
         margin-top: 8px;
       }
 
       #diagBanner {
-        display: none; /* your script can unhide if needed */
+        display: none;
       }
 
       #messageModal {
-        display: none; /* script will toggle this */
+        display: none;
       }
     </style>
   </head>
@@ -280,9 +278,10 @@
           <span>CodeCrowds</span>
         </a>
 
+        <!-- 🔹 shared IDs for the top pill -->
         <div class="user-pill">
-          <div class="user-avatar" id="profileAvatar">U</div>
-          <span class="user-email" id="profileEmail">you@example.com</span>
+          <div class="user-avatar" id="topUserAvatar">U</div>
+          <span class="user-email" id="topUserEmail">you@example.com</span>
         </div>
       </header>
 
@@ -405,20 +404,5 @@
 
     <!-- Toast -->
     <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
-
-    <script>
-      // simple avatar/email fill (same idea as profile page)
-      const params = new URLSearchParams(window.location.search);
-      const username = params.get("username") || "";
-      const email = params.get("email") || "";
-
-      const avatarEl = document.getElementById("profileAvatar");
-      const emailBadge = document.getElementById("profileEmail");
-
-      if (email) emailBadge.textContent = email;
-
-      const sourceName = username || (email ? email.split("@")[0] : "User");
-      avatarEl.textContent = sourceName.trim()[0].toUpperCase();
-    </script>
   </body>
 </html>
