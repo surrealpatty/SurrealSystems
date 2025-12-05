@@ -397,7 +397,11 @@
           <p class="sidebar-title">Dashboard</p>
           <ul class="nav-list">
             <li><a href="index.html" class="nav-link">Home</a></li>
-            <li><a href="profile.html" class="nav-link">Profile</a></li>
+            <li>
+              <a href="profile.html" class="nav-link" id="sidebarProfileLink">
+                Profile
+              </a>
+            </li>
             <li>
               <a href="services.html" class="nav-link nav-link--active">
                 Services
@@ -456,8 +460,8 @@
               </button>
               <button
                 type="button"
+                id="backToProfileBtn"
                 class="btn btn-ghost"
-                onclick="window.location.href='profile.html'"
               >
                 Back to Profile
               </button>
@@ -512,5 +516,38 @@
 
     <!-- Toast -->
     <div id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Back to Profile wiring: use current username from localStorage -->
+    <script>
+      (function () {
+        function safeGet(key) {
+          try {
+            return localStorage.getItem(key);
+          } catch {
+            return null;
+          }
+        }
+
+        const username = (safeGet("username") || "").trim();
+
+        // If we have a username, use ?username=... so it goes to that user's profile
+        const profileUrl = username
+          ? `profile.html?username=${encodeURIComponent(username)}`
+          : "profile.html";
+
+        const backBtn = document.getElementById("backToProfileBtn");
+        const sidebarProfileLink = document.getElementById("sidebarProfileLink");
+
+        if (backBtn) {
+          backBtn.addEventListener("click", () => {
+            window.location.href = profileUrl;
+          });
+        }
+
+        if (sidebarProfileLink) {
+          sidebarProfileLink.href = profileUrl;
+        }
+      })();
+    </script>
   </body>
 </html>
