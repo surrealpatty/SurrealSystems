@@ -1,192 +1,200 @@
 // src/routes/messages.js
-const express = require("express");
+const express = require('express');
 const router = express.Router();
+const { Message, User } = require('../models');
+const authenticateToken = require('../middlewares/authenticateToken');
+const { body, query, param } = require('express-validator');
+const validate = require('../middlewares/validate');
 
-const { Message, User, Service } = require("../models");
-const authenticateToken = require("../middlewares/authenticateToken");
-const { body, query, param } = require("express-validator");
-const validate = require("../middlewares/validate");
-
-/* ------------ helpers ------------ */
-function ok(res, payload, status = 200) {
-  // keep shape compatible with your front-end extractMessages()
-  return res.status(status).json({
-    success: true,
-    messages: payload,
-    data: { messages: payload },
-  });
+/**
+ * Utility helpers
+ */
+function ok(res, payload = {}, status = 200) {
+  // Success responses always look like { success: true, ...payload }
+  return res.status(status).json({ success: true, ...payload });
 }
 
-function err(res, message = "Something went wrong", status = 500, details) {
+function err(res, message = 'Something went wrong', status = 500, details) {
   const out = { success: false, error: { message } };
   if (details) out.error.details = details;
   return res.status(status).json(out);
 }
 
-/* ============================================================
-   GET /api/messages/inbox
-   All messages RECEIVED by the logged-in user
-   ============================================================ */
+/**
+ * GET /api/messages/inbox
+ * List messages where the logged-in user is the receiver.
+ */
 router.get(
-  "/inbox",
+  '/inbox',
   authenticateToken,
   [
-    query("limit").optional().isInt({ min: 1, max: 100 }).toInt(),
-    query("offset").optional().isInt({ min: 0 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('offset').optional().isInt({ min: 0 }).toInt(),
   ],
   validate,
   async (req, res) => {
     try {
-      const limit = req.query.limit ?? 50;
+      const limit = req.query.limit ?? 20;
       const offset = req.query.offset ?? 0;
 
-      const rows = await Message.findAll({
+      const { rows, count } = await Message.findAndCountAll({
         where: { receiverId: req.user.id },
         include: [
-          { model: User, as: "sender", attributes: ["id", "username", "email"] },
-          { model: User, as: "receiver", attributes: ["id", "username", "email"] },
-          { model: Service, as: "service", attributes: ["id", "title"] },
+          {
+            model: User,
+            // do NOT use aliases to avoid mismatch issues
+            attributes: ['id', 'username', 'email'],
+          },
         ],
-        order: [["createdAt", "DESC"]],
+        order: [['createdAt', 'DESC']],
         limit,
         offset,
       });
 
-      return ok(res, rows);
+      return ok(res, {
+        messages: rows,
+        count,
+        limit,
+        offset,
+      });
     } catch (e) {
-      console.error("[GET /messages/inbox] error", e);
-      return err(res, "Failed to load inbox", 500, e.message);
+      console.error('GET /api/messages/inbox error:', e);
+      return err(res, 'Failed to load inbox');
     }
-  },
+  }
 );
 
-/* ============================================================
-   GET /api/messages/sent
-   All messages SENT by the logged-in user
-   ============================================================ */
+/**
+ * GET /api/messages/sent
+ * List messages where the logged-in user is the sender.
+ */
 router.get(
-  "/sent",
+  '/sent',
   authenticateToken,
   [
-    query("limit").optional().isInt({ min: 1, max: 100 }).toInt(),
-    query("offset").optional().isInt({ min: 0 }).toInt(),
+    query('limit').optional().isInt({ min: 1, max: 100 }).toInt(),
+    query('offset').optional().isInt({ min: 0 }).toInt(),
   ],
   validate,
   async (req, res) => {
     try {
-      const limit = req.query.limit ?? 50;
+      const limit = req.query.limit ?? 20;
       const offset = req.query.offset ?? 0;
 
-      const rows = await Message.findAll({
+      const { rows, count } = await Message.findAndCountAll({
         where: { senderId: req.user.id },
         include: [
-          { model: User, as: "sender", attributes: ["id", "username", "email"] },
-          { model: User, as: "receiver", attributes: ["id", "username", "email"] },
-          { model: Service, as: "service", attributes: ["id", "title"] },
+          {
+            model: User,
+            attributes: ['id', 'username', 'email'],
+          },
         ],
-        order: [["createdAt", "DESC"]],
+        order: [['createdAt', 'DESC']],
         limit,
         offset,
       });
 
-      return ok(res, rows);
+      return ok(res, {
+        messages: rows,
+        count,
+        limit,
+        offset,
+      });
     } catch (e) {
-      console.error("[GET /messages/sent] error", e);
-      return err(res, "Failed to load sent messages", 500, e.message);
+      console.error('GET /api/messages/sent error:', e);
+      return err(res, 'Failed to load sent messages');
     }
-  },
+  }
 );
 
-/* ============================================================
-   GET /api/messages/thread/:userId
-   Conversation between logged-in user and another user
-   ============================================================ */
+/**
+ * GET /api/messages/:id
+ * Fetch a single message (only if the user is sender or receiver).
+ */
 router.get(
-  "/thread/:userId",
+  '/:id',
   authenticateToken,
-  [param("userId").isInt().toInt()],
+  [param('id').isInt().toInt()],
   validate,
   async (req, res) => {
     try {
-      const otherUserId = req.params.userId;
+      const id = req.params.id;
 
-      const rows = await Message.findAll({
-        where: {
-          // either I sent it OR they sent it
-          [Message.sequelize.Op.or]: [
-            { senderId: req.user.id, receiverId: otherUserId },
-            { senderId: otherUserId, receiverId: req.user.id },
-          ],
-        },
+      const message = await Message.findOne({
+        where: { id },
         include: [
-          { model: User, as: "sender", attributes: ["id", "username", "email"] },
-          { model: User, as: "receiver", attributes: ["id", "username", "email"] },
-          { model: Service, as: "service", attributes: ["id", "title"] },
+          { model: User, attributes: ['id', 'username', 'email'] },
         ],
-        order: [["createdAt", "ASC"]],
       });
 
-      return ok(res, rows);
+      if (!message) {
+        return err(res, 'Message not found', 404);
+      }
+
+      // (Optional) access control: make sure this user is part of the message
+      if (
+        message.senderId !== req.user.id &&
+        message.receiverId !== req.user.id
+      ) {
+        return err(res, 'Not allowed to view this message', 403);
+      }
+
+      return ok(res, { message });
     } catch (e) {
-      console.error("[GET /messages/thread/:userId] error", e);
-      return err(res, "Failed to load conversation", 500, e.message);
+      console.error('GET /api/messages/:id error:', e);
+      return err(res, 'Failed to load message');
     }
-  },
+  }
 );
 
-/* ============================================================
-   POST /api/messages
-   Send a message from logged-in user to someone else
-   Body: { receiverId, content, serviceId? }
-   ============================================================ */
+/**
+ * POST /api/messages
+ * Send a message.
+ * Body: { receiverId, subject, body }
+ */
 router.post(
-  "/",
+  '/',
   authenticateToken,
   [
-    body("receiverId").isInt().withMessage("receiverId is required").toInt(),
-    body("content")
-      .isString()
-      .isLength({ min: 1, max: 2000 })
-      .withMessage("content must be 1–2000 characters"),
-    body("serviceId").optional().isInt().toInt(),
+    body('receiverId')
+      .isInt({ min: 1 })
+      .withMessage('receiverId is required'),
+    body('subject')
+      .trim()
+      .isLength({ min: 1, max: 255 })
+      .withMessage('Subject is required'),
+    body('body')
+      .trim()
+      .isLength({ min: 1 })
+      .withMessage('Message body is required'),
   ],
   validate,
   async (req, res) => {
     try {
-      const { receiverId, content, serviceId } = req.body;
-      const senderId = req.user.id;
+      const { receiverId, subject, body: content } = req.body;
 
-      if (senderId === receiverId) {
-        return err(res, "You cannot send a message to yourself", 400);
+      if (receiverId === req.user.id) {
+        return err(res, 'You cannot send a message to yourself', 400);
       }
 
-      // optionally you can verify the receiver exists
       const receiver = await User.findByPk(receiverId);
       if (!receiver) {
-        return err(res, "Receiver not found", 404);
+        return err(res, 'Receiver not found', 404);
       }
 
-      const msg = await Message.create({
-        senderId,
+      const message = await Message.create({
+        senderId: req.user.id,
         receiverId,
-        content,
-        serviceId: serviceId || null,
+        subject,
+        body: content,
       });
 
-      const full = await Message.findByPk(msg.id, {
-        include: [
-          { model: User, as: "sender", attributes: ["id", "username", "email"] },
-          { model: User, as: "receiver", attributes: ["id", "username", "email"] },
-          { model: Service, as: "service", attributes: ["id", "title"] },
-        ],
-      });
-
-      return ok(res, full, 201);
+      return ok(res, { message }, 201);
     } catch (e) {
-      console.error("[POST /messages] error", e);
-      return err(res, "Failed to send message", 500, e.message);
+      console.error('POST /api/messages error:', e);
+      return err(res, 'Failed to send message');
     }
-  },
+  }
 );
 
 module.exports = router;
