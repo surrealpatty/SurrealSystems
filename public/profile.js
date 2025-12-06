@@ -1,7 +1,7 @@
 // public/profile.js
 // Profile page logic: profile info + edit + create service dropdown + show services.
 
-console.log("[profile] loaded profile.js v4");
+console.log("[profile] loaded profile.js v5");
 
 // Safe localStorage helpers
 function safeGet(key) {
@@ -245,6 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const editDisplayNameInput = document.getElementById("editDisplayName");
   const editEmailInput = document.getElementById("editEmail");
   const editDescriptionInput = document.getElementById("editDescription");
+  const accountSettingsCard = document.getElementById("accountSettingsCard");
 
   function enterEditMode() {
     if (!profileView || !profileEditForm) return;
@@ -263,12 +264,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     profileView.classList.add("is-hidden");
     profileEditForm.classList.remove("is-hidden");
+
+    if (accountSettingsCard) {
+      accountSettingsCard.classList.remove("is-hidden");
+    }
   }
 
   function exitEditMode() {
     if (!profileView || !profileEditForm) return;
     profileEditForm.classList.add("is-hidden");
     profileView.classList.remove("is-hidden");
+
+    if (accountSettingsCard) {
+      accountSettingsCard.classList.add("is-hidden");
+    }
   }
 
   if (editBtn) {
@@ -559,8 +568,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       services = services.filter((svc) => {
         const svcUserId =
-          svc.userId ??
-          svc.UserId ??
+          svc.userId ?? 
+          svc.UserId ?? 
           (svc.user && (svc.user.id ?? svc.user.userId));
         const svcUsername =
           (svc.user &&
