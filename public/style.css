@@ -1174,3 +1174,99 @@ textarea { min-height:120px; resize:vertical; }
 [data-theme="light"] .settings-item p {
   color: #6b7280 !important;
 }
+/* =========================================================
+   GLOBAL LIGHT MODE – applies to profile, services, messages
+   ========================================================= */
+
+/* Background + base text for the whole page */
+body.profile-dark {
+  background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
+  color: #e5e7eb;
+}
+
+body.profile-light {
+  background: radial-gradient(circle at top, #eef2ff 0, #e0f2fe 45%, #f9fafb 100%);
+  color: #020617;
+}
+
+/* White cards and sidebar in light mode */
+body.profile-light .sidebar,
+body.profile-light .card,
+body.profile-light .services-empty,
+body.profile-light .profile-service-card,
+body.profile-light .settings-item,
+body.profile-light .service-card,
+body.profile-light .message-card {
+  background-color: #ffffff !important;
+  border-color: #e2e8f0 !important;
+  color: #111827 !important;
+}
+
+/* Slightly tinted empty states so they stand out */
+body.profile-light .services-empty {
+  background-color: #f9fafb !important;
+  color: #4b5563 !important;
+}
+
+/* Headings more readable on light */
+body.profile-light h1,
+body.profile-light h2,
+body.profile-light h3,
+body.profile-light h4 {
+  color: #020617 !important;
+}
+
+/* Muted / label text darker on light (but still secondary) */
+body.profile-light .profile-label,
+body.profile-light .profile-edit-label,
+body.profile-light .settings-subtitle,
+body.profile-light .profile-edit-hint {
+  color: #4b5563 !important;
+}
+
+body.profile-light .profile-service-meta,
+body.profile-light .settings-item p,
+body.profile-light .service-card p,
+body.profile-light .message-card p {
+  color: #6b7280 !important;
+}
+
+/* Inputs on light: white backgrounds, dark text */
+body.profile-light input,
+body.profile-light textarea,
+body.profile-light select {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #d1d5db !important;
+}
+
+body.profile-light input:focus,
+body.profile-light textarea:focus,
+body.profile-light select:focus {
+  border-color: #3b82f6 !important;
+  box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4) !important;
+}
+
+/* Sidebar nav links in light mode */
+body.profile-light .sidebar-title {
+  color: #6b7280 !important;
+}
+
+body.profile-light .nav-link {
+  color: #111827 !important;
+}
+
+body.profile-light .nav-link:hover {
+  background-color: #e5edff !important;
+  border-color: #c7d2fe !important;
+}
+
+body.profile-light .nav-link.nav-link--active {
+  background-color: #e0ecff !important;
+  border-color: #60a5fa !important;
+  color: #1d4ed8 !important;
+}
+
+body.profile-light .nav-link.nav-link--danger {
+  color: #b91c1c !important;
+}

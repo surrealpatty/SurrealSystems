@@ -513,3 +513,24 @@ try {
   window.getTheme = getTheme;
   window.setTheme = setTheme;
 } catch {}
+// ---------------- GLOBAL THEME SYNC (dark / light) ----------------
+// Reuse the same key the profile page uses.
+(function syncThemeAcrossPages() {
+  const STORAGE_KEY = "codecrowds-profile-theme";
+  const body = document.body;
+  if (!body) return;
+
+  // read saved mode (default to dark)
+  let mode = "dark";
+  try {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved === "light" || saved === "dark") {
+      mode = saved;
+    }
+  } catch (e) {
+    // localStorage might be blocked; just stay dark
+  }
+
+  body.classList.remove("profile-dark", "profile-light");
+  body.classList.add(mode === "light" ? "profile-light" : "profile-dark");
+})();
