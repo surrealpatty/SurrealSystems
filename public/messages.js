@@ -43,8 +43,10 @@
       const data = await resp.json().catch(() => null);
       const user = (data && (data.user || data)) || null;
       if (user && user.id) {
-        // ensure userId stored locally for compatibility with rest of the page
+        // store user details so all pages (profile, messages, etc.) share them
         if (!localUserId) localStorage.setItem("userId", String(user.id));
+        if (user.username) localStorage.setItem("username", user.username);
+        if (user.email) localStorage.setItem("email", user.email);
         return { user, tokenPresent: !!localToken };
       }
       return null;
@@ -52,6 +54,25 @@
       // network/CORS error — we cannot verify; treat as unauthenticated to be safe
       console.warn("[ensureAuthenticated] network error:", e);
       return null;
+    }
+  }
+
+  // Set the pill in the top-right (avatar + email)
+  function hydrateHeaderUserPill() {
+    const storedUsername = localStorage.getItem("username") || "";
+    const storedEmail = localStorage.getItem("email") || "you@example.com";
+
+    // IDs should match your messages.html header
+    const avatarEl = document.getElementById("profileAvatar");
+    const emailEl = document.getElementById("profileEmail");
+
+    if (avatarEl) {
+      const letter =
+        (storedUsername || storedEmail || "U").charAt(0).toUpperCase();
+      avatarEl.textContent = letter;
+    }
+    if (emailEl) {
+      emailEl.textContent = storedEmail;
     }
   }
 
@@ -128,10 +149,7 @@
 
   /**
    * Render a single message card.
-   * Title format:
-   *   RE 'title of ad this message is from'
-   * We try to use the related service/ad title if present, otherwise fall
-   * back to the message subject, then a generic label.
+   * Layout: RE 'title of ad this message is from'
    */
   function renderMessageCard(m, kind = "inbox") {
     const article = document.createElement("article");
@@ -397,7 +415,6 @@
     const auth = await ensureAuthenticated();
     if (!auth) {
       console.warn("Not authenticated — redirecting to login");
-      // go to your login page, not old index
       window.location.href = "login.html";
       return;
     }
@@ -408,6 +425,9 @@
       localStorage.getItem("userId") ||
       (auth.user && String(auth.user.id)) ||
       userId;
+
+    // update avatar + email at top
+    hydrateHeaderUserPill();
 
     console.info("[messages] API_URL=", API_URL, "userIdPresent=", !!userId);
     loadInbox();
