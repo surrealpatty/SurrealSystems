@@ -17,7 +17,7 @@
     <!-- Global styles (your main site CSS) -->
     <link rel="stylesheet" href="style.css" />
 
-    <!-- Page-specific styles (dark profile layout + light version) -->
+    <!-- Page-specific styles (dark + light profile layout) -->
     <style>
       :root {
         --bg: #020617;
@@ -34,7 +34,7 @@
         box-sizing: border-box;
       }
 
-      /* note: NO background here – we do that with .profile-dark / .profile-light */
+      /* base body – no background here, we set it with .profile-dark / .profile-light */
       body {
         margin: 0;
         min-height: 100vh;
@@ -43,13 +43,13 @@
         color: var(--text-main);
       }
 
-      /* DARK MODE (your current look) */
+      /* ===== DARK MODE (current look) ===== */
       body.profile-dark {
         background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
         color: var(--text-main);
       }
 
-      /* LIGHT MODE (bright, soft gradient) */
+      /* ===== LIGHT MODE (bright, clean) ===== */
       body.profile-light {
         background: radial-gradient(
           circle at top,
@@ -299,21 +299,6 @@
         background: rgba(15, 23, 42, 0.9);
       }
 
-      body.profile-light .btn-primary {
-        color: #f9fafb;
-      }
-
-      body.profile-light .btn-secondary,
-      body.profile-light .btn-muted {
-        background: #f9fafb;
-        color: #374151;
-        border-color: #d1d5db;
-      }
-
-      body.profile-light .btn-muted:hover {
-        background: #e5e7eb;
-      }
-
       .services-empty {
         margin-top: 6px;
         padding: 0.65rem 0.75rem;
@@ -322,12 +307,6 @@
         background: #020617;
         font-size: 0.85rem;
         color: var(--text-muted);
-      }
-
-      body.profile-light .services-empty {
-        background: #f9fafb;
-        border-color: #e2e8f0;
-        color: #4b5563;
       }
 
       .profile-footer {
@@ -389,25 +368,6 @@
         color: var(--text-muted);
       }
 
-      body.profile-light .profile-label,
-      body.profile-light .profile-edit-label,
-      body.profile-light .profile-edit-hint {
-        color: #4b5563;
-      }
-
-      body.profile-light .profile-edit-input,
-      body.profile-light .profile-edit-textarea {
-        background: #ffffff;
-        color: #111827;
-        border-color: #d1d5db;
-      }
-
-      body.profile-light .profile-edit-input:focus,
-      body.profile-light .profile-edit-textarea:focus {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
-      }
-
       .profile-edit-actions {
         display: flex;
         flex-wrap: wrap;
@@ -454,16 +414,6 @@
       .profile-service-meta {
         font-size: 0.83rem;
         color: #9ca3af;
-      }
-
-      body.profile-light .profile-service-card {
-        background: #ffffff;
-        border-color: #e2e8f0;
-        color: #020617;
-      }
-
-      body.profile-light .profile-service-meta {
-        color: #6b7280;
       }
 
       @media (max-width: 640px) {
@@ -515,24 +465,6 @@
         color: #fecaca;
       }
 
-      body.profile-light .settings-item {
-        background: #ffffff;
-        border-color: #e2e8f0;
-        color: #020617;
-      }
-
-      body.profile-light .settings-subtitle {
-        color: #4b5563;
-      }
-
-      body.profile-light .settings-item p {
-        color: #6b7280;
-      }
-
-      body.profile-light .settings-item.danger h3 {
-        color: #b91c1c;
-      }
-
       /* simple toggle switch */
       .switch {
         position: relative;
@@ -574,6 +506,76 @@
 
       .switch input:checked + .slider:before {
         transform: translateX(16px);
+      }
+
+      /* ======= STRONG LIGHT-MODE OVERRIDES (make it truly light) ======= */
+
+      /* White cards & sidebar with dark text */
+      body.profile-light .sidebar,
+      body.profile-light .card,
+      body.profile-light .services-empty,
+      body.profile-light .profile-service-card,
+      body.profile-light .settings-item {
+        background: #ffffff !important;
+        border-color: #e2e8f0 !important;
+        color: #020617 !important;
+      }
+
+      /* Slightly tinted empty state */
+      body.profile-light .services-empty {
+        background: #f9fafb !important;
+        color: #4b5563 !important;
+      }
+
+      /* Labels / muted text darker on light */
+      body.profile-light .profile-label,
+      body.profile-light .profile-edit-label,
+      body.profile-light .settings-subtitle,
+      body.profile-light .profile-edit-hint {
+        color: #4b5563 !important;
+      }
+
+      body.profile-light .profile-service-meta,
+      body.profile-light .settings-item p {
+        color: #6b7280 !important;
+      }
+
+      /* inputs on light mode: white fields, dark text */
+      body.profile-light .profile-edit-input,
+      body.profile-light .profile-edit-textarea,
+      body.profile-light #serviceTitle,
+      body.profile-light #servicePrice,
+      body.profile-light #serviceDescription {
+        background: #ffffff !important;
+        color: #111827 !important;
+        border-color: #d1d5db !important;
+      }
+
+      body.profile-light .profile-edit-input:focus,
+      body.profile-light .profile-edit-textarea:focus {
+        border-color: #3b82f6 !important;
+        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4) !important;
+      }
+
+      /* buttons */
+      body.profile-light .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #22c55e);
+        color: #f9fafb;
+      }
+
+      body.profile-light .btn-secondary,
+      body.profile-light .btn-muted {
+        background: #f9fafb;
+        color: #374151;
+        border-color: #d1d5db;
+      }
+
+      body.profile-light .btn-muted:hover {
+        background: #e5e7eb;
+      }
+
+      body.profile-light .settings-item.danger h3 {
+        color: #b91c1c;
       }
     </style>
   </head>
