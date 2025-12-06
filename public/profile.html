@@ -17,7 +17,7 @@
     <!-- Global styles (your main site CSS) -->
     <link rel="stylesheet" href="style.css" />
 
-    <!-- Page-specific styles (dark profile layout) -->
+    <!-- Page-specific styles (dark profile layout + light-mode overrides) -->
     <style>
       :root {
         --bg: #020617;
@@ -458,6 +458,112 @@
       .switch input:checked + .slider:before {
         transform: translateX(16px);
       }
+
+      /* ---------------- LIGHT MODE OVERRIDES ---------------- */
+
+      body.light-mode {
+        background: radial-gradient(
+          circle at top,
+          #eef2ff 0,
+          #e0f2fe 45%,
+          #f9fafb 100%
+        );
+        color: #020617;
+      }
+
+      body.light-mode .profile-brand {
+        color: #020617;
+      }
+
+      body.light-mode .profile-user-pill {
+        background: #f9fafb;
+        border-color: #e5e7eb;
+      }
+
+      body.light-mode .profile-email {
+        color: #111827;
+      }
+
+      body.light-mode .sidebar,
+      body.light-mode .card,
+      body.light-mode .services-empty,
+      body.light-mode .profile-service-card,
+      body.light-mode .settings-item {
+        background: #ffffff;
+        border-color: #e2e8f0;
+        color: #020617;
+      }
+
+      body.light-mode .services-empty {
+        background: #f9fafb;
+        color: #4b5563;
+      }
+
+      body.light-mode .profile-label,
+      body.light-mode .profile-edit-label,
+      body.light-mode .settings-subtitle,
+      body.light-mode .profile-edit-hint {
+        color: #4b5563;
+      }
+
+      body.light-mode .profile-service-meta {
+        color: #6b7280;
+      }
+
+      body.light-mode .nav-link {
+        color: #111827;
+      }
+
+      body.light-mode .nav-link:hover {
+        background: #e5edff;
+        border-color: #c7d2fe;
+      }
+
+      body.light-mode .nav-link--active {
+        background: #e0ecff;
+        border-color: #60a5fa;
+        color: #1d4ed8;
+      }
+
+      body.light-mode .nav-link--danger {
+        color: #b91c1c;
+      }
+
+      body.light-mode .btn-primary {
+        background: linear-gradient(135deg, #3b82f6, #22c55e);
+        color: #f9fafb;
+      }
+
+      body.light-mode .btn-secondary,
+      body.light-mode .btn-muted {
+        background: #f9fafb;
+        color: #374151;
+        border-color: #d1d5db;
+      }
+
+      body.light-mode .btn-muted:hover {
+        background: #e5e7eb;
+      }
+
+      body.light-mode .settings-item.danger h3 {
+        color: #b91c1c;
+      }
+
+      body.light-mode .profile-edit-input,
+      body.light-mode .profile-edit-textarea,
+      body.light-mode #serviceTitle,
+      body.light-mode #servicePrice,
+      body.light-mode #serviceDescription {
+        background: #ffffff;
+        color: #111827;
+        border-color: #d1d5db;
+      }
+
+      body.light-mode .profile-edit-input:focus,
+      body.light-mode .profile-edit-textarea:focus {
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+      }
     </style>
   </head>
 
@@ -473,6 +579,16 @@
         <div class="profile-user-pill">
           <div class="profile-avatar" id="topUserAvatar">U</div>
           <span class="profile-email" id="topUserEmail">you@example.com</span>
+
+          <!-- Theme toggle switch (dark / light) -->
+          <label
+            class="switch"
+            aria-label="Toggle dark / light theme"
+            title="Toggle dark / light theme"
+          >
+            <input type="checkbox" id="themeToggle" />
+            <span class="slider"></span>
+          </label>
         </div>
       </header>
 
@@ -522,15 +638,12 @@
                   Edit Profile
                 </button>
 
-                <!-- Theme toggle switch (dark / light) -->
-                <label
-                  class="switch"
-                  aria-label="Toggle dark / light theme"
-                  title="Toggle dark / light theme"
-                >
-                  <input type="checkbox" id="themeToggle" />
+                <!-- Second copy of the toggle inside the card if you want it here instead:
+                <label class="switch" aria-label="Toggle dark / light theme" title="Toggle dark / light theme">
+                  <input type="checkbox" id="themeToggleCard" />
                   <span class="slider"></span>
                 </label>
+                -->
               </div>
             </div>
 
@@ -677,7 +790,9 @@
               </div>
 
               <div class="profile-edit-row">
-                <label for="serviceDescription" class="profile-edit-label">Description</label>
+                <label for="serviceDescription" class="profile-edit-label">
+                  Description
+                </label>
                 <textarea
                   id="serviceDescription"
                   class="profile-edit-textarea"
@@ -713,5 +828,36 @@
 
     <!-- Profile page logic -->
     <script src="profile.js" defer></script>
+
+    <!-- Light / dark toggle script (profile-only) -->
+    <script>
+      (function () {
+        const STORAGE_KEY = "codecrowds-profile-theme";
+        const body = document.body;
+        const toggle = document.getElementById("themeToggle");
+
+        function applyTheme(mode) {
+          if (mode === "light") {
+            body.classList.add("light-mode");
+          } else {
+            body.classList.remove("light-mode");
+            mode = "dark";
+          }
+          localStorage.setItem(STORAGE_KEY, mode);
+          if (toggle) {
+            toggle.checked = mode === "light";
+          }
+        }
+
+        const saved = localStorage.getItem(STORAGE_KEY) || "dark";
+        applyTheme(saved);
+
+        if (toggle) {
+          toggle.addEventListener("change", () => {
+            applyTheme(toggle.checked ? "light" : "dark");
+          });
+        }
+      })();
+    </script>
   </body>
 </html>
