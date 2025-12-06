@@ -1105,3 +1105,72 @@ textarea { min-height:120px; resize:vertical; }
 #toast.show {
   opacity: 1;
 }
+/* =========================================================
+   LIGHT MODE – make the profile page easy to read
+   (keeps your dark mode exactly the same)
+   ========================================================= */
+
+/* Make the variables themselves more "light" when in light mode */
+[data-theme="light"] {
+  --card-bg: #ffffff;
+  --card-text: #111827;
+  --muted: #4b5563;
+  --color-card: var(--card-bg);
+  --color-text: var(--card-text);
+  --color-muted: var(--muted);
+}
+
+/* Force white cards + sidebar on the profile layout */
+[data-theme="light"] .profile-layout .sidebar,
+[data-theme="light"] .profile-layout .card,
+[data-theme="light"] .profile-layout .services-empty,
+[data-theme="light"] .profile-layout .profile-service-card,
+[data-theme="light"] .profile-layout .settings-item {
+  background-color: #ffffff !important;
+  color: #111827 !important;
+  border-color: #e2e8f0 !important;
+}
+
+/* Slightly tinted empty state so it doesn’t look like a regular card */
+[data-theme="light"] .profile-layout .services-empty {
+  background-color: #f9fafb !important;
+  color: #4b5563 !important;
+}
+
+/* Headings in light mode – strong dark text */
+[data-theme="light"] .profile-layout h1,
+[data-theme="light"] .profile-layout h2,
+[data-theme="light"] .profile-layout h3,
+[data-theme="light"] .profile-layout h4 {
+  color: #020617 !important;
+}
+
+/* Sidebar text + nav links for light mode */
+[data-theme="light"] .sidebar-title {
+  color: #6b7280 !important;
+}
+
+[data-theme="light"] .nav-link {
+  color: #111827 !important;
+}
+
+[data-theme="light"] .nav-link:hover {
+  background-color: #e5edff !important;
+  border-color: #c7d2fe !important;
+}
+
+[data-theme="light"] .nav-link.nav-link--active {
+  background-color: #e0ecff !important;
+  border-color: #60a5fa !important;
+  color: #1d4ed8 !important;
+}
+
+[data-theme="light"] .nav-link.nav-link--danger {
+  color: #b91c1c !important;
+}
+
+/* Service metadata + settings text a bit softer but still readable */
+[data-theme="light"] .profile-service-meta,
+[data-theme="light"] .settings-item p {
+  color: #6b7280 !important;
+}
