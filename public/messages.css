@@ -1,130 +1,189 @@
-/* messages.css -- styles previously inline in messages.html */
+/* public/messages.css
+   Dark-friendly layout for the messages page
+   (works with the global dashboard styles in public/style.css)
+*/
 
-/* Basic page / container */
-body,
-html {
+/* Wrapper that sits in the right column next to the sidebar */
+.messages-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 8px 0 32px;
+}
+
+/* Main card that holds the header, tabs, and list */
+.messages-card {
+  border-radius: 1.25rem;
+  border: 1px solid #1f2937;
+  background: rgba(15, 23, 42, 0.96);
+  padding: 18px 18px 22px;
+  color: #e5e7eb;
+}
+
+/* Header text "Your messages" */
+.messages-header-title {
+  margin: 0 0 4px;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+/* Small helper text under the title (if used) */
+.messages-header-subtitle {
   margin: 0;
-  padding: 0;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #4e54c8, #00aaff);
-  color: #fff;
-  min-height: 100%;
+  font-size: 0.85rem;
+  color: #9ca3af;
 }
 
-.container {
-  max-width: 900px;
-  width: 90%;
-  padding: 2.5rem 2rem;
-  margin: 50px auto;
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  color: #333;
-  text-align: center;
+/* Top right chip with the user email */
+.messages-user-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.65);
+  background: rgba(15, 23, 42, 0.96);
+  font-size: 0.85rem;
 }
 
-/* Headings */
-h1 {
-  color: #4e54c8;
-  margin-bottom: 1rem;
-}
-
-/* Tabbar */
+/* Tab bar (Received / Sent / Back to Profile) */
 .tabbar {
   display: flex;
-  justify-content: center;
-  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
   align-items: center;
-}
-.tab {
-  padding: 12px 18px;
-  font-size: 1rem;
-  color: #fff;
-  background-color: #4e54c8;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+  gap: 8px;
   margin-top: 10px;
-  transition: 0.2s;
+  margin-bottom: 12px;
 }
+
+.tab {
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+  background: rgba(15, 23, 42, 0.75);
+  border-radius: 999px;
+  border: 1px solid rgba(148, 163, 184, 0.7);
+  cursor: pointer;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.1s ease;
+}
+
 .tab:hover {
-  background-color: #3b40a1;
+  background: rgba(55, 65, 81, 0.9);
+  border-color: rgba(156, 163, 175, 0.95);
 }
+
+.tab.active {
+  background: linear-gradient(135deg, #3b82f6, #22c55e);
+  border-color: transparent;
+  color: #f9fafb;
+}
+
 .tab[disabled] {
-  opacity: 0.6;
+  opacity: 0.55;
   cursor: default;
 }
-.tab.active {
-  background-color: #00aaff;
-  color: #fff;
-}
 
-/* Messages grid */
+/* Messages grid/list */
 .messages-list {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-top: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 14px;
+  margin-top: 8px;
 }
 
-/* Message Card */
-.card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s;
-  color: #333;
+/* Individual message card */
+.messages-list .card {
+  background: #020617;
+  border-radius: 1rem;
+  padding: 14px 13px 12px;
+  border: 1px solid #1f2937;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  color: #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
   text-align: left;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
-.card:hover {
-  transform: translateY(-5px);
+
+.messages-list .card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(59, 130, 246, 0.8);
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.85);
 }
-.card h3 {
-  margin-bottom: 5px;
-  color: #4e54c8;
+
+.messages-list .message-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #e5e7eb;
 }
-.card p {
-  margin: 5px 0;
-  color: #555;
-}
-.card .timestamp {
+
+.messages-list .message-meta {
+  margin: 2px 0 6px;
   font-size: 0.8rem;
-  color: #999;
+  color: #9ca3af;
 }
 
-/* card actions */
+.messages-list p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #e5e7eb;
+}
+
+.messages-list .timestamp {
+  margin-top: 6px;
+  font-size: 0.78rem;
+  color: #9ca3af;
+}
+
+/* Buttons inside cards */
 .card-actions {
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
-/* conversation footer */
+.card-actions .viewConversationBtn {
+  font-size: 0.82rem;
+  padding: 6px 12px;
+}
+
+/* Conversation footer (Back button) */
 .conversation-footer {
-  grid-column: 1 / -1; /* make footer span full width of grid */
+  grid-column: 1 / -1;
   display: flex;
   justify-content: center;
+  margin-top: 12px;
 }
 
-/* states */
-.loading {
-  color: #666;
-}
-.empty {
-  color: #666;
-}
+/* Status text states */
+.loading,
+.empty,
 .error {
-  color: #b00020;
+  grid-column: 1 / -1;
+  text-align: center;
+  font-size: 0.9rem;
 }
 
-/* Responsive */
-@media (max-width: 480px) {
-  .container {
-    padding: 2rem 1rem;
+.loading,
+.empty {
+  color: #9ca3af;
+}
+
+.error {
+  color: #fecaca;
+}
+
+/* Small screens */
+@media (max-width: 600px) {
+  .messages-card {
+    padding: 14px 12px 18px;
   }
-  .tab {
-    padding: 10px 12px;
+
+  .tabbar {
+    justify-content: flex-start;
+  }
+
+  .messages-list {
+    grid-template-columns: 1fr;
   }
 }

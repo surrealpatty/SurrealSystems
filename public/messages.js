@@ -126,6 +126,13 @@
       messagesList.innerHTML = `<p class="empty">${escapeHtml(text)}</p>`;
   }
 
+  /**
+   * Render a single message card.
+   * Title format:
+   *   RE 'title of ad this message is from'
+   * We try to use the related service/ad title if present, otherwise fall
+   * back to the message subject, then a generic label.
+   */
   function renderMessageCard(m, kind = "inbox") {
     const article = document.createElement("article");
     article.className = "card";
@@ -133,41 +140,44 @@
 
     if (kind === "inbox") {
       const fromName = m.sender?.username || "Unknown";
-      // Subject = ad title / subject line if present, otherwise fallback
-      const subject =
-        m.subject && m.subject.trim().length
-          ? m.subject
-          : `New message from ${fromName}`;
+      const adTitle =
+        (m.service && m.service.title) ||
+        m.adTitle ||
+        m.subject ||
+        `Message from ${fromName}`;
+      const headingText = `RE '${adTitle}'`;
 
       article.innerHTML = `
-        <h3 class="message-title">RE: "${escapeHtml(subject)}"</h3>
+        <h3 class="message-title">${escapeHtml(headingText)}</h3>
         <p class="message-meta">From: ${escapeHtml(fromName)}</p>
         <p>${escapeHtml(m.content || "")}</p>
         <p class="timestamp">${new Date(m.createdAt).toLocaleString()}</p>
         <div class="card-actions">
           <button class="viewConversationBtn"
                   data-userid="${m.sender?.id || m.senderId}"
-                  data-username="${escapeHtml(fromName)}">
+                  data-username="${fromName}">
             View Conversation
           </button>
         </div>
       `;
     } else {
       const toName = m.receiver?.username || "Unknown";
-      const subject =
-        m.subject && m.subject.trim().length
-          ? m.subject
-          : `Message to ${toName}`;
+      const adTitle =
+        (m.service && m.service.title) ||
+        m.adTitle ||
+        m.subject ||
+        `Message to ${toName}`;
+      const headingText = `RE '${adTitle}'`;
 
       article.innerHTML = `
-        <h3 class="message-title">RE: "${escapeHtml(subject)}"</h3>
+        <h3 class="message-title">${escapeHtml(headingText)}</h3>
         <p class="message-meta">To: ${escapeHtml(toName)}</p>
         <p>${escapeHtml(m.content || "")}</p>
         <p class="timestamp">${new Date(m.createdAt).toLocaleString()}</p>
         <div class="card-actions">
           <button class="viewConversationBtn"
                   data-userid="${m.receiver?.id || m.receiverId}"
-                  data-username="${escapeHtml(toName)}">
+                  data-username="${toName}">
             View Conversation
           </button>
         </div>
