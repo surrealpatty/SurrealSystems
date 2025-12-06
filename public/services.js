@@ -14,7 +14,7 @@
   }
 
   function getToken() {
-    return safeGet("token"); // must match login/register storage
+    return safeGet("token"); // may be unused; backend decides auth
   }
 
   function getUserId() {
@@ -59,7 +59,7 @@
       '<p><span class="spinner"></span> Loading services…</p>';
 
     try {
-      // apiFetch is defined in script.js and automatically sends the token
+      // apiFetch is defined in script.js and automatically sends auth (if any)
       const json = await apiFetch("/services");
 
       // Accept either { services: [...] } or { data: [...] }
@@ -217,16 +217,7 @@
   }
 
   async function handleSendMessage() {
-    const token = getToken();
-
     if (!sendError) return;
-
-    // must be logged in – only require a token
-    if (!token) {
-      sendError.textContent = "Please log in to send messages.";
-      sendError.hidden = false;
-      return;
-    }
 
     if (!currentRecipientId) {
       sendError.textContent = "No recipient selected.";
@@ -268,6 +259,7 @@
         "Something went wrong sending your message.";
 
       if (status === 401) {
+        // backend says you are not logged in
         sendError.textContent = "Please log in to send messages.";
       } else {
         sendError.textContent = serverMsg;
@@ -331,3 +323,4 @@
     loadServices();
   });
 })();
+
