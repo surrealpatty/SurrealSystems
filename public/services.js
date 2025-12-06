@@ -239,11 +239,13 @@
     }
 
     try {
+      // IMPORTANT: match backend field names
       await apiFetch("/messages", {
         method: "POST",
         body: JSON.stringify({
-          recipientId: currentRecipientId,
-          content: bodyText,
+          receiverId: currentRecipientId, // backend expects receiverId
+          body: bodyText,                 // backend expects body/message/text
+          subject: "Message about your service",
         }),
       });
 
@@ -323,4 +325,3 @@
     loadServices();
   });
 })();
-
