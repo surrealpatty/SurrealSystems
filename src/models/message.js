@@ -1,57 +1,45 @@
 // src/models/message.js
-module.exports = (sequelize) => {
-  const { DataTypes } = require('sequelize');
+"use strict";
 
+module.exports = (sequelize, DataTypes) => {
   const Message = sequelize.define(
-    'Message',
+    "Message",
     {
-      id: { type: DataTypes.INTEGER, primaryKey: true, autoIncrement: true },
-
-      // sender / receiver
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      },
       senderId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'senderId',
       },
       receiverId: {
         type: DataTypes.INTEGER,
         allowNull: false,
-        field: 'receiverId',
       },
-
-      // Optional subject – e.g. title of the ad / service this message is about
-      subject: {
-        type: DataTypes.STRING(255),
+      serviceId: {
+        type: DataTypes.INTEGER,
         allowNull: true,
-        field: 'subject',
       },
-
-      content: { type: DataTypes.TEXT, allowNull: false },
     },
     {
-      tableName: 'messages',
-      timestamps: true,
-      underscored: false, // createdAt / updatedAt
+      tableName: "Messages",
     },
   );
 
-  // If your models/index.js calls associate, this will wire up relations.
   Message.associate = (models) => {
-    // sender / receiver associations (already used by includes with "as")
     Message.belongsTo(models.User, {
-      as: 'sender',
-      foreignKey: 'senderId',
+      as: "sender",
+      foreignKey: "senderId",
     });
     Message.belongsTo(models.User, {
-      as: 'receiver',
-      foreignKey: 'receiverId',
+      as: "receiver",
+      foreignKey: "receiverId",
     });
-
-    // If later you add a Service FK, you can also do:
-    // Message.belongsTo(models.Service, {
-    //   as: 'service',
-    //   foreignKey: 'serviceId',
-    // });
+    Message.belongsTo(models.Service, {
+      as: "service",
+      foreignKey: "serviceId",
+    });
   };
 
   return Message;
