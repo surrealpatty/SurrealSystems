@@ -119,20 +119,35 @@ router.post(
   '/',
   authenticateToken,
   [
-    body('receiverId').isInt().withMessage('receiverId is required'),
-    body('subject').optional().isString().isLength({ max: 255 }),
-    body('body').isString().notEmpty().withMessage('Message body is required'),
+    body('receiverId')
+      .isInt()
+      .withMessage('receiverId is required'),
+    // Frontend sends `body` text; we store it in the `content` column.
+    body('body')
+      .isString()
+      .notEmpty()
+      .withMessage('Message body is required'),
+    // Subject is optional and *not* stored in DB for now (no subject column)
+    body('subject')
+      .optional()
+      .isString()
+      .isLength({ max: 255 }),
+    body('serviceId')
+      .optional()
+      .isInt()
+      .withMessage('serviceId must be an integer'),
   ],
   validate,
   async (req, res) => {
     try {
-      const { receiverId, subject, body } = req.body;
+      const { receiverId, body: bodyText, serviceId } = req.body;
 
+      // Map bodyText -> `content` column in Message model
       const created = await Message.create({
         senderId: req.user.id,
         receiverId,
-        subject: subject || '',
-        body,
+        content: bodyText,
+        serviceId: serviceId || null,
       });
 
       const message = created.toJSON();
@@ -145,7 +160,7 @@ router.post(
 );
 
 /* ------------------------------------------------------------------ */
-/* OPTIONAL: GET /api/messages/thread/:userId  (conversation)         */
+/* GET /api/messages/thread/:userId  (conversation)                   */
 /* ------------------------------------------------------------------ */
 router.get(
   '/thread/:userId',
