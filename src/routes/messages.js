@@ -147,54 +147,63 @@ router.get(
   }
 );
 
-/**
- * POST /api/messages
- * Send a message.
- * Body: { receiverId, subject, body }
- */
-router.post(
-  '/',
-  authenticateToken,
-  [
-    body('receiverId')
-      .isInt({ min: 1 })
-      .withMessage('receiverId is required'),
-    body('subject')
-      .trim()
-      .isLength({ min: 1, max: 255 })
-      .withMessage('Subject is required'),
-    body('body')
-      .trim()
-      .isLength({ min: 1 })
-      .withMessage('Message body is required'),
-  ],
-  validate,
-  async (req, res) => {
-    try {
-      const { receiverId, subject, body: content } = req.body;
+// POST /api/messages
+// Send a message. We do **manual** validation here instead of express-validator
+// so it plays nicely with the frontend.
+router.post('/', authenticateToken, async (req, res) => {
+  try {
+    const {
+      receiverId,
+      subject,
+      body: content,
+      serviceId,
+      message,
+      text,
+    } = req.body || {};
 
-      if (receiverId === req.user.id) {
-        return err(res, 'You cannot send a message to yourself', 400);
-      }
+    // Be flexible with the body field name
+    const messageBody =
+      (typeof content === 'string' && content.trim()) ||
+      (typeof message === 'string' && message.trim()) ||
+      (typeof text === 'string' && text.trim()) ||
+      '';
 
-      const receiver = await User.findByPk(receiverId);
-      if (!receiver) {
-        return err(res, 'Receiver not found', 404);
-      }
-
-      const message = await Message.create({
-        senderId: req.user.id,
-        receiverId,
-        subject,
-        body: content,
-      });
-
-      return ok(res, { message }, 201);
-    } catch (e) {
-      console.error('POST /api/messages error:', e);
-      return err(res, 'Failed to send message');
+    if (!receiverId) {
+      return err(res, 'receiverId is required', 400);
     }
+
+    if (!messageBody) {
+      return err(res, 'Message body is required', 400);
+    }
+
+    if (Number(receiverId) === Number(req.user.id)) {
+      return err(res, 'You cannot send a message to yourself', 400);
+    }
+
+    const receiver = await User.findByPk(receiverId);
+    if (!receiver) {
+      return err(res, 'Receiver not found', 404);
+    }
+
+    const finalSubject =
+      typeof subject === 'string' && subject.trim().length > 0
+        ? subject.trim()
+        : 'New message from CodeCrowds';
+
+    const msg = await Message.create({
+      senderId: req.user.id,
+      receiverId,
+      subject: finalSubject,
+      body: messageBody,
+      serviceId: serviceId || null,
+    });
+
+    return ok(res, { message: msg }, 201);
+  } catch (e) {
+    console.error('POST /api/messages error:', e);
+    return err(res, 'Failed to send message');
   }
-);
+});
+
 
 module.exports = router;
