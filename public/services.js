@@ -218,12 +218,11 @@
 
   async function handleSendMessage() {
     const token = getToken();
-    const userId = getUserId();
 
     if (!sendError) return;
 
-    // must be logged in
-    if (!token || !userId) {
+    // must be logged in – only require a token
+    if (!token) {
       sendError.textContent = "Please log in to send messages.";
       sendError.hidden = false;
       return;
