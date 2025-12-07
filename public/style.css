@@ -554,12 +554,7 @@ textarea { min-height:120px; resize:vertical; }
 .foot-note { margin-top:14px; font-size:13px; color:var(--color-muted); text-align:center; }
 .foot-note a { color:var(--brand-a); text-decoration:underline; }
 
-/* minimal accessibility helpers */
 [aria-live]{transition: none;}
-
-/* small helpers (add more if needed) */
-/* (empty on purpose) */
-
 
 /* -------------------- Profile page (profile.html) -------------------- */
 
@@ -602,9 +597,12 @@ textarea { min-height:120px; resize:vertical; }
   padding: 0.4rem 0.8rem;
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.6);
-  background: rgba(15, 23, 42, 0.96);
   font-size: 0.85rem;
+  background: rgba(255, 255, 255, 0.75); /* neutral base */
+  -webkit-backdrop-filter: blur(10px); /* Safari 9+ / iOS */
+  backdrop-filter: blur(10px);         /* modern browsers */
 }
+
 
 .profile-avatar {
   width: 30px;
@@ -618,8 +616,9 @@ textarea { min-height:120px; resize:vertical; }
   color: #020617;
 }
 
+/* Let text inside pill follow the pill color */
 .profile-email {
-  color: var(--color-text);
+  color: inherit;
 }
 
 /* Layout: sidebar + main column */
@@ -1293,4 +1292,22 @@ body.profile-dark #profileName {
 /* strong dark text on light card */
 body.profile-light #profileName {
   color: #111827 !important;
+}
+
+/* ============================================
+   PROFILE USER PILL – match services pill
+   ============================================ */
+
+/* Dark mode: navy pill with light text */
+body.profile-dark .profile-user-pill {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: rgba(148, 163, 184, 0.6);
+  color: #e5e7eb;
+}
+
+/* Light mode: soft blue pill with dark text – like services */
+body.profile-light .profile-user-pill {
+  background: #e0f2fe;
+  border-color: #bfdbfe;
+  color: #111827;
 }
