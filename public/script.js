@@ -390,17 +390,18 @@ function initLoginPage() {
 }
 
 /* =======================================================================
-   Top-right user chip: show username instead of email (all pages)
+   Top-right user chip: show DISPLAY NAME on all pages
 ======================================================================= */
 
-// Read current user from localStorage / cc_me or /users/me
+// Read current user; always try /users/me for the freshest display name.
+// Fall back to whatever we have in localStorage if the request fails.
 async function ccGetCurrentUser() {
-  // Try cc_me first
+  // 1) Read what we already have (fallback)
   let me = null;
   try {
     const raw = localStorage.getItem("cc_me");
     if (raw) me = JSON.parse(raw);
-  } catch (e) {
+  } catch {
     me = null;
   }
 
@@ -412,14 +413,12 @@ async function ccGetCurrentUser() {
     "";
   let email = (me && me.email) || localStorage.getItem("email") || "";
 
-  // If we already have a username or email, just return it
-  if (username || email) {
-    return { id, username, email };
-  }
+  const fallback = { id, username, email };
 
-  // Otherwise, try to load from backend /users/me (if logged in)
+  // 2) Try to hit /users/me for fresh data
   const baseUrl =
     (typeof window !== "undefined" && window.API_URL) || API_BASE || "";
+
   try {
     const res = await fetch(baseUrl.replace(/\/+$/, "") + "/users/me", {
       method: "GET",
@@ -427,12 +426,13 @@ async function ccGetCurrentUser() {
       headers: { Accept: "application/json" },
     });
     if (!res.ok) {
-      return { id, username, email };
+      return fallback;
     }
+
     const data = await res.json();
     const u =
       (data && data.user) || (data && data.data && data.data.user) || data;
-    if (!u) return { id, username, email };
+    if (!u) return fallback;
 
     const uname =
       u.username ||
@@ -447,14 +447,14 @@ async function ccGetCurrentUser() {
       localStorage.setItem("username", uname);
       localStorage.setItem("email", uemail);
       localStorage.setItem("cc_me", JSON.stringify(u));
-    } catch (e) {
+    } catch {
       // ignore storage errors
     }
 
     return { id: u.id, username: uname, email: uemail };
   } catch (e) {
     console.warn("[nav] failed to fetch /users/me", e);
-    return { id, username, email };
+    return fallback;
   }
 }
 
@@ -468,22 +468,18 @@ async function ccInitTopUserChip() {
   // If there is no top-right chip on this page, do nothing
   if (!avatarEl && !labelEl) return;
 
-  // 1) First try to read the DISPLAY NAME already shown on profile card
-  //    so edits appear immediately without a reload.
+  // 1) Prefer the DISPLAY NAME that is already on the profile card
   let domDisplayName = "";
   const profileNameEl = document.getElementById("profileName");
   if (profileNameEl && profileNameEl.textContent) {
     domDisplayName = profileNameEl.textContent.trim();
   }
 
-  // 2) Get user info from storage / backend
+  // 2) Get the freshest user object (tries /users/me)
   const user = await ccGetCurrentUser();
 
-  // 3) Decide what to show:
-  //    - Prefer the DOM display name if present
-  //    - Then username from user
-  //    - Then email prefix
-  let displayName =
+  // 3) Decide what to show
+  const displayName =
     domDisplayName ||
     (user && user.username) ||
     (user && user.email ? user.email.split("@")[0] : "") ||
@@ -491,7 +487,7 @@ async function ccInitTopUserChip() {
 
   if (labelEl) {
     labelEl.textContent = displayName;
-    // optional: keep full email as tooltip if we have it
+    // keep full email as tooltip if we have it
     if (user && user.email) {
       labelEl.title = user.email;
     }
