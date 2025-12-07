@@ -418,7 +418,8 @@ async function ccGetCurrentUser() {
   }
 
   // Otherwise, try to load from backend /users/me (if logged in)
-  const baseUrl = (typeof window !== "undefined" && window.API_URL) || API_BASE || "";
+  const baseUrl =
+    (typeof window !== "undefined" && window.API_URL) || API_BASE || "";
   try {
     const res = await fetch(baseUrl.replace(/\/+$/, "") + "/users/me", {
       method: "GET",
@@ -467,21 +468,35 @@ async function ccInitTopUserChip() {
   // If there is no top-right chip on this page, do nothing
   if (!avatarEl && !labelEl) return;
 
-  const user = await ccGetCurrentUser();
-  if (!user) return;
+  // 1) First try to read the DISPLAY NAME already shown on profile card
+  //    so edits appear immediately without a reload.
+  let domDisplayName = "";
+  const profileNameEl = document.getElementById("profileName");
+  if (profileNameEl && profileNameEl.textContent) {
+    domDisplayName = profileNameEl.textContent.trim();
+  }
 
-  const displayName =
-    user.username ||
-    (user.email ? user.email.split("@")[0] : "") ||
+  // 2) Get user info from storage / backend
+  const user = await ccGetCurrentUser();
+
+  // 3) Decide what to show:
+  //    - Prefer the DOM display name if present
+  //    - Then username from user
+  //    - Then email prefix
+  let displayName =
+    domDisplayName ||
+    (user && user.username) ||
+    (user && user.email ? user.email.split("@")[0] : "") ||
     "User";
 
   if (labelEl) {
     labelEl.textContent = displayName;
-    // optional: keep full email as tooltip
-    if (user.email) {
+    // optional: keep full email as tooltip if we have it
+    if (user && user.email) {
       labelEl.title = user.email;
     }
   }
+
   if (avatarEl && displayName) {
     avatarEl.textContent = displayName.trim()[0].toUpperCase();
   }

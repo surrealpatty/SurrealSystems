@@ -79,6 +79,7 @@
         background: linear-gradient(135deg, #22c55e, #3b82f6);
       }
 
+      /* shared pill look – base shape, blur in style.css */
       .profile-user-pill {
         display: inline-flex;
         align-items: center;
@@ -266,7 +267,6 @@
       body.profile-light .profile-row--name .profile-value {
         color: #111827;
       }
-      /* end special display-name styling */
 
       body.profile-dark .profile-label,
       body.profile-dark .profile-edit-label,
@@ -551,11 +551,11 @@
           <span>CodeCrowds</span>
         </a>
 
-          <div class="top-user-pill">
-    <div class="top-user-avatar" id="topUserAvatar">Q</div>
-    <span class="top-user-label" id="topUserEmail">you@example.com</span>
-  </div>
-
+        <!-- 🔹 Shared top-right user pill – JS fills with display name -->
+        <div class="profile-user-pill" id="topUserChip">
+          <div class="profile-avatar" id="topUserAvatar">Q</div>
+          <span class="profile-email" id="topUserEmail">you@example.com</span>
+        </div>
       </header>
 
       <div class="profile-layout">
@@ -575,7 +575,7 @@
         <main class="content-column">
           <section class="card">
             <div id="profileView">
-              <!-- 🔹 name row now has profile-row--name for special styling -->
+              <!-- name row now has profile-row--name for special styling -->
               <div class="profile-row profile-row--name">
                 <div class="profile-label">Display name</div>
                 <div class="profile-value" id="profileName">New developer</div>
@@ -759,6 +759,5 @@
     <script src="init.js" defer></script>
     <script src="script.js" defer></script>
     <script src="profile.js" defer></script>
-
   </body>
 </html>
