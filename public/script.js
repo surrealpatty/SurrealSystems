@@ -506,7 +506,7 @@ async function ccInitTopUserChip() {
 initThemeFromPreference();
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Wire up toggle if present on this page (profile / messages)
+  // Wire up toggle if present on this page (profile page)
   initThemeToggle();
 
   // Hide action rail by default if user not logged in (extra safety for public pages)
@@ -524,10 +524,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   initLoginPage();
 
-  // 🔹 Run once immediately…
+  // Top-right chip
   ccInitTopUserChip();
-  // …and again shortly after, so it can see the updated #profileName
-  setTimeout(ccInitTopUserChip, 800);
 });
 
 /* ============================== Expose API ============================== */
