@@ -1,4 +1,3 @@
-// public/script.js
 /* ============================================================================ 
   CodeCrowds – shared client helpers (improved)
 ============================================================================= */
@@ -507,7 +506,7 @@ async function ccInitTopUserChip() {
 initThemeFromPreference();
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Wire up toggle if present on this page (profile page)
+  // Wire up toggle if present on this page (profile / messages)
   initThemeToggle();
 
   // Hide action rail by default if user not logged in (extra safety for public pages)

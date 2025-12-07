@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Messages – CodeCrowds</title>
+
+    <!-- Global styles -->
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="messages.css" />
 
@@ -28,6 +30,7 @@
           "Segoe UI", sans-serif;
       }
 
+      /* background is controlled by profile-light / profile-dark from script.js */
       body.dashboard.profile-dark {
         background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
         color: var(--text-main);
@@ -67,6 +70,7 @@
         background: linear-gradient(135deg, #22c55e, #3b82f6);
       }
 
+      /* top-right pill – classes for styling, IDs for JS to hook into */
       .user-pill {
         display: inline-flex;
         align-items: center;
@@ -377,6 +381,10 @@
         transform: translateX(16px);
       }
     </style>
+
+    <!-- Shared helpers / theme / top-right chip logic -->
+    <script src="init.js" defer></script>
+    <script src="script.js" defer></script>
   </head>
 
   <body class="dashboard messages-page">
@@ -387,9 +395,10 @@
           <span>CodeCrowds</span>
         </a>
 
-        <div class="user-pill">
-          <div class="user-avatar" id="profileAvatar">U</div>
-          <span class="user-email" id="profileEmail">you@example.com</span>
+        <!-- 🔹 Shared top-right user pill – script.js fills with DISPLAY NAME -->
+        <div class="user-pill" id="topUserChip">
+          <div class="user-avatar" id="topUserAvatar">U</div>
+          <span class="user-email" id="topUserEmail">you@example.com</span>
 
           <label class="switch" aria-label="Toggle dark / light theme">
             <input type="checkbox" id="themeToggle" />
@@ -442,53 +451,7 @@
       </footer>
     </div>
 
+    <!-- Page-specific JS (after shared helpers) -->
     <script src="messages.js" defer></script>
-    <script>
-      const params = new URLSearchParams(window.location.search);
-      const username = params.get("username") || "";
-      const email = params.get("email") || "";
-
-      const avatarEl = document.getElementById("profileAvatar");
-      const emailBadge = document.getElementById("profileEmail");
-
-      if (email) emailBadge.textContent = email;
-
-      const sourceName = username || (email ? email.split("@")[0] : "User");
-      avatarEl.textContent = sourceName.trim()[0].toUpperCase();
-    </script>
-
-    <!-- Shared theme script -->
-    <script>
-      (function () {
-        const STORAGE_KEY = "codecrowds-theme";
-        const body = document.body;
-        const toggle = document.getElementById("themeToggle");
-        const DARK_CLASS = "profile-dark";
-        const LIGHT_CLASS = "profile-light";
-
-        function applyTheme(mode) {
-          if (mode === "light") {
-            body.classList.add(LIGHT_CLASS);
-            body.classList.remove(DARK_CLASS);
-          } else {
-            body.classList.add(DARK_CLASS);
-            body.classList.remove(LIGHT_CLASS);
-            mode = "dark";
-          }
-
-          localStorage.setItem(STORAGE_KEY, mode);
-          if (toggle) toggle.checked = mode === "light";
-        }
-
-        const saved = localStorage.getItem(STORAGE_KEY) || "dark";
-        applyTheme(saved);
-
-        if (toggle) {
-          toggle.addEventListener("change", () => {
-            applyTheme(toggle.checked ? "light" : "dark");
-          });
-        }
-      })();
-    </script>
   </body>
 </html>
