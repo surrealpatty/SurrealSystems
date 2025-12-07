@@ -57,22 +57,25 @@
     }
   }
 
-  // Set the pill in the top-right (avatar + email)
+  // Set the pill in the top-right (avatar + DISPLAY NAME)
   function hydrateHeaderUserPill() {
     const storedUsername = localStorage.getItem("username") || "";
     const storedEmail = localStorage.getItem("email") || "you@example.com";
 
+    // We prefer to show the username as the display name.
+    const displayName = storedUsername || storedEmail;
+
     // IDs should match your messages.html header
     const avatarEl = document.getElementById("profileAvatar");
-    const emailEl = document.getElementById("profileEmail");
+    const nameEl = document.getElementById("profileEmail"); // this element now shows the display name
 
     if (avatarEl) {
-      const letter =
-        (storedUsername || storedEmail || "U").charAt(0).toUpperCase();
+      const letter = (displayName || "U").charAt(0).toUpperCase();
       avatarEl.textContent = letter;
     }
-    if (emailEl) {
-      emailEl.textContent = storedEmail;
+    if (nameEl) {
+      // <-- THIS is what changes the chip text to `qaz` instead of `qaz@qaz.com`
+      nameEl.textContent = displayName;
     }
   }
 
@@ -426,7 +429,7 @@
       (auth.user && String(auth.user.id)) ||
       userId;
 
-    // update avatar + email at top
+    // update avatar + display name at top
     hydrateHeaderUserPill();
 
     console.info("[messages] API_URL=", API_URL, "userIdPresent=", !!userId);
