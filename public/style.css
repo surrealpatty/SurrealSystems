@@ -1274,3 +1274,23 @@ body.profile-light #profileName {
   font-weight: 600;
 }
 
+/* ============================================
+   PROFILE DISPLAY NAME – match services title
+   ============================================ */
+
+body.profile-dark #profileName,
+body.profile-light #profileName {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* bright white on dark background */
+body.profile-dark #profileName {
+  color: #f9fafb !important;
+}
+
+/* strong dark text on light card */
+body.profile-light #profileName {
+  color: #111827 !important;
+}
