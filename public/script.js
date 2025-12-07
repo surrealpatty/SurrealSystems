@@ -1,3 +1,4 @@
+// public/script.js
 /* ============================================================================ 
   CodeCrowds – shared client helpers (improved)
 ============================================================================= */
@@ -36,7 +37,8 @@ function applyTheme(theme) {
 
   if (body) {
     body.classList.toggle("profile-light", theme === "light");
-    body.classList.toggle("profile-dark", theme !== "light"); // default to dark if not light
+    // if not light (dark or anything else), treat as dark
+    body.classList.toggle("profile-dark", theme !== "light");
   }
 }
 
@@ -487,8 +489,7 @@ async function ccInitTopUserChip() {
 initThemeFromPreference();
 
 document.addEventListener("DOMContentLoaded", () => {
-  // Theme: re-apply (harmless) and wire up toggle if present
-  initThemeFromPreference();
+  // Wire up toggle if present on this page (profile page)
   initThemeToggle();
 
   // Hide action rail by default if user not logged in (extra safety for public pages)

@@ -759,38 +759,5 @@
     <script src="script.js" defer></script>
     <script src="profile.js" defer></script>
 
-    <!-- Theme script JUST for profile-dark/profile-light -->
-    <script>
-      (function () {
-        const STORAGE_KEY = "codecrowds-theme"; // new key
-        const body = document.body;
-        const toggle = document.getElementById("themeToggle");
-        const DARK_CLASS = "profile-dark";
-        const LIGHT_CLASS = "profile-light";
-
-        function applyTheme(mode) {
-          if (mode === "light") {
-            body.classList.add(LIGHT_CLASS);
-            body.classList.remove(DARK_CLASS);
-          } else {
-            body.classList.add(DARK_CLASS);
-            body.classList.remove(LIGHT_CLASS);
-            mode = "dark";
-          }
-
-          localStorage.setItem(STORAGE_KEY, mode);
-          if (toggle) toggle.checked = mode === "light";
-        }
-
-        const saved = localStorage.getItem(STORAGE_KEY) || "dark";
-        applyTheme(saved);
-
-        if (toggle) {
-          toggle.addEventListener("change", () => {
-            applyTheme(toggle.checked ? "light" : "dark");
-          });
-        }
-      })();
-    </script>
   </body>
 </html>
