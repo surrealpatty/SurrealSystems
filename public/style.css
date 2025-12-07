@@ -255,7 +255,6 @@ main{display:grid;grid-template-columns:1fr 440px;gap:40px;align-items:stretch;p
   gap:12px;
 }
 .card:hover{transform:translateY(-6px);box-shadow:0 18px 36px rgba(0,0,0,0.12);}
-/* ensure headings inside a card look right */
 .card h3{color:var(--color-primary);font-size:1.1rem;margin:0 0 8px;}
 .card p{margin:0;color:var(--color-muted);font-size:0.95rem;}
 
@@ -303,10 +302,10 @@ textarea,
 select {
   padding: 10px 12px;
   border-radius: 8px;
-  border: 1px solid #4b5563;        /* slightly lighter border */
+  border: 1px solid #4b5563;
   font-size: 15px;
-  color: #ffffff;                    /* bright typing text */
-  background: #020617;               /* dark background */
+  color: #ffffff;
+  background: #020617;
   width: 100%;
   box-sizing: border-box;
 }
@@ -334,7 +333,7 @@ select:focus {
 #services-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;align-items:start;}
 #newServiceSection{display:none;flex-direction:column;gap:10px;margin-top:10px;}
 
-/* Action rail (kept in CSS in case used on other pages) */
+/* Action rail */
 .action-rail{
   position:fixed;
   right:20px;
@@ -449,7 +448,6 @@ select:focus {
 .container:not(.container--transparent) .site-footer{color:var(--color-text)}
 
 /* -------------------- Login / Register container tweaks -------------------- */
-/* Ensure the login column/card fills the grid track and allows footer to be pushed to bottom */
 .login-container.card {
   height: 100%;
   display: flex;
@@ -458,20 +456,18 @@ select:focus {
   box-sizing: border-box;
 }
 
-/* Use gap in the form to create explicit spacing between inputs and between input and button */
 .login-container.card form {
   display: flex;
   flex-direction: column;
-  gap: 14px; /* spacing between email, password, and the button */
-  margin: 0; /* ensure no extra default margin interferes */
+  gap: 14px;
+  margin: 0;
   padding: 0;
 }
 
-/* Push signup to the bottom so it aligns with left column content */
 .login-container.card .signup-switch {
   margin-top: auto;
   padding-top: 12px;
-  color: var(--color-text); /* black on white card */
+  color: var(--color-text);
   font-size: 0.95rem;
 }
 
@@ -489,8 +485,6 @@ select:focus {
 .register-card h2 { margin:0 0 8px 0; font-size:28px; color:var(--color-text); }
 .register-card p.lead { margin:0 0 18px 0; color:var(--color-muted); font-size:14px; }
 
-
-/* LIMIT these styles to the REGISTER card only */
 .register-card .input,
 .register-card input[type="text"],
 .register-card input[type="email"],
@@ -519,7 +513,6 @@ textarea { min-height:120px; resize:vertical; }
 .muted { color:var(--muted); font-size:13px; margin-top:6px; }
 .muted.right { text-align:right; font-size:13px; }
 
-/* password row replaced inline styles */
 .password-row { display:flex; gap:8px; align-items:center; margin-top:8px; }
 .toggle-btn {
   background:#fff;
@@ -535,7 +528,6 @@ textarea { min-height:120px; resize:vertical; }
   outline-offset:2px;
 }
 
-/* gradient button (kept for register card) */
 .btn-gradient {
   display:inline-block;
   width:100%;
@@ -558,14 +550,12 @@ textarea { min-height:120px; resize:vertical; }
 
 /* -------------------- Profile page (profile.html) -------------------- */
 
-/* Overall wrapper for the profile page */
 .profile-wrapper {
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px 16px 40px;
 }
 
-/* Top header: brand on the left, user pill on the right */
 .profile-header {
   display: flex;
   justify-content: space-between;
@@ -590,21 +580,26 @@ textarea { min-height:120px; resize:vertical; }
   background: linear-gradient(135deg, #22c55e, #3b82f6);
 }
 
-.profile-user-pill {
+/* ============ GLOBAL TOP-RIGHT USER CHIP (ALL PAGES) ============ */
+.top-user-pill,
+.profile-user-pill,
+.user-pill {
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.4rem 0.8rem;
+  padding: 0.35rem 0.9rem;
   border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.6);
-  font-size: 0.85rem;
-  background: rgba(255, 255, 255, 0.75); /* neutral base */
+  border: 1px solid rgba(148, 163, 184, 0.5);
+  background: rgba(248, 250, 252, 0.9);
   -webkit-backdrop-filter: blur(10px); /* Safari 9+ / iOS */
   backdrop-filter: blur(10px);         /* modern browsers */
+  font-size: 0.85rem;
+  color: #111827;
 }
 
-
-.profile-avatar {
+.top-user-avatar,
+.profile-avatar,
+.user-avatar {
   width: 30px;
   height: 30px;
   border-radius: 999px;
@@ -616,9 +611,28 @@ textarea { min-height:120px; resize:vertical; }
   color: #020617;
 }
 
-/* Let text inside pill follow the pill color */
-.profile-email {
+.top-user-label,
+.profile-email,
+.user-email {
   color: inherit;
+}
+
+/* Dark background tweak */
+body.profile-dark .top-user-pill,
+body.profile-dark .profile-user-pill,
+body.profile-dark .user-pill {
+  background: rgba(15, 23, 42, 0.96);
+  border-color: rgba(148, 163, 184, 0.7);
+  color: #e5e7eb;
+}
+
+/* Light background tweak (like services page) */
+body.profile-light .top-user-pill,
+body.profile-light .profile-user-pill,
+body.profile-light .user-pill {
+  background: #e0f2fe;
+  border-color: #bfdbfe;
+  color: #111827;
 }
 
 /* Layout: sidebar + main column */
@@ -743,13 +757,10 @@ textarea { min-height:120px; resize:vertical; }
 }
 
 /* ----- Edit profile form ----- */
-
-/* Hidden utility used by JS toggle */
 .is-hidden {
   display: none !important;
 }
 
-/* Container for the edit form */
 .profile-edit {
   margin-top: 14px;
   padding-top: 12px;
@@ -778,7 +789,6 @@ textarea { min-height:120px; resize:vertical; }
   box-sizing: border-box;
 }
 
-/* Save / cancel buttons */
 .profile-edit-actions {
   display: flex;
   flex-wrap: wrap;
@@ -786,7 +796,6 @@ textarea { min-height:120px; resize:vertical; }
   margin-top: 4px;
 }
 
-/* Muted / secondary button style */
 .btn-muted {
   background: transparent;
   color: var(--color-muted);
@@ -802,18 +811,16 @@ textarea { min-height:120px; resize:vertical; }
 .profile-layout input,
 .profile-layout textarea,
 .profile-layout select {
-  color: #ffffff;                 /* bright typing text */
-  background: #020617;            /* keep dark background */
-  border: 1px solid #4b5563;      /* slightly lighter border */
+  color: #ffffff;
+  background: #020617;
+  border: 1px solid #4b5563;
 }
 
-/* lighter placeholders */
 .profile-layout input::placeholder,
 .profile-layout textarea::placeholder {
   color: #9ca3af;
 }
 
-/* clearer focus state on dark inputs */
 .profile-layout input:focus,
 .profile-layout textarea:focus,
 .profile-layout select:focus {
@@ -948,18 +955,17 @@ textarea { min-height:120px; resize:vertical; }
 
 /* === Make text easy to see on HOME (login) and REGISTER === */
 
-/* Login form on index/home page */
 .login-container.card input,
 .login-container.card textarea,
 .login-container.card select {
-  color: #ffffff;               /* bright typing text */
-  background: #020617;          /* dark field background */
-  border: 1px solid #4b5563;    /* lighter border */
+  color: #ffffff;
+  background: #020617;
+  border: 1px solid #4b5563;
 }
 
 .login-container.card input::placeholder,
 .login-container.card textarea::placeholder {
-  color: #9ca3af;               /* light grey placeholder */
+  color: #9ca3af;
 }
 
 .login-container.card input:focus,
@@ -970,12 +976,11 @@ textarea { min-height:120px; resize:vertical; }
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.45);
 }
 
-/* Register page card */
 .register-card input,
 .register-card textarea,
 .register-card select {
-  color: #ffffff;               /* bright typing text */
-  background: #020617;          /* dark field background */
+  color: #ffffff;
+  background: #020617;
   border: 1px solid #4b5563;
 }
 
@@ -992,18 +997,18 @@ textarea { min-height:120px; resize:vertical; }
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.45);
 }
 
-/* === FINAL OVERRIDE: make inputs readable on dark HOME / landing === */
+/* FINAL OVERRIDE: make inputs readable on dark HOME / landing */
 .container--transparent .card input,
 .container--transparent .card textarea,
 .container--transparent .card select {
-  color: #ffffff !important;      /* bright text when typing */
-  background: #020617;            /* dark field background */
-  border: 1px solid #4b5563;      /* subtle lighter border */
+  color: #ffffff !important;
+  background: #020617;
+  border: 1px solid #4b5563;
 }
 
 .container--transparent .card input::placeholder,
 .container--transparent .card textarea::placeholder {
-  color: #9ca3af;                 /* lighter placeholder */
+  color: #9ca3af;
 }
 
 .container--transparent .card input:focus,
@@ -1016,43 +1021,38 @@ textarea { min-height:120px; resize:vertical; }
 
 /* -------------------- Message modal (services & others) -------------------- */
 
-/* Full-screen dark overlay, centered modal */
 #messageModal {
   position: fixed;
   inset: 0;
-  display: none;                   /* JS sets this to flex when open */
+  display: none;
   align-items: center;
   justify-content: center;
   background: rgba(15, 23, 42, 0.65);
   z-index: 80;
 }
 
-/* The modal card */
 #messageModal .modal-content {
-  width: min(520px, 92vw);         /* bigger modal so it doesn’t feel tiny */
+  width: min(520px, 92vw);
   border-radius: 1.25rem;
   padding: 1.6rem 1.4rem;
   background: rgba(15, 23, 42, 0.98);
   border: 1px solid rgba(148, 163, 184, 0.7);
   color: #e5e7eb;
   box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
-  font-size: 0.95rem;              /* larger base text */
+  font-size: 0.95rem;
   box-sizing: border-box;
 }
 
-/* Title inside the modal */
 #messageModal h2 {
   margin: 0 0 0.75rem 0;
   font-size: 1.2rem;
   font-weight: 600;
 }
 
-/* Wrapper for textarea */
 #messageModal .field-wrap {
   margin-top: 0.75rem;
 }
 
-/* Message textarea itself */
 #messageModal textarea {
   min-height: 140px;
   font-size: 0.95rem;
@@ -1060,14 +1060,12 @@ textarea { min-height:120px; resize:vertical; }
   resize: vertical;
 }
 
-/* Error text below the textarea – make it readable */
 .error {
   font-size: 0.95rem;
-  color: #fecaca;                 /* soft red */
+  color: #fecaca;
   margin-top: 0.4rem;
 }
 
-/* Meta row with character count */
 .modal-meta {
   margin-top: 0.4rem;
   font-size: 0.8rem;
@@ -1076,14 +1074,12 @@ textarea { min-height:120px; resize:vertical; }
   justify-content: flex-end;
 }
 
-/* Buttons row in modal */
 .modal-actions {
   display: flex;
   gap: 0.6rem;
   margin-top: 0.9rem;
 }
 
-/* Toast for small notifications (e.g. "Message sent") */
 #toast {
   position: fixed;
   bottom: 20px;
@@ -1107,10 +1103,8 @@ textarea { min-height:120px; resize:vertical; }
 
 /* =========================================================
    LIGHT MODE – make the profile page easy to read
-   (keeps your dark mode exactly the same)
    ========================================================= */
 
-/* Make the variables themselves more "light" when in light mode */
 [data-theme="light"] {
   --card-bg: #ffffff;
   --card-text: #111827;
@@ -1131,13 +1125,11 @@ textarea { min-height:120px; resize:vertical; }
   border-color: #e2e8f0 !important;
 }
 
-/* Slightly tinted empty state so it doesn’t look like a regular card */
 [data-theme="light"] .profile-layout .services-empty {
   background-color: #f9fafb !important;
   color: #4b5563 !important;
 }
 
-/* Headings in light mode – strong dark text */
 [data-theme="light"] .profile-layout h1,
 [data-theme="light"] .profile-layout h2,
 [data-theme="light"] .profile-layout h3,
@@ -1145,7 +1137,6 @@ textarea { min-height:120px; resize:vertical; }
   color: #020617 !important;
 }
 
-/* Sidebar text + nav links for light mode */
 [data-theme="light"] .sidebar-title {
   color: #6b7280 !important;
 }
@@ -1169,7 +1160,6 @@ textarea { min-height:120px; resize:vertical; }
   color: #b91c1c !important;
 }
 
-/* Service metadata + settings text a bit softer but still readable */
 [data-theme="light"] .profile-service-meta,
 [data-theme="light"] .settings-item p {
   color: #6b7280 !important;
@@ -1179,7 +1169,6 @@ textarea { min-height:120px; resize:vertical; }
    GLOBAL LIGHT MODE – applies to profile, services, messages
    ========================================================= */
 
-/* Background + base text for the whole page */
 body.profile-dark {
   background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
   color: #e5e7eb;
@@ -1190,7 +1179,6 @@ body.profile-light {
   color: #020617;
 }
 
-/* White cards and sidebar in light mode */
 body.profile-light .sidebar,
 body.profile-light .card,
 body.profile-light .services-empty,
@@ -1203,13 +1191,11 @@ body.profile-light .message-card {
   color: #111827 !important;
 }
 
-/* Slightly tinted empty states so they stand out */
 body.profile-light .services-empty {
   background-color: #f9fafb !important;
   color: #4b5563 !important;
 }
 
-/* Headings more readable on light */
 body.profile-light h1,
 body.profile-light h2,
 body.profile-light h3,
@@ -1217,7 +1203,6 @@ body.profile-light h4 {
   color: #020617 !important;
 }
 
-/* Muted / label text darker on light (but still secondary) */
 body.profile-light .profile-label,
 body.profile-light .profile-edit-label,
 body.profile-light .settings-subtitle,
@@ -1232,7 +1217,6 @@ body.profile-light .message-card p {
   color: #6b7280 !important;
 }
 
-/* Inputs on light: white backgrounds, dark text */
 body.profile-light input,
 body.profile-light textarea,
 body.profile-light select {
@@ -1248,7 +1232,6 @@ body.profile-light select:focus {
   box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4) !important;
 }
 
-/* Sidebar nav links in light mode */
 body.profile-light .sidebar-title {
   color: #6b7280 !important;
 }
@@ -1268,15 +1251,7 @@ body.profile-light .nav-link.nav-link--active {
   color: #1d4ed8 !important;
 }
 
-body.profile-light #profileName {
-  color: #1d4ed8;   /* brand-ish blue */
-  font-weight: 600;
-}
-
-/* ============================================
-   PROFILE DISPLAY NAME – match services title
-   ============================================ */
-
+/* PROFILE DISPLAY NAME – match services title */
 body.profile-dark #profileName,
 body.profile-light #profileName {
   font-size: 1.25rem;
@@ -1284,30 +1259,10 @@ body.profile-light #profileName {
   letter-spacing: -0.01em;
 }
 
-/* bright white on dark background */
 body.profile-dark #profileName {
   color: #f9fafb !important;
 }
 
-/* strong dark text on light card */
 body.profile-light #profileName {
   color: #111827 !important;
-}
-
-/* ============================================
-   PROFILE USER PILL – match services pill
-   ============================================ */
-
-/* Dark mode: navy pill with light text */
-body.profile-dark .profile-user-pill {
-  background: rgba(15, 23, 42, 0.96);
-  border-color: rgba(148, 163, 184, 0.6);
-  color: #e5e7eb;
-}
-
-/* Light mode: soft blue pill with dark text – like services */
-body.profile-light .profile-user-pill {
-  background: #e0f2fe;
-  border-color: #bfdbfe;
-  color: #111827;
 }
