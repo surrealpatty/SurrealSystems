@@ -253,7 +253,7 @@
         font-weight: 500;
       }
 
-      /* 🔹 SPECIAL STYLE for the DISPLAY NAME row – match services look */
+      /* SPECIAL STYLE for DISPLAY NAME row */
       .profile-row--name .profile-value {
         font-size: 1.25rem;
         font-weight: 700;
@@ -551,7 +551,7 @@
           <span>CodeCrowds</span>
         </a>
 
-        <!-- 🔹 Shared top-right user pill – JS fills with display name -->
+        <!-- Shared top-right user pill – JS fills with display name -->
         <div class="profile-user-pill" id="topUserChip">
           <div class="profile-avatar" id="topUserAvatar">Q</div>
           <span class="profile-email" id="topUserEmail">you@example.com</span>
@@ -756,8 +756,26 @@
       </footer>
     </div>
 
+    <!-- Shared scripts -->
     <script src="init.js" defer></script>
     <script src="script.js" defer></script>
     <script src="profile.js" defer></script>
+
+    <!-- 🔹 Force the top-right pill to match the DISPLAY NAME on the card -->
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const nameEl = document.getElementById("profileName");
+        const chipLabel = document.getElementById("topUserEmail");
+        const chipAvatar = document.getElementById("topUserAvatar");
+
+        if (!nameEl || !chipLabel || !chipAvatar) return;
+
+        const txt = (nameEl.textContent || "").trim();
+        if (!txt || txt === "New developer") return;
+
+        chipLabel.textContent = txt;
+        chipAvatar.textContent = txt[0].toUpperCase();
+      });
+    </script>
   </body>
 </html>
