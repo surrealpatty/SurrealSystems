@@ -7,7 +7,8 @@ const TOKEN_KEY = "token";
 const USER_ID_KEY = "userId";
 
 /* =============================== Theme keys ============================== */
-const THEME_KEY = "cc_theme";
+/* Single global theme key used on all pages (profile, services, messages, home) */
+const THEME_KEY = "codecrowds-theme";
 
 /* ---------- Theme helpers ---------- */
 function getTheme() {
@@ -18,11 +19,24 @@ function getTheme() {
   }
 }
 
+/**
+ * Apply theme to the document:
+ * - set data-theme on <html> for CSS variables
+ * - set body.profile-light / body.profile-dark for page backgrounds
+ */
 function applyTheme(theme) {
+  const root = document.documentElement;
+  const body = document.body;
+
   if (theme === "light" || theme === "dark") {
-    document.documentElement.setAttribute("data-theme", theme);
+    root.setAttribute("data-theme", theme);
   } else {
-    document.documentElement.removeAttribute("data-theme");
+    root.removeAttribute("data-theme");
+  }
+
+  if (body) {
+    body.classList.toggle("profile-light", theme === "light");
+    body.classList.toggle("profile-dark", theme !== "light"); // default to dark if not light
   }
 }
 
@@ -39,38 +53,39 @@ function setTheme(theme) {
   applyTheme(theme);
 }
 
-/* 👉 DARK IS THE DEFAULT NOW */
+/* 👉 LIGHT IS THE DEFAULT NOW */
 function initThemeFromPreference() {
   let theme = getTheme();
 
-  // If no saved theme, default to dark
+  // If no saved theme or an invalid value, default to light
   if (theme !== "light" && theme !== "dark") {
-    theme = "dark";
+    theme = "light";
   }
 
   applyTheme(theme);
 }
 
+/**
+ * Initialize the toggle on pages that have a #themeToggle switch (e.g. profile.html).
+ * The toggle semantics:
+ *  - checked  = light mode
+ *  - unchecked = dark mode
+ */
 function initThemeToggle() {
   const toggle = document.getElementById("themeToggle");
   if (!toggle) return;
 
-  const saved = getTheme();
-  const currentAttr = document.documentElement.getAttribute("data-theme") || "";
+  let theme = getTheme();
+  if (theme !== "light" && theme !== "dark") {
+    theme = "light";
+  }
 
-  let isDark =
-    saved === "dark" ||
-    (!saved &&
-      (currentAttr === "dark" ||
-        (!currentAttr &&
-          window.matchMedia &&
-          window.matchMedia("(prefers-color-scheme: dark)").matches)));
-
-  toggle.checked = isDark;
+  // checked == light
+  toggle.checked = theme === "light";
 
   toggle.addEventListener("change", () => {
-    const theme = toggle.checked ? "dark" : "light";
-    setTheme(theme);
+    const newTheme = toggle.checked ? "light" : "dark";
+    setTheme(newTheme);
   });
 }
 
@@ -467,8 +482,12 @@ async function ccInitTopUserChip() {
 }
 
 /* ================================ Boot ================================== */
+
+/* Apply theme ASAP (before DOMContentLoaded) to reduce flash */
+initThemeFromPreference();
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Theme first so everything paints correctly
+  // Theme: re-apply (harmless) and wire up toggle if present
   initThemeFromPreference();
   initThemeToggle();
 
@@ -513,43 +532,3 @@ try {
   window.getTheme = getTheme;
   window.setTheme = setTheme;
 } catch {}
-// ---------------- GLOBAL THEME SYNC (dark / light) ----------------
-// Reuse the same key the profile page uses.
-(function syncThemeAcrossPages() {
-  const STORAGE_KEY = "codecrowds-profile-theme";
-  const body = document.body;
-  if (!body) return;
-
-  // read saved mode (default to dark)
-  let mode = "dark";
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "light" || saved === "dark") {
-      mode = saved;
-    }
-  } catch (e) {
-    // localStorage might be blocked; just stay dark
-  }
-
-  body.classList.remove("profile-dark", "profile-light");
-  body.classList.add(mode === "light" ? "profile-light" : "profile-dark");
-})();
-// ---------------- GLOBAL THEME SYNC (dark / light) ----------------
-(function syncThemeAcrossPages() {
-  const STORAGE_KEY = "codecrowds-profile-theme";
-  const body = document.body;
-  if (!body) return;
-
-  let mode = "dark";
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved === "light" || saved === "dark") {
-      mode = saved;
-    }
-  } catch (e) {
-    // ignore if localStorage not available
-  }
-
-  body.classList.remove("profile-dark", "profile-light");
-  body.classList.add(mode === "light" ? "profile-light" : "profile-dark");
-})();
