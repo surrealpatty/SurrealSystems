@@ -337,17 +337,29 @@
 
   <!-- Local script just for Show / Hide password -->
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      const input = document.getElementById("password");
-      const btn = document.querySelector(".toggle-password");
-      if (!input || !btn) return;
+document.addEventListener("DOMContentLoaded", () => {
+  
+  const input = document.getElementById("password");
+  const btn = document.querySelector(".toggle-password");
 
-      btn.addEventListener("click", () => {
-        const isPassword = input.type === "password";
-        input.type = isPassword ? "text" : "password";
-        btn.textContent = isPassword ? "Hide" : "Show";
-      });
-    });
-  </script>
+  if (!input || !btn) return;
+
+  btn.addEventListener("click", () => {
+      const isHidden = input.type === "password";
+
+      // toggle input type
+      input.type = isHidden ? "text" : "password";
+
+      // update button label
+      btn.textContent = isHidden ? "Hide" : "Show";
+
+      // little visual pulse to show change happened
+      btn.style.transform = "scale(0.92)";
+      setTimeout(() => btn.style.transform = "scale(1)", 120);
+  });
+
+});
+</script>
+
 </body>
 </html>
