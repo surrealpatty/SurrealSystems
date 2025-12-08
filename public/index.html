@@ -330,11 +330,18 @@
   </div>
 
   <script>
-    function togglePW() {
-      const input = document.getElementById("pw");
-      if (!input) return;
+document.addEventListener("DOMContentLoaded", () => {
+
+  const input = document.getElementById("pw");
+  const btn = document.querySelector(".toggle-password");
+
+  btn.addEventListener("click", () => {
       input.type = input.type === "password" ? "text" : "password";
-    }
-  </script>
+      btn.textContent = input.type === "password" ? "Show" : "Hide"; // also updates the button label
+  });
+
+});
+</script>
+
 </body>
 </html>
