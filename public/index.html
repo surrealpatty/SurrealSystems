@@ -180,6 +180,7 @@
       color: #fff;
       font-size: 0.8rem;
       white-space: nowrap;
+      transition: 0.15s ease-in-out;
     }
 
     /* =======================
@@ -247,7 +248,7 @@
     }
   </style>
 
-  <!-- Re-enable your app’s JS logic -->
+  <!-- Hook your app logic back up -->
   <script src="init.js" defer></script>
   <script src="script.js" defer></script>
 </head>
@@ -293,7 +294,7 @@
         <h2>Welcome back</h2>
         <p>Log in to manage your posts, messages, and projects.</p>
 
-        <!-- IMPORTANT: id + name attributes so script.js can read values -->
+        <!-- IMPORTANT: id + name for your login JS -->
         <form id="loginForm">
           <div class="field">
             <label for="email">Email</label>
@@ -319,6 +320,7 @@
               <button
                 type="button"
                 class="toggle-password"
+                onclick="togglePassword()"
               >
                 Show
               </button>
@@ -335,31 +337,23 @@
     </div>
   </div>
 
-  <!-- Local script just for Show / Hide password -->
+  <!-- Simple Show / Hide function used by onclick -->
   <script>
-document.addEventListener("DOMContentLoaded", () => {
-  
-  const input = document.getElementById("password");
-  const btn = document.querySelector(".toggle-password");
+    function togglePassword() {
+      const input = document.getElementById("password");
+      const btn = document.querySelector(".toggle-password");
+      if (!input || !btn) return;
 
-  if (!input || !btn) return;
-
-  btn.addEventListener("click", () => {
       const isHidden = input.type === "password";
-
-      // toggle input type
       input.type = isHidden ? "text" : "password";
-
-      // update button label
       btn.textContent = isHidden ? "Hide" : "Show";
 
-      // little visual pulse to show change happened
+      // tiny visual feedback
       btn.style.transform = "scale(0.92)";
-      setTimeout(() => btn.style.transform = "scale(1)", 120);
-  });
-
-});
-</script>
-
+      setTimeout(() => {
+        btn.style.transform = "scale(1)";
+      }, 120);
+    }
+  </script>
 </body>
 </html>
