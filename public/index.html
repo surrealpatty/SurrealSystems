@@ -278,4 +278,70 @@
         </div>
 
         <div class="pitch-item">
-          <h3
+          <h3>Ad-Free &amp; Premium</h3>
+          <p>Upgrade for ad-free experience, lower fees, and better visibility.</p>
+          <div class="badge-premium">● Premium perks for power users</div>
+        </div>
+      </section>
+
+      <!-- RIGHT COLUMN -->
+      <section class="card">
+        <h2>Welcome back</h2>
+        <p>Log in to manage your posts, messages, and projects.</p>
+
+        <form id="loginForm">
+          <div class="field">
+            <label for="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              placeholder="you@example.com"
+              required
+            />
+          </div>
+
+          <div class="field">
+            <label for="pw">Password</label>
+            <div class="password-row">
+              <input
+                id="pw"
+                type="password"
+                placeholder="Your password"
+                required
+              />
+              <button
+  type="button"
+  class="toggle-password"
+>
+  Show
+</button>
+
+            </div>
+          </div>
+
+          <button type="submit" class="primary-btn">Login</button>
+          <p class="subtext">
+            Don’t have an account?
+            <a href="register.html">Sign up</a>
+          </p>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <script>
+document.addEventListener("DOMContentLoaded", () => {
+
+  const input = document.getElementById("pw");
+  const btn = document.querySelector(".toggle-password");
+
+  btn.addEventListener("click", () => {
+      input.type = input.type === "password" ? "text" : "password";
+      btn.textContent = input.type === "password" ? "Show" : "Hide"; // also updates the button label
+  });
+
+});
+</script>
+
+</body>
+</html>
