@@ -6,7 +6,7 @@
   <title>CodeCrowds – Register</title>
   <meta name="description" content="Create your CodeCrowds account." />
 
-  <!-- Same body font as login -->
+  <!-- Same font family as login -->
   <link
     rel="stylesheet"
     href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
@@ -37,7 +37,7 @@
       align-items: flex-start;
       font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
         sans-serif;
-      /* match login page background */
+      /* EXACTLY like login page */
       background: radial-gradient(
         circle at top left,
         #111827 0,
@@ -54,7 +54,7 @@
       padding: 20px 20px 24px;
     }
 
-    /* brand row (same style as login) */
+    /* Brand row */
     .brand-row {
       display: flex;
       align-items: center;
@@ -91,7 +91,7 @@
       }
     }
 
-    /* left pitch panel – same content as login */
+    /* LEFT PANEL – same “bubbles” as login */
     .pitch {
       padding: 24px 24px 28px;
       border-radius: var(--radius-xl);
@@ -140,7 +140,6 @@
       line-height: 1.4;
     }
 
-    /* little pill like on the login page: “Premium perks for power users” */
     .pitch-footer {
       margin-top: 18px;
     }
@@ -165,7 +164,7 @@
       background: linear-gradient(135deg, #22c55e, #3b82f6);
     }
 
-    /* right card – visually matched to login card */
+    /* RIGHT CARD – match login card */
     .card {
       padding: 24px 22px 26px;
       border-radius: var(--radius-xl);
@@ -177,14 +176,8 @@
     }
 
     .card h2 {
-      margin: 0 0 4px;
+      margin: 0 0 10px;
       font-size: 1.4rem;
-    }
-
-    .card-subtitle {
-      margin: 0 0 18px;
-      font-size: 0.88rem;
-      color: var(--text-muted);
     }
 
     form {
@@ -267,6 +260,7 @@
       font-size: 0.78rem;
       color: var(--text-muted);
       margin-top: 4px;
+      min-height: 1em;
     }
 
     .strength--weak {
@@ -299,17 +293,22 @@
       display: inline-flex;
       justify-content: center;
       align-items: center;
+      border: none;
     }
 
-    /* toned-down button: gradient, but no glow box-shadow */
+    /* FULL-WIDTH gradient bar like LOGIN button */
     .btn-primary {
-      border: none;
-      background: linear-gradient(135deg, #3b82f6, #22c55e);
-      color: #0b1120;
+      width: 100%;
+      height: 44px;
+      background: linear-gradient(90deg, #22c55e, #3b82f6);
+      color: #f9fafb;
+      box-shadow:
+        0 0 0 1px rgba(59, 130, 246, 0.4),
+        0 18px 40px rgba(22, 101, 52, 0.6);
     }
 
     .btn-primary:hover {
-      filter: brightness(1.05);
+      filter: brightness(1.03);
     }
 
     .signup-switch {
@@ -359,7 +358,7 @@
     </header>
 
     <div class="layout">
-      <!-- Left marketing pitch (same words as index/login) -->
+      <!-- LEFT: same “bubbles” as index/login -->
       <section class="pitch">
         <h1 class="pitch-title">Offer your coding skills to the world.</h1>
         <p class="pitch-subtitle">
@@ -386,7 +385,6 @@
           </article>
         </div>
 
-        <!-- pill text: Premium perks for power users -->
         <div class="pitch-footer">
           <span class="pitch-pill">
             <span class="pitch-pill-dot"></span>
@@ -395,12 +393,9 @@
         </div>
       </section>
 
-      <!-- Right register card -->
+      <!-- RIGHT: register card -->
       <aside class="card" aria-labelledby="register-heading">
         <h2 id="register-heading">Create your account</h2>
-        <p class="card-subtitle">
-          Join CodeCrowds to create posts, manage your messages, and grow your projects.
-        </p>
 
         <form id="registerForm" novalidate>
           <div class="field">
@@ -457,9 +452,7 @@
                 Show
               </button>
             </div>
-            <div id="passwordStrength" class="strength" aria-live="polite">
-              Use at least 8 characters with a mix of letters, numbers, and symbols.
-            </div>
+            <div id="passwordStrength" class="strength" aria-live="polite"></div>
           </div>
 
           <div class="field">
@@ -497,7 +490,6 @@
     <footer>© 2025 CodeCrowds. All rights reserved.</footer>
   </div>
 
-  <!-- Shared script handles register logic + show/hide -->
   <script src="/register.js" defer></script>
 </body>
 </html>
