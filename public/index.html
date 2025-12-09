@@ -50,8 +50,12 @@
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      background: #22c55e;
-      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.4);
+      /* gradient dot like your screenshot */
+      background: linear-gradient(135deg, #22c55e, #3b82f6);
+    }
+
+    .brand-text {
+      letter-spacing: 0.01em;
     }
 
     .layout {
@@ -201,7 +205,6 @@
       color: #ffffff;
       font-weight: 600;
       font-size: 1rem;
-      /* removed heavy glow */
       transition: transform 0.12s ease, filter 0.15s ease;
     }
 
@@ -231,7 +234,7 @@
     }
 
     /* =======================
-       RESPONSIVE (small screens)
+       RESPONSIVE
     ========================= */
     @media (max-height: 720px) {
       .page {
@@ -263,7 +266,6 @@
     }
   </style>
 
-  <!-- Your existing login logic -->
   <script src="init.js" defer></script>
   <script src="script.js" defer></script>
 </head>
@@ -273,7 +275,7 @@
     <!-- Brand row -->
     <div class="brand-row">
       <span class="brand-dot"></span>
-      <span>CodeCrowds</span>
+      <span class="brand-text">CodeCrowds</span>
     </div>
 
     <div class="layout">
@@ -304,12 +306,11 @@
         </div>
       </section>
 
-      <!-- RIGHT COLUMN -->
+      <!-- RIGHT COLUMN: LOGIN -->
       <section class="card">
         <h2>Welcome back</h2>
         <p>Log in to manage your posts, messages, and projects.</p>
 
-        <!-- ids & names that script.js expects -->
         <form id="loginForm">
           <div class="field">
             <label for="email">Email</label>
@@ -364,7 +365,6 @@
         input.type = isHidden ? "text" : "password";
         btn.textContent = isHidden ? "Hide" : "Show";
 
-        // tiny visual feedback
         btn.style.transform = "scale(0.92)";
         setTimeout(() => {
           btn.style.transform = "scale(1)";

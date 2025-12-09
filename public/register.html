@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CodeCrowds – Register</title>
+  <meta name="description" content="Create your CodeCrowds account." />
 
   <style>
     /* =======================
@@ -50,8 +51,11 @@
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      background: #22c55e;
-      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.4);
+      background: linear-gradient(135deg, #22c55e, #3b82f6);
+    }
+
+    .brand-text {
+      letter-spacing: 0.01em;
     }
 
     .layout {
@@ -62,8 +66,7 @@
     }
 
     /* =======================
-       LEFT MARKETING PANEL
-       (EXACT COPY OF INDEX)
+       LEFT MARKETING PANEL (same as login)
     ========================= */
     .pitch {
       background: rgba(15, 23, 42, 0.95);
@@ -109,8 +112,7 @@
     }
 
     /* =======================
-       RIGHT CARD (REGISTER)
-       — shares the same shell
+       REGISTER CARD (RIGHT)
     ========================= */
     .card {
       background: rgba(15, 23, 42, 0.97);
@@ -133,7 +135,7 @@
     }
 
     form {
-      margin: 0;
+      margin-top: 8px;
     }
 
     .field {
@@ -144,24 +146,26 @@
       font-size: 0.9rem;
     }
 
-    .field label {
-      color: #cbd5f5;
+    .field-label-row {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: baseline;
       gap: 8px;
     }
 
+    .field label {
+      color: #cbd5f5;
+    }
+
     .hint {
-      font-size: 0.8rem;
-      color: #94a3b8;
-      font-weight: 400;
+      font-size: 0.78rem;
+      color: #9ca3af;
     }
 
     .field input,
     .field textarea {
       padding: 10px 14px;
-      border-radius: 12px;
+      border-radius: 14px;
       border: 1px solid rgba(148, 163, 184, 0.6);
       background: #050a18;
       color: #ffffff;
@@ -182,7 +186,7 @@
 
     .field textarea {
       resize: vertical;
-      min-height: 110px;
+      min-height: 96px;
     }
 
     .password-row {
@@ -211,27 +215,23 @@
       background: #02081f;
     }
 
-    .strength {
-      margin-top: 4px;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      min-height: 1em;
-    }
-
     .meta-row {
       margin-top: 4px;
       display: flex;
       justify-content: flex-end;
-      font-size: 0.8rem;
-      color: #64748b;
+      font-size: 0.78rem;
+      color: #9ca3af;
     }
 
-    /* =======================
-       BUTTON + TEXT
-    ========================= */
+    #passwordStrength {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: #9ca3af;
+    }
+
     .primary-btn {
       width: 100%;
-      margin-top: 12px;
+      margin-top: 14px;
       padding: 11px 16px;
       background-image: linear-gradient(90deg, #3b82f6, #22c55e);
       border-radius: 999px;
@@ -269,8 +269,8 @@
     }
 
     .message {
-      margin-top: 6px;
-      font-size: 0.82rem;
+      margin-top: 8px;
+      font-size: 0.83rem;
       min-height: 1em;
     }
 
@@ -314,19 +314,17 @@
       }
     }
   </style>
-
 </head>
-
 <body>
   <div class="page">
     <!-- Brand row -->
     <div class="brand-row">
       <span class="brand-dot"></span>
-      <span>CodeCrowds</span>
+      <span class="brand-text">CodeCrowds</span>
     </div>
 
     <div class="layout">
-      <!-- LEFT COLUMN (identical to index.html) -->
+      <!-- LEFT COLUMN – SAME AS LOGIN -->
       <section class="pitch">
         <h1 class="pitch-title">Offer your coding skills to the world.</h1>
         <p class="pitch-subtitle">
@@ -353,17 +351,17 @@
         </div>
       </section>
 
-      <!-- RIGHT COLUMN (REGISTER FORM, wired to register.js) -->
-      <section class="card">
-        <h2>Create your account</h2>
+      <!-- RIGHT COLUMN – REGISTER -->
+      <section class="card" aria-labelledby="register-heading">
+        <h2 id="register-heading">Create your account</h2>
         <p>Join CodeCrowds to create posts, manage your messages, and grow your projects.</p>
 
         <form id="registerForm" novalidate>
           <div class="field">
-            <label for="registerUsername">
-              <span>Username</span>
+            <div class="field-label-row">
+              <label for="registerUsername">Username</label>
               <span class="hint">3–32 characters</span>
-            </label>
+            </div>
             <input
               id="registerUsername"
               name="username"
@@ -389,10 +387,10 @@
           </div>
 
           <div class="field">
-            <label for="registerPassword">
-              <span>Password</span>
+            <div class="field-label-row">
+              <label for="registerPassword">Password</label>
               <span class="hint">At least 8 characters</span>
-            </label>
+            </div>
             <div class="password-row">
               <input
                 id="registerPassword"
@@ -407,27 +405,25 @@
                 type="button"
                 class="toggle-password"
                 id="togglePassword"
+                aria-pressed="false"
+                title="Show password"
               >
                 Show
               </button>
             </div>
-            <div
-              id="passwordStrength"
-              class="strength"
-              aria-live="polite"
-            >
+            <div id="passwordStrength" aria-live="polite">
               Use at least 8 characters with a mix of letters, numbers, and symbols.
             </div>
           </div>
 
           <div class="field">
             <label for="registerDescription">
-              <span>Tell us about yourself</span>
-              <span class="hint">(optional)</span>
+              Tell us about yourself <span class="hint">(optional)</span>
             </label>
             <textarea
               id="registerDescription"
               name="description"
+              rows="4"
               maxlength="400"
               placeholder="What do you offer? What are your skills?"
             ></textarea>
@@ -436,7 +432,7 @@
             </div>
           </div>
 
-          <button id="submitBtn" type="submit" class="primary-btn">
+          <button id="submitBtn" class="primary-btn" type="submit">
             Create account
           </button>
 
@@ -456,7 +452,7 @@
     </div>
   </div>
 
-  <!-- Register logic (handles show/hide + API) -->
+  <!-- Shared register / show-password logic -->
   <script src="/register.js" defer></script>
 </body>
 </html>
