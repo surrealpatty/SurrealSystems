@@ -180,7 +180,11 @@
       color: #fff;
       font-size: 0.8rem;
       white-space: nowrap;
-      transition: 0.15s ease-in-out;
+      transition: transform 0.12s ease, background 0.15s ease-in-out;
+    }
+
+    .toggle-password:hover {
+      background: #02081f;
     }
 
     /* =======================
@@ -197,7 +201,18 @@
       color: #ffffff;
       font-weight: 600;
       font-size: 1rem;
-      box-shadow: 0 20px 45px rgba(37, 181, 122, 0.6);
+      /* removed heavy glow */
+      transition: transform 0.12s ease, filter 0.15s ease;
+    }
+
+    .primary-btn:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .primary-btn:active {
+      transform: translateY(0);
+      filter: brightness(0.98);
     }
 
     .subtext {
