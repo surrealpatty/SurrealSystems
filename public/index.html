@@ -248,7 +248,7 @@
     }
   </style>
 
-  <!-- Hook your existing login logic back up -->
+  <!-- Your existing login logic -->
   <script src="init.js" defer></script>
   <script src="script.js" defer></script>
 </head>
@@ -294,12 +294,12 @@
         <h2>Welcome back</h2>
         <p>Log in to manage your posts, messages, and projects.</p>
 
-        <!-- IMPORTANT: ids + names match what script.js expects -->
+        <!-- ids & names that script.js expects -->
         <form id="loginForm">
           <div class="field">
-            <label for="loginEmail">Email</label>
+            <label for="email">Email</label>
             <input
-              id="loginEmail"
+              id="email"
               name="email"
               type="email"
               placeholder="you@example.com"
@@ -308,10 +308,10 @@
           </div>
 
           <div class="field">
-            <label for="loginPassword">Password</label>
+            <label for="password">Password</label>
             <div class="password-row">
               <input
-                id="loginPassword"
+                id="password"
                 name="password"
                 type="password"
                 placeholder="Your password"
@@ -337,10 +337,10 @@
     </div>
   </div>
 
-  <!-- Show / Hide password logic -->
+  <!-- Show / Hide password -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const input = document.getElementById("loginPassword");
+      const input = document.getElementById("password");
       const btn = document.getElementById("togglePassword");
       if (!input || !btn) return;
 
