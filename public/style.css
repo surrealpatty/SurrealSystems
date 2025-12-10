@@ -48,8 +48,8 @@
   --btn-bg:var(--brand-a);
   --btn-text:#ffffff;
 
-  /* theme-aware page background (LIGHT default) */
-  --page-bg:linear-gradient(135deg,var(--brand-a),var(--brand-b));
+  /* theme-aware page background – now a full-height dark gradient */
+  --page-bg:radial-gradient(circle at top left, #111827 0, #020617 55%, #020617 75%, #000000 100%);
 }
 
 /* Explicit light theme overrides (same as defaults now) */
@@ -60,13 +60,14 @@
   --color-card:var(--card-bg);
   --color-text:var(--card-text);
   --color-muted:var(--muted);
-  --page-bg:linear-gradient(135deg,var(--brand-a),var(--brand-b));
+  /* keep same global dark background so it doesn’t change by theme */
+  --page-bg:radial-gradient(circle at top left, #111827 0, #020617 55%, #020617 75%, #000000 100%);
 }
 
 /* Dark theme palette (for dark mode) */
 :root[data-theme="dark"]{
-  /* page background: deep navy/charcoal */
-  --page-bg:radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
+  /* page background: deep navy/charcoal, full height */
+  --page-bg:radial-gradient(circle at top left, #111827 0, #020617 55%, #020617 75%, #000000 100%);
 
   /* cards + text */
   --card-bg:#0b1220;          /* main card background */
@@ -83,7 +84,7 @@
 /* Respect OS preference if no explicit theme is set */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme]){
-    --page-bg:radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
+    --page-bg:radial-gradient(circle at top left, #111827 0, #020617 55%, #020617 75%, #000000 100%);
     --card-bg:#0b1220;
     --card-text:#e5e7eb;
     --muted:#9ca3af;
@@ -101,6 +102,7 @@
 html,body,.container,.card,.row,.meta-row{min-width:0;}
 html,body{
   height:100%;
+  min-height:100vh;
   margin:0;
   padding:0;
   font-family:var(--font-sans);
@@ -108,7 +110,7 @@ html,body{
   -moz-osx-font-smoothing:grayscale;
   line-height:1.45;
   color:var(--color-text);
-  /* was fixed gradient; now theme-aware */
+  /* use the global gradient – now full-height and consistent */
   background:var(--page-bg);
 }
 
@@ -1170,12 +1172,14 @@ body.profile-light .user-pill {
    ========================================================= */
 
 body.profile-dark {
-  background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #000 100%);
+  /* use the same global gradient – no colour break */
+  background: var(--page-bg);
   color: #e5e7eb;
 }
 
 body.profile-light {
-  background: radial-gradient(circle at top, #eef2ff 0, #e0f2fe 45%, #f9fafb 100%);
+  /* single soft colour so the top colour extends all the way down */
+  background: #eef2ff;
   color: #020617;
 }
 
