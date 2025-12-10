@@ -48,8 +48,8 @@
   --btn-bg:var(--brand-a);
   --btn-text:#ffffff;
 
-  /* default page background (dark gradient) */
-  --page-bg:radial-gradient(circle at top left, #111827 0, #020617 55%, #020617 75%, #000000 100%);
+  /* DEFAULT PAGE BACKGROUND (dark mode) – single solid colour */
+  --page-bg:#020617;
 }
 
 /* Explicit light theme overrides */
@@ -60,14 +60,14 @@
   --color-card:var(--card-bg);
   --color-text:var(--card-text);
   --color-muted:var(--muted);
-  /* light mode: soft pale blue like your screenshot */
-  --page-bg:linear-gradient(180deg,#f7f9ff 0%, #e6f0ff 40%, #e6f0ff 100%);
+  /* LIGHT MODE PAGE BACKGROUND – single soft blue for full page */
+  --page-bg:#eef2ff;
 }
 
 /* Dark theme palette (for dark mode) */
 :root[data-theme="dark"]{
-  /* page background: deep navy/charcoal, full height */
-  --page-bg:radial-gradient(circle at top left, #111827 0, #020617 55%, #020617 75%, #000000 100%);
+  /* page background: single solid deep navy */
+  --page-bg:#020617;
 
   /* cards + text */
   --card-bg:#0b1220;          /* main card background */
@@ -84,7 +84,7 @@
 /* Respect OS preference if no explicit theme is set */
 @media (prefers-color-scheme: dark){
   :root:not([data-theme]){
-    --page-bg:radial-gradient(circle at top left, #111827 0, #020617 55%, #020617 75%, #000000 100%);
+    --page-bg:#020617;
     --card-bg:#0b1220;
     --card-text:#e5e7eb;
     --muted:#9ca3af;
@@ -107,6 +107,11 @@ body {
   padding: 0;
 }
 
+/* NEW: make sure the outer page background matches too */
+html {
+  background: var(--page-bg) !important;
+}
+
 body {
   min-height: 100vh;
   font-family: var(--font-sans);
@@ -116,15 +121,10 @@ body {
   color: var(--color-text);
 
   /* Background stays still; content scrolls over it.
-     Uses --page-bg, which changes between dark and light themes. */
-  background: var(--page-bg);
-  background-attachment: fixed;
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top center;
+     One **solid colour** for the entire page in both modes. */
+  background: var(--page-bg) fixed no-repeat center top !important;
+  background-size: cover !important;
 }
-
-
 
 /* -------------------- Container (default = white card) -------------------- */
 .container{
@@ -1183,7 +1183,7 @@ body.profile-light .user-pill {
    GLOBAL LIGHT MODE – applies to profile, services, messages
    ========================================================= */
 
-/* background is handled via --page-bg; these only change text/element colors */
+/* background is handled globally on body/html; these only change text & card colours */
 body.profile-dark {
   color: #e5e7eb;
 }
