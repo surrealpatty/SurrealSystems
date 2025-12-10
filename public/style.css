@@ -609,6 +609,22 @@ textarea { min-height:120px; resize:vertical; }
   backdrop-filter: blur(10px);         /* modern browsers */
   font-size: 0.85rem;
   color: #111827;
+
+  /* NEW: make the pill behave like a button visually */
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease,
+    transform 0.1s ease;
+}
+
+/* NEW: subtle hover effect for the user pill */
+.top-user-pill:hover,
+.profile-user-pill:hover,
+.user-pill:hover {
+  background: rgba(241, 245, 249, 0.98);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.35);
+  transform: translateY(-1px);
 }
 
 .top-user-avatar,
