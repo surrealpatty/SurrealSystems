@@ -540,10 +540,23 @@
       body.profile-light .theme-toggle-label {
         color: #4b5563;
       }
+
+      /* tiny utility for small buttons inside cards */
+      .btn-small {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.78rem;
+      }
+
+      .profile-service-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 8px;
+      }
     </style>
   </head>
 
-  <body class="dashboard profile-page">
+  <!-- add profile-dark so it starts in dark mode, JS will toggle class -->
+  <body class="dashboard profile-page profile-dark">
     <div class="profile-wrapper">
       <header class="profile-header">
         <a href="index.html" class="profile-brand">
