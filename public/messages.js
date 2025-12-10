@@ -450,6 +450,7 @@
     const partnerIdRaw = panel.getAttribute("data-partner-id");
     const serviceIdRaw = panel.getAttribute("data-service-id") || "";
     const partnerName = panel.getAttribute("data-partner-name") || "User";
+    const serviceTitleAttr = panel.getAttribute("data-service-title") || "";
 
     const partnerId = partnerIdRaw ? Number(partnerIdRaw) : null;
     const serviceId = serviceIdRaw ? Number(serviceIdRaw) : null;
@@ -467,9 +468,15 @@
       return;
     }
 
+    // Build subject line for backend validation
+    const subject = serviceTitleAttr
+      ? `RE '${serviceTitleAttr}'`
+      : "Message from CodeCrowds";
+
     const payload = {
       content,
       receiverId: partnerId,
+      subject,          // <-- NEW: send subject for validation
     };
     if (serviceId) payload.serviceId = serviceId;
 
