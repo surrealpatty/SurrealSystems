@@ -91,8 +91,13 @@
   margin-top: 8px;
 }
 
-/* Individual message card */
-.messages-list .card {
+/* ------------------------------------------------------------------
+   INDIVIDUAL MESSAGE BOXES
+   Style ANY direct <div> child inside .messages-list
+   except status/footer rows. This way it works no matter
+   what class your JS/HTML uses.
+------------------------------------------------------------------- */
+.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer) {
   background: #020617;
   border-radius: 1rem;
   padding: 14px 13px 12px;
@@ -105,14 +110,23 @@
   text-align: left;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 
-  /* ⭐ NEW — bouncing animation */
+  /* ⭐ Bouncing animation */
   animation: bounceCard 3.2s ease-in-out infinite;
 }
 
 /* Slightly offset bounce timing so each card bounces uniquely */
-.messages-list .card:nth-child(2) { animation-delay: 0.4s; }
-.messages-list .card:nth-child(3) { animation-delay: 0.8s; }
-.messages-list .card:nth-child(4) { animation-delay: 1.2s; }
+.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(1) {
+  animation-delay: 0s;
+}
+.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(2) {
+  animation-delay: 0.4s;
+}
+.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(3) {
+  animation-delay: 0.8s;
+}
+.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(4) {
+  animation-delay: 1.2s;
+}
 
 @keyframes bounceCard {
   0%   { transform: translateY(0); }
@@ -120,7 +134,8 @@
   100% { transform: translateY(0); }
 }
 
-.messages-list .card:hover {
+/* Extra hover polish */
+.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):hover {
   transform: translateY(-4px);
   border-color: rgba(59, 130, 246, 0.8);
   box-shadow: 0 16px 36px rgba(15, 23, 42, 0.85);
