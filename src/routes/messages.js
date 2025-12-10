@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { Message, User } = require('../models');
+const { Message, User, Service } = require('../models');
 const authenticateToken = require('../middlewares/authenticateToken');
 const { body, query, param } = require('express-validator');
 const validate = require('../middlewares/validate');
@@ -115,6 +115,7 @@ router.get(
 /* ------------------------------------------------------------------ */
 /* POST /api/messages  (send a new message)                           */
 /*  - accepts either `body` or `content` field for the text           */
+/*  - auto-fills subject from the service title if missing            */
 /* ------------------------------------------------------------------ */
 router.post(
   '/',
@@ -131,6 +132,7 @@ router.post(
     body('subject')
       .optional()
       .isString()
+      .trim()
       .isLength({ max: 255 }),
     body('serviceId').optional().isInt().toInt(),
   ],
@@ -138,6 +140,7 @@ router.post(
   async (req, res) => {
     try {
       const { receiverId, serviceId } = req.body;
+      let { subject } = req.body;
 
       const rawBody =
         typeof req.body.body === 'string'
@@ -153,11 +156,33 @@ router.post(
         return err(res, 'Message body is required', 400);
       }
 
+      // Normalise and auto-generate subject if needed
+      let finalSubject = '';
+      if (typeof subject === 'string') {
+        finalSubject = subject.trim();
+      }
+
+      if (!finalSubject) {
+        // Try to derive from the service title, if we have a serviceId
+        if (serviceId) {
+          const svc = await Service.findByPk(serviceId);
+          if (svc && svc.title) {
+            finalSubject = `RE "${svc.title}"`;
+          }
+        }
+
+        // Fallback if no service or title found
+        if (!finalSubject) {
+          finalSubject = 'Message about your service';
+        }
+      }
+
       const created = await Message.create({
         senderId: req.user.id,
         receiverId,
         content: bodyText,
         serviceId: serviceId || null,
+        subject: finalSubject,
       });
 
       const message = created.toJSON();

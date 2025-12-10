@@ -40,6 +40,8 @@
   let allServices = [];
   let currentRecipientId = null;
   let currentRecipientName = "";
+  let currentServiceId = null;
+  let currentServiceTitle = "";
 
   // ---------- Toast helper ----------
   function showToast(message) {
@@ -167,7 +169,8 @@
           showToast("Cannot determine service owner.");
           return;
         }
-        openMessageModal(ownerId, username);
+        // pass the whole service so we can use its title + id
+        openMessageModal(ownerId, username, svc);
       });
 
       footer.appendChild(msgBtn);
@@ -183,9 +186,12 @@
   }
 
   // ---------- Message modal ----------
-  function openMessageModal(recipientId, recipientName) {
+  function openMessageModal(recipientId, recipientName, service) {
     currentRecipientId = recipientId;
     currentRecipientName = recipientName || "";
+
+    currentServiceId = service && service.id != null ? service.id : null;
+    currentServiceTitle = (service && service.title) || "";
 
     if (messageRecipientSpan) {
       messageRecipientSpan.textContent = currentRecipientName;
@@ -210,6 +216,9 @@
   function closeMessageModal() {
     currentRecipientId = null;
     currentRecipientName = "";
+    currentServiceId = null;
+    currentServiceTitle = "";
+
     if (messageModal) {
       messageModal.style.display = "none";
       messageModal.setAttribute("aria-hidden", "true");
@@ -238,15 +247,27 @@
       sendMessageBtn.disabled = true;
     }
 
+    // Build subject from the service title, or fall back
+    const subject =
+      currentServiceTitle && currentServiceTitle.trim().length > 0
+        ? `RE "${currentServiceTitle}"`
+        : "Message about your service";
+
+    const payload = {
+      receiverId: currentRecipientId, // backend expects receiverId
+      body: bodyText,                 // backend accepts `body` or `content`
+      subject,
+    };
+
+    // Attach the serviceId so the backend can group by ad
+    if (currentServiceId) {
+      payload.serviceId = currentServiceId;
+    }
+
     try {
-      // IMPORTANT: match backend field names
       await apiFetch("/messages", {
         method: "POST",
-        body: JSON.stringify({
-          receiverId: currentRecipientId, // backend expects receiverId
-          body: bodyText,                 // backend expects body/message/text
-          subject: "Message about your service",
-        }),
+        body: JSON.stringify(payload),
       });
 
       showToast("Message sent.");
