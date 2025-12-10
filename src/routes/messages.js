@@ -2,7 +2,7 @@
 const express = require('express');
 const router = express.Router();
 
-const { Message, User, Service } = require('../models');
+const { Message, User } = require('../models');
 const authenticateToken = require('../middlewares/authenticateToken');
 const { body, query, param } = require('express-validator');
 const validate = require('../middlewares/validate');
@@ -53,11 +53,6 @@ router.get(
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
           },
-          {
-            model: Service,
-            as: 'service',
-            attributes: ['id', 'title'],
-          },
         ],
         order: [['createdAt', 'DESC']],
         limit,
@@ -102,11 +97,6 @@ router.get(
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
           },
-          {
-            model: Service,
-            as: 'service',
-            attributes: ['id', 'title'],
-          },
         ],
         order: [['createdAt', 'DESC']],
         limit,
@@ -134,6 +124,8 @@ router.post(
       .isInt()
       .withMessage('receiverId is required')
       .toInt(),
+    // Let both `body` and `content` be optional strings;
+    // we'll check that at least one is non-empty in the handler.
     body('body').optional().isString(),
     body('content').optional().isString(),
     body('subject')
@@ -157,28 +149,8 @@ router.post(
       const bodyText = rawBody.trim();
 
       if (!bodyText) {
+        // manual validation so both old & new front-ends get the same message
         return err(res, 'Message body is required', 400);
-      }
-
-      // Subject logic:
-      // 1) Use incoming subject if provided
-      // 2) Otherwise, if we have a serviceId, use "RE 'Service Title'"
-      let subjectFromClient =
-        typeof req.body.subject === 'string' ? req.body.subject.trim() : '';
-      let subjectToSave = subjectFromClient || null;
-
-      if (!subjectToSave && serviceId) {
-        try {
-          const svc = await Service.findByPk(serviceId);
-          if (svc && typeof svc.title === 'string') {
-            subjectToSave = `RE '${svc.title}'`;
-          }
-        } catch (e) {
-          console.warn(
-            'WARN: could not resolve Service title for message subject',
-            e,
-          );
-        }
       }
 
       const created = await Message.create({
@@ -186,7 +158,6 @@ router.post(
         receiverId,
         content: bodyText,
         serviceId: serviceId || null,
-        subject: subjectToSave,
       });
 
       const message = created.toJSON();
@@ -213,6 +184,7 @@ router.get(
 
       const rows = await Message.findAll({
         where: {
+          // either I sent to them or they sent to me
           [Message.sequelize.Op.or]: [
             { senderId: req.user.id, receiverId: otherUserId },
             { senderId: otherUserId, receiverId: req.user.id },
@@ -229,11 +201,6 @@ router.get(
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
           },
-          {
-            model: Service,
-            as: 'service',
-            attributes: ['id', 'title'],
-          },
         ],
         order: [['createdAt', 'ASC']],
       });
@@ -249,7 +216,11 @@ router.get(
 
 /* ------------------------------------------------------------------ */
 /* GET /api/messages/:id/thread  (conversation by message + ad)       */
-/*  NEW route – not used by current UI but kept for flexibility       */
+/*  NEW route – used by the new messages.js "Reply" panel             */
+/*  - Finds the clicked message                                       */
+/*  - Checks the current user is in it                                */
+/*  - Uses its serviceId + the two users to fetch ONLY that ad's      */
+/*    conversation between them                                       */
 /* ------------------------------------------------------------------ */
 router.get(
   '/:id/thread',
@@ -273,11 +244,6 @@ router.get(
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
           },
-          {
-            model: Service,
-            as: 'service',
-            attributes: ['id', 'title'],
-          },
         ],
       });
 
@@ -287,6 +253,7 @@ router.get(
 
       const root = rootRow.toJSON();
 
+      // Make sure logged-in user is part of this message
       if (
         root.senderId !== req.user.id &&
         root.receiverId !== req.user.id
@@ -312,6 +279,7 @@ router.get(
         ],
       };
 
+      // Lock to this specific ad / service if there is one
       if (serviceId !== null) {
         where.serviceId = serviceId;
       }
@@ -328,11 +296,6 @@ router.get(
             model: User,
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
-          },
-          {
-            model: Service,
-            as: 'service',
-            attributes: ['id', 'title'],
           },
         ],
         order: [['createdAt', 'ASC']],
