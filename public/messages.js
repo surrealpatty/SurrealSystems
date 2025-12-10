@@ -333,10 +333,17 @@
       m.serviceTitle ||
       "";
 
-    // SUBJECT LINE = AD TITLE (fallback to generic if no title)
-    const subjectDisplay = serviceTitle
-      ? `RE '${serviceTitle}'`
-      : `Message from ${senderName}`;
+    // 🔹 NEW: pick subject from the message, fall back to ad title or generic
+    const subjectRaw = m.subject || "";
+    const subjectDisplay =
+      subjectRaw && subjectRaw.trim().length > 0
+        ? subjectRaw.trim()
+        : serviceTitle
+        ? `RE '${serviceTitle}'`
+        : `Message from ${senderName}`;
+
+    // For the panel header, use either service title or the subject text
+    const headerTitle = serviceTitle || subjectDisplay;
 
     return `
       <article class="message-card" data-message-id="${escapeHtml(
@@ -365,7 +372,7 @@
           data-partner-id="${escapeHtml(String(partnerId ?? ""))}"
           data-partner-name="${escapeHtml(partnerName)}"
           data-service-id="${escapeHtml(String(serviceId))}"
-          data-service-title="${escapeHtml(serviceTitle)}"
+          data-service-title="${escapeHtml(headerTitle)}"
           data-root-created="${escapeHtml(createdIso || "")}"
         >
           <div class="thread-header"></div>
