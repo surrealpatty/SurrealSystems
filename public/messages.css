@@ -83,8 +83,8 @@
   cursor: default;
 }
 
-/* Messages grid/list */
-.messages-list {
+/* Messages grid/list – NOTE: ID selector */
+#messages-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap: 14px;
@@ -93,16 +93,15 @@
 
 /* ------------------------------------------------------------------
    INDIVIDUAL MESSAGE BOXES
-   Style ANY direct <div> child inside .messages-list
-   except status/footer rows. This way it works no matter
-   what class your JS/HTML uses.
+   Style ANY direct <div> child inside #messages-list
+   except status/footer rows.
 ------------------------------------------------------------------- */
-.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer) {
+#messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer) {
   background: #020617;
   border-radius: 1rem;
   padding: 14px 13px 12px;
   border: 1px solid #1f2937;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
   color: #e5e7eb;
   display: flex;
   flex-direction: column;
@@ -115,34 +114,34 @@
 }
 
 /* Slightly offset bounce timing so each card bounces uniquely */
-.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(1) {
+#messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(1) {
   animation-delay: 0s;
 }
-.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(2) {
+#messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(2) {
   animation-delay: 0.4s;
 }
-.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(3) {
+#messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(3) {
   animation-delay: 0.8s;
 }
-.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(4) {
+#messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):nth-child(4) {
   animation-delay: 1.2s;
 }
 
 @keyframes bounceCard {
   0%   { transform: translateY(0); }
-  50%  { transform: translateY(-6px); }
+  50%  { transform: translateY(-8px); }
   100% { transform: translateY(0); }
 }
 
 /* Extra hover polish */
-.messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):hover {
+#messages-list > div:not(.loading):not(.empty):not(.error):not(.conversation-footer):hover {
   transform: translateY(-4px);
-  border-color: rgba(59, 130, 246, 0.8);
-  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.85);
+  border-color: rgba(59, 130, 246, 0.9);
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
 }
 
 /* Title inside each card */
-.messages-list .message-title {
+#messages-list .message-title {
   margin: 0;
   font-size: 0.95rem;
   font-weight: 600;
@@ -150,19 +149,19 @@
 }
 
 /* "From xyz" + timestamp line */
-.messages-list .message-meta {
+#messages-list .message-meta {
   margin: 2px 0 6px;
   font-size: 0.8rem;
   color: #9ca3af;
 }
 
-.messages-list p {
+#messages-list p {
   margin: 0;
   font-size: 0.9rem;
   color: #e5e7eb;
 }
 
-.messages-list .timestamp {
+#messages-list .timestamp {
   margin-top: 6px;
   font-size: 0.78rem;
   color: #9ca3af;
@@ -214,7 +213,7 @@
     justify-content: flex-start;
   }
 
-  .messages-list {
+  #messages-list {
     grid-template-columns: 1fr;
   }
 }
