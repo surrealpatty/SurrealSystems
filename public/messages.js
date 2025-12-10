@@ -2,10 +2,11 @@
 // Messages page with "Reply" button.
 // Each card represents a single thread = (ad/service + other user).
 // Subject line is the ad title, and the thread only shows messages
-// for that ad between you and that user.
+// for that ad between you and that user (or, if no ad, from that
+// message forward only).
 
 (() => {
-  console.log("[messages] loaded messages.js (front-end per-ad threads)");
+  console.log("[messages] loaded messages.js (front-end per-ad threads v2)");
 
   // -----------------------------
   // API base URL helper (Render vs local)
@@ -273,7 +274,8 @@
         ? `${previewRaw.slice(0, 217)}…`
         : previewRaw;
 
-    const when = formatDate(m.createdAt || m.sentAt || m.created_at);
+    const createdIso = m.createdAt || m.created_at || "";
+    const when = formatDate(createdIso);
     const msgId = m.id || m.messageId || m.messageID || "";
 
     // Determine partnerId again so we can store it on the card
@@ -321,6 +323,7 @@
           data-partner-name="${escapeHtml(partnerName)}"
           data-service-id="${escapeHtml(String(serviceId))}"
           data-service-title="${escapeHtml(serviceTitle)}"
+          data-root-created="${escapeHtml(createdIso || '')}"
         >
           <div class="thread-header"></div>
           <div class="thread-messages"></div>
@@ -339,11 +342,12 @@
   // -----------------------------
   // THREAD VIEW – per (ad + user), built from allMessages
   // -----------------------------
-  function threadMessagesFor(partnerId, serviceId) {
+  function threadMessagesFor(partnerId, serviceId, rootCreatedIso) {
     const partnerIdNum =
       partnerId == null || partnerId === "" ? null : Number(partnerId);
     const svcIdNum =
       serviceId == null || serviceId === "" ? null : Number(serviceId);
+    const rootTime = rootCreatedIso ? new Date(rootCreatedIso).getTime() : null;
 
     const filtered = allMessages.filter((m) => {
       const sId = m.senderId ?? m.sender_id;
@@ -358,14 +362,23 @@
 
       if (!pairMatch) return false;
 
-      // Must belong to the same ad/service
+      const mSvc = m.serviceId ?? m.service_id ?? null;
+      const mTime = new Date(m.createdAt || m.created_at || 0).getTime();
+
       if (svcIdNum != null) {
-        const mSvc = m.serviceId ?? m.service_id ?? null;
+        // If the card has a service, require same serviceId
         if (mSvc == null) return false;
-        return Number(mSvc) === svcIdNum;
+        if (Number(mSvc) !== svcIdNum) return false;
+        return true;
       }
 
-      // If this thread has no service attached, just keep the pair
+      // If the card has NO serviceId, only include messages
+      // from this user starting at this message's time.
+      if (rootTime != null) {
+        return mTime >= rootTime;
+      }
+
+      // Fallback: just pair match
       return true;
     });
 
@@ -445,12 +458,13 @@
     const partnerName = panel.getAttribute("data-partner-name") || "User";
     const serviceId = panel.getAttribute("data-service-id") || "";
     const serviceTitle = panel.getAttribute("data-service-title") || "";
+    const rootCreatedIso = panel.getAttribute("data-root-created") || "";
 
     const headerEl = panel.querySelector(".thread-header");
     const messagesEl = panel.querySelector(".thread-messages");
     const textarea = panel.querySelector(".thread-reply-input");
 
-    const msgs = threadMessagesFor(partnerId, serviceId);
+    const msgs = threadMessagesFor(partnerId, serviceId, rootCreatedIso);
 
     if (headerEl) {
       headerEl.innerHTML = buildThreadHeaderHtml(partnerName, serviceTitle);
@@ -477,6 +491,7 @@
     const serviceIdRaw = panel.getAttribute("data-service-id") || "";
     const partnerName = panel.getAttribute("data-partner-name") || "User";
     const serviceTitleAttr = panel.getAttribute("data-service-title") || "";
+    const rootCreatedIso = panel.getAttribute("data-root-created") || "";
 
     const partnerId = partnerIdRaw ? Number(partnerIdRaw) : null;
     const serviceId = serviceIdRaw ? Number(serviceIdRaw) : null;
@@ -494,16 +509,13 @@
       return;
     }
 
-    // subject isn't stored in DB but backend allows it;
-    // nice to keep it consistent with the card title.
     const subject = serviceTitleAttr
       ? `RE '${serviceTitleAttr}'`
       : "Message from CodeCrowds";
 
     const payload = {
       receiverId: partnerId,
-      // backend accepts either `body` or `content`:
-      content,
+      content, // backend POST route supports this
       subject,
     };
     if (serviceId) payload.serviceId = serviceId;
@@ -517,7 +529,6 @@
         res;
 
       if (created && created.id != null) {
-        // update sent + combined cache
         sentMessages.push(created);
         indexAllMessages();
       }
@@ -525,13 +536,12 @@
       textarea.value = "";
 
       // Rebuild this thread locally from updated allMessages
-      const msgs = threadMessagesFor(partnerId, serviceId);
+      const msgs = threadMessagesFor(partnerId, serviceId, rootCreatedIso);
       const messagesEl = panel.querySelector(".thread-messages");
       if (messagesEl) {
         messagesEl.innerHTML = buildThreadMessagesHtml(msgs, partnerName);
       }
 
-      // If user is on Sent tab, re-render the list so newest is on top
       if (currentView === "sent") {
         renderView("sent");
       }
