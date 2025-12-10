@@ -107,7 +107,6 @@ body {
   padding: 0;
 }
 
-/* put all background + text styling on body only */
 body {
   min-height: 100vh;
   font-family: var(--font-sans);
@@ -115,8 +114,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
   line-height: 1.45;
   color: var(--color-text);
-  background: var(--page-bg); /* SINGLE source of page background */
+
+  /* Background stays still; content scrolls over it */
+  background: var(--page-bg);
+  background-attachment: fixed;
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: top center;
 }
+
 
 
 /* -------------------- Container (default = white card) -------------------- */
