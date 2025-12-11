@@ -3,14 +3,17 @@
    (works with the global dashboard styles in public/style.css)
 */
 
-/* Wrapper that sits in the right column next to the sidebar */
+/* ===========================
+   LAYOUT WRAPPER + CARD
+   =========================== */
+
 .messages-wrapper {
   max-width: 1100px;
   margin: 0 auto;
   padding: 8px 0 32px;
 }
 
-/* Main card that holds the header, tabs, and list */
+/* Main card that holds header, tabs, and list */
 .messages-card {
   border-radius: 1.25rem;
   border: 1px solid #1f2937;
@@ -19,21 +22,30 @@
   color: #e5e7eb;
 }
 
-/* Header text "Your messages" */
+/* Light-mode override for the main card */
+body.dashboard.profile-light .messages-card {
+  background: #f9fbff;
+  border-color: rgba(209, 213, 219, 0.9);
+  color: #111827;
+}
+
+/* ===========================
+   HEADER
+   =========================== */
+
 .messages-header-title {
   margin: 0 0 4px;
   font-size: 1.2rem;
   font-weight: 600;
 }
 
-/* Small helper text under the title (if used) */
 .messages-header-subtitle {
   margin: 0;
   font-size: 0.85rem;
   color: #9ca3af;
 }
 
-/* Top right chip with the user email */
+/* Top-right chip with user email */
 .messages-user-chip {
   display: inline-flex;
   align-items: center;
@@ -45,7 +57,10 @@
   font-size: 0.85rem;
 }
 
-/* Tab bar (Received / Sent / Back to Profile) */
+/* ===========================
+   TAB BAR (Received / Sent / Back)
+   =========================== */
+
 .tabbar {
   display: flex;
   flex-wrap: wrap;
@@ -56,19 +71,14 @@
   margin-bottom: 12px;
 }
 
-/* ============================================================
-   BASE PILL STYLE – TABS + REPLY/DELETE BUTTONS (DARK MODE)
-   This makes Reply + Delete share the same background as Sent.
-   ============================================================ */
-.tab,
-.conversation-footer button {
+.tab {
   padding: 8px 14px;
   font-size: 0.9rem;
+  color: #e5e7eb;
+  background: rgba(15, 23, 42, 0.75);
   border-radius: 999px;
   border: 1px solid rgba(148, 163, 184, 0.7);
   cursor: pointer;
-  background: rgba(15, 23, 42, 0.75); /* same as Sent tab in dark mode */
-  color: #e5e7eb;
   transition:
     background 0.16s ease,
     border-color 0.16s ease,
@@ -76,13 +86,12 @@
     transform 0.1s ease;
 }
 
-.tab:hover,
-.conversation-footer button:hover {
+.tab:hover {
   background: rgba(55, 65, 81, 0.9);
   border-color: rgba(156, 163, 175, 0.95);
 }
 
-/* ACTIVE TAB (Received or Sent when selected) */
+/* Active tab (e.g., Received or Sent) */
 .tab.active {
   background: #f3f4f6;
   color: #4e54c8;
@@ -94,64 +103,28 @@
   cursor: default;
 }
 
-/* ============================================================
-   DELETE BUTTON – SAME BG AS SENT, RED TEXT/BORDER
-   ============================================================ */
-.conversation-footer .delete-btn {
-  color: #dc2626;
-  border-color: #dc2626;
-  font-weight: 600;
-}
-
-.conversation-footer .delete-btn:hover {
-  background: #dc2626;
-  color: #ffffff;
-  border-color: #dc2626;
-}
-
-/* ============================================================
-   LIGHT MODE OVERRIDES (profile-light)
-   Makes tabs + Reply/Delete match again in light mode.
-   ============================================================ */
-body.dashboard.profile-light .messages-card {
-  background: #f9fbff;
-  border-color: rgba(209, 213, 219, 0.9);
-  color: #111827;
-}
-
-body.dashboard.profile-light .tab,
-body.dashboard.profile-light .conversation-footer button {
-  background: #ffffff;               /* same as Sent tab in light mode */
+/* Light mode tabs */
+body.dashboard.profile-light .tab {
+  background: #ffffff;
   color: #4b5563;
   border-color: rgba(148, 163, 184, 0.7);
 }
 
-body.dashboard.profile-light .tab:hover,
-body.dashboard.profile-light .conversation-footer button:hover {
+body.dashboard.profile-light .tab:hover {
   background: #f3f4f6;
   border-color: rgba(156, 163, 175, 0.95);
 }
 
-/* keep active tab special in light mode too */
 body.dashboard.profile-light .tab.active {
   background: #f3f4f6;
   color: #4e54c8;
   border-color: #4e54c8;
 }
 
-/* Delete in light mode: same bg as Sent, red text/border */
-body.dashboard.profile-light .conversation-footer .delete-btn {
-  color: #dc2626;
-  border-color: #dc2626;
-}
+/* ===========================
+   MESSAGE GRID
+   =========================== */
 
-body.dashboard.profile-light .conversation-footer .delete-btn:hover {
-  background: #dc2626;
-  color: #ffffff;
-  border-color: #dc2626;
-}
-
-/* Messages grid/list */
 #messages-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -159,9 +132,10 @@ body.dashboard.profile-light .conversation-footer .delete-btn:hover {
   margin-top: 8px;
 }
 
-/* ------------------------------------------------------------------
-   INDIVIDUAL CONVERSATION CARDS
-------------------------------------------------------------------- */
+/* ===========================
+   INDIVIDUAL MESSAGE CARDS
+   =========================== */
+
 .message-card {
   background: #020617;
   border-radius: 1rem;
@@ -174,7 +148,10 @@ body.dashboard.profile-light .conversation-footer .delete-btn:hover {
   gap: 4px;
   text-align: left;
   cursor: pointer;
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  transition:
+    transform 0.22s ease,
+    box-shadow 0.22s ease,
+    border-color 0.22s ease;
 }
 
 .message-card:hover {
@@ -210,14 +187,67 @@ body.dashboard.profile-light .conversation-footer .delete-btn:hover {
   color: #9ca3af;
 }
 
-/* Conversation footer (Reply + Delete buttons) */
+/* ===========================
+   FOOTER (REPLY + DELETE)
+   =========================== */
+
 .conversation-footer {
   margin-top: 10px;
   display: flex;
   gap: 8px;
 }
 
-/* Status text states */
+/* REPLY button — soft light-blue pill (same as “Sent” look) */
+.reply-btn {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #3b82f6;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.reply-btn:hover {
+  background: rgba(59, 130, 246, 0.25);
+  border-color: rgba(59, 130, 246, 0.55);
+}
+
+/* DELETE button — same blue background, red text/border */
+.delete-btn {
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid #dc2626;
+  color: #dc2626;
+  font-weight: 600;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.delete-btn:hover {
+  background: #dc2626;
+  color: #ffffff;
+  border-color: #dc2626;
+}
+
+/* Light mode: same pill look works on white cards */
+body.dashboard.profile-light .reply-btn,
+body.dashboard.profile-light .delete-btn {
+  background: rgba(59, 130, 246, 0.15);
+}
+
+/* Keep Delete red details in light mode */
+body.dashboard.profile-light .delete-btn {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+/* ===========================
+   STATUS TEXT (loading/empty/error)
+   =========================== */
+
 .loading,
 .empty,
 .error {
@@ -235,7 +265,10 @@ body.dashboard.profile-light .conversation-footer .delete-btn:hover {
   color: #fecaca;
 }
 
-/* Small screens */
+/* ===========================
+   RESPONSIVE
+   =========================== */
+
 @media (max-width: 600px) {
   .messages-card {
     padding: 14px 12px 18px;
@@ -251,16 +284,13 @@ body.dashboard.profile-light .conversation-footer .delete-btn:hover {
 }
 
 /* ============================================================
-   DELETE ACCOUNT BUTTON (WORKS FOR LIGHT + DARK MODE)
-   Targets the third settings card exactly as in your screenshot
+   DELETE ACCOUNT BUTTON (SETTINGS PAGE)
    ============================================================ */
 
-/* Make the DELETE ACCOUNT title red */
 .settings-card:nth-of-type(3) h3 {
   color: var(--danger) !important;
 }
 
-/* Style the DELETE ACCOUNT button */
 .settings-card:nth-of-type(3) button {
   display: inline-flex;
   align-items: center;
@@ -282,14 +312,12 @@ body.dashboard.profile-light .conversation-footer .delete-btn:hover {
     box-shadow 0.18s ease;
 }
 
-/* Hover state */
 .settings-card:nth-of-type(3) button:hover {
   background: rgba(255, 77, 79, 0.15) !important;
   color: var(--danger) !important;
   box-shadow: 0 0 8px rgba(255, 77, 79, 0.35) !important;
 }
 
-/* Press / active */
 .settings-card:nth-of-type(3) button:active {
   background: rgba(255, 77, 79, 0.25) !important;
   color: #fff !important;
