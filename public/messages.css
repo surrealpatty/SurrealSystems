@@ -178,16 +178,23 @@
   color: #ffffff !important;
 }
 
-/* Delete button specific styling */
+/* ================================================================
+   DELETE BUTTON — Light background + Red border + Red text
+================================================================= */
 .conversation-footer .delete-btn {
-  background: #dc2626;
-  border-color: #b91c1c;
-  color: #f9fafb;
+  background: #f3f4f6 !important;
+  color: #dc2626 !important;
+  border: 1px solid #dc2626 !important;
+  font-weight: 600;
+  border-radius: 999px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  transition: 0.18s ease;
 }
 
 .conversation-footer .delete-btn:hover {
-  background: #b91c1c;
-  border-color: #7f1d1d;
+  background: #dc2626 !important;
+  color: #ffffff !important;
 }
 
 /* Status text states */
