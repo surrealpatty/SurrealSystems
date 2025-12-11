@@ -36,7 +36,7 @@
       max-width: 1100px;
       padding: 20px 20px 24px;
       flex: 1 0 auto;            /* take remaining height so footer sits at bottom */
-      position: relative;        /* for the corner logo */
+      position: relative;        /* for the bottom logo badge */
     }
 
     .brand-row {
@@ -237,28 +237,42 @@
     }
 
     /* =======================
-       BOTTOM-RIGHT CORNER LOGO
+       BOTTOM-CENTER BRAND BADGE
     ======================== */
-    .corner-logo {
+    .bottom-brand {
       position: absolute;
-      right: 32px;
-      bottom: 32px;
-      opacity: 0.26;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%);
+      text-align: center;
+      opacity: 0.28;
       z-index: 10;
       transition: opacity 0.2s ease, transform 0.2s ease;
       pointer-events: none; /* so it never blocks clicks */
     }
 
-    .corner-logo img {
-      width: 180px;           /* glow badge size */
+    .bottom-brand img {
+      width: 160px;
       height: auto;
       display: block;
-      filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.8));
+      filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.85));
     }
 
-    .corner-logo:hover {
-      opacity: 0.34;
-      transform: translateY(-2px);
+    .bottom-brand-text {
+      margin-top: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #4e54c8, #00aaff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .bottom-brand:hover {
+      opacity: 0.36;
+      transform: translateX(-50%) translateY(-2px);
     }
 
     /* =======================
@@ -308,8 +322,8 @@
         margin-top: 16px;
       }
 
-      /* hide logo on small screens to keep things clean */
-      .corner-logo {
+      /* hide logo badge on small screens to keep things clean */
+      .bottom-brand {
         display: none;
       }
     }
@@ -401,9 +415,10 @@
       </section>
     </div>
 
-    <!-- Bottom-right decorative logo using the new CC badge -->
-    <div class="corner-logo">
+    <!-- Bottom-center brand badge with CC logo + CodeCrowds text -->
+    <div class="bottom-brand">
       <img src="/codecrowds-cc-logo.png" alt="CodeCrowds logo" />
+      <div class="bottom-brand-text">CODECROWDS</div>
     </div>
   </div>
 
