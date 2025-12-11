@@ -3,7 +3,7 @@
 // Each card = one thread (ad/service + other user).
 
 (() => {
-  console.log("[messages] loaded messages.js (front-end per-ad threads v5)");
+  console.log("[messages] loaded messages.js (front-end per-ad threads v4)");
 
   // -----------------------------
   // API base URL helper (Render vs local)
@@ -333,22 +333,16 @@
       m.serviceTitle ||
       "";
 
-    // 🔹 Subject / heading:
-    // If we have an ad title, use
-    //   "Message about: {title}"
-    // Otherwise, fall back to subject or "Message from …"
+    // 🔹 NEW: pick subject from the message, fall back to ad title or generic
     const subjectRaw = m.subject || "";
-    let subjectDisplay = "";
+    const subjectDisplay =
+      subjectRaw && subjectRaw.trim().length > 0
+        ? subjectRaw.trim()
+        : serviceTitle
+        ? `RE '${serviceTitle}'`
+        : `Message from ${senderName}`;
 
-    if (serviceTitle) {
-      subjectDisplay = `Message about: ${serviceTitle}`;
-    } else if (subjectRaw && subjectRaw.trim().length > 0) {
-      subjectDisplay = subjectRaw.trim();
-    } else {
-      subjectDisplay = `Message from ${senderName}`;
-    }
-
-    // For the panel header, we want the pure ad title if available
+    // For the panel header, use either service title or the subject text
     const headerTitle = serviceTitle || subjectDisplay;
 
     return `
@@ -592,14 +586,6 @@
         res;
 
       if (created && created.id != null) {
-        // attach service info so the new message also shows the ad title
-        if (serviceId) {
-          created.service = created.service || {
-            id: serviceId,
-            title: serviceTitleAttr || "",
-          };
-        }
-
         sentMessages.push(created);
         indexAllMessages();
       }
