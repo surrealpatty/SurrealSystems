@@ -241,23 +241,23 @@
     ======================== */
     .corner-logo {
       position: absolute;
-      right: 0;
-      bottom: 0;
-      opacity: 0.22;
+      right: 32px;
+      bottom: 32px;
+      opacity: 0.26;
       z-index: 10;
       transition: opacity 0.2s ease, transform 0.2s ease;
       pointer-events: none; /* so it never blocks clicks */
     }
 
     .corner-logo img {
-      width: 130px;           /* adjust size here */
+      width: 180px;           /* glow badge size */
       height: auto;
       display: block;
-      filter: drop-shadow(0 0 18px rgba(59, 130, 246, 0.6));
+      filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.8));
     }
 
     .corner-logo:hover {
-      opacity: 0.3;
+      opacity: 0.34;
       transform: translateY(-2px);
     }
 
@@ -401,9 +401,9 @@
       </section>
     </div>
 
-    <!-- Bottom-right decorative logo (update src to your actual logo file) -->
+    <!-- Bottom-right decorative logo using the new CC badge -->
     <div class="corner-logo">
-      <img src="logo-corner.png" alt="CodeCrowds logo" />
+      <img src="codecrowds-cc-logo.png" alt="CodeCrowds logo" />
     </div>
   </div>
 
