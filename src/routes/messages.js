@@ -53,11 +53,6 @@ router.get(
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
           },
-          {
-            model: Service,
-            as: 'service', // 👈 IMPORTANT: use the alias
-            attributes: ['id', 'title'],
-          },
         ],
         order: [['createdAt', 'DESC']],
         limit,
@@ -101,11 +96,6 @@ router.get(
             model: User,
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
-          },
-          {
-            model: Service,
-            as: 'service', // 👈 alias
-            attributes: ['id', 'title'],
           },
         ],
         order: [['createdAt', 'DESC']],
@@ -236,11 +226,6 @@ router.get(
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
           },
-          {
-            model: Service,
-            as: 'service', // 👈 alias
-            attributes: ['id', 'title'],
-          },
         ],
         order: [['createdAt', 'ASC']],
       });
@@ -278,11 +263,6 @@ router.get(
             model: User,
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
-          },
-          {
-            model: Service,
-            as: 'service', // 👈 alias
-            attributes: ['id', 'title'],
           },
         ],
       });
@@ -336,11 +316,6 @@ router.get(
             model: User,
             as: 'receiver',
             attributes: ['id', 'username', 'email'],
-          },
-          {
-            model: Service,
-            as: 'service', // 👈 alias
-            attributes: ['id', 'title'],
           },
         ],
         order: [['createdAt', 'ASC']],

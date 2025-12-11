@@ -3,7 +3,7 @@
 // Each card = one thread (ad/service + other user).
 
 (() => {
-  console.log("[messages] loaded messages.js (front-end per-ad threads v5)");
+  console.log("[messages] loaded messages.js (front-end v6 – subject as ad title)");
 
   // -----------------------------
   // API base URL helper (Render vs local)
@@ -33,9 +33,6 @@
   let sentMessages = [];
   let allMessages = [];
   const currentUserId = getCurrentUserId();
-
-  // cache of service titles: { [id]: "title" }
-  const serviceTitleCache = {};
 
   // -----------------------------
   // Helpers
@@ -206,45 +203,6 @@
   }
 
   // -----------------------------
-  // Load service titles for messages using /api/services/:id
-  // (extra safety; now that backend includes Service, we rarely need this)
-  // -----------------------------
-  async function hydrateServiceTitles(messages) {
-    const ids = new Set();
-
-    for (const m of messages) {
-      if (!m) continue;
-      const rawId = m.serviceId ?? m.service_id;
-      if (rawId == null) continue;
-      const num = Number(rawId);
-      if (!Number.isFinite(num)) continue;
-      if (serviceTitleCache[num]) continue; // already have it
-      ids.add(num);
-    }
-
-    if (!ids.size) return;
-
-    const tasks = Array.from(ids).map(async (id) => {
-      try {
-        const data = await apiGet(`/services/${encodeURIComponent(id)}`);
-        // Try to pull service object from various shapes
-        const svc =
-          data.service ||
-          (data.data && data.data.service) ||
-          data;
-        const title = svc && (svc.title || svc.name);
-        if (title) {
-          serviceTitleCache[id] = title;
-        }
-      } catch (err) {
-        console.warn("[messages] failed to fetch service title for", id, err);
-      }
-    });
-
-    await Promise.all(tasks);
-  }
-
-  // -----------------------------
   // Fetch both inbox + sent once
   // -----------------------------
   async function fetchAllMessages() {
@@ -257,9 +215,6 @@
 
       inboxMessages = normalizeMessages(inboxRaw);
       sentMessages = normalizeMessages(sentRaw);
-
-      // fetch ad titles for any messages that have serviceId
-      await hydrateServiceTitles([...inboxMessages, ...sentMessages]);
 
       indexAllMessages();
       renderView("inbox");
@@ -329,6 +284,23 @@
     messagesList.innerHTML = html;
   }
 
+  // Parse the subject to pull out the ad title:
+  // e.g. 'RE "Logo Design"' -> 'Logo Design'
+  function extractAdTitleFromSubject(subjectRaw) {
+    if (!subjectRaw) return "";
+    const subject = String(subjectRaw).trim();
+    if (!subject) return "";
+
+    // Look for RE "Title" or RE 'Title'
+    const match = subject.match(/RE\s+["'](.+?)["']/i);
+    if (match && match[1]) {
+      return match[1];
+    }
+
+    // Fallback: just use whole subject
+    return subject;
+  }
+
   function renderMessageCard(m, view) {
     const senderName =
       m.senderName ||
@@ -371,37 +343,25 @@
     else if (currentUserId != null && rId === currentUserId) partnerId = sId;
     const partnerName = view === "inbox" ? senderName : receiverName || "User";
 
-    // Service / ad info
     const serviceIdRaw = m.serviceId ?? m.service_id ?? "";
-    const serviceIdNum =
-      serviceIdRaw === "" ? null : Number(serviceIdRaw);
-    const cachedTitle =
-      serviceIdNum != null && Number.isFinite(serviceIdNum)
-        ? serviceTitleCache[serviceIdNum] || ""
-        : "";
-
-    const serviceTitle =
-      cachedTitle ||
-      (m.service && (m.service.title || m.service.name)) ||
-      m.serviceTitle ||
-      "";
-
     const subjectRaw = m.subject || "";
+
+    const adTitle = extractAdTitleFromSubject(subjectRaw);
 
     // 🔹 Decide what to show as the big heading on the card
     let cardTitle = "";
     let headerTitle = "";
 
-    if (serviceTitle) {
-      // Preferred: the ad title
-      cardTitle = serviceTitle;
-      headerTitle = serviceTitle;
+    if (adTitle) {
+      // Preferred: extracted ad title from subject
+      cardTitle = adTitle;
+      headerTitle = adTitle;
     } else if (subjectRaw && subjectRaw.trim().length > 0) {
       // Fallback: subject text
       cardTitle = subjectRaw.trim();
       headerTitle = cardTitle;
     } else {
-      // Old messages with no ad + no subject
+      // Old messages with no subject
       cardTitle = `Message from ${senderName}`;
       headerTitle = cardTitle;
     }
@@ -628,7 +588,7 @@
     }
 
     const subject = serviceTitleAttr
-      ? `RE '${serviceTitleAttr}'`
+      ? `RE "${serviceTitleAttr}"`
       : "Message from CodeCrowds";
 
     const payload = {
