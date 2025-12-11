@@ -3,7 +3,9 @@
 // Each card = one thread (ad/service + other user).
 
 (() => {
-  console.log("[messages] loaded messages.js (front-end v7 – subject as ad title + auth header)");
+  console.log(
+    "[messages] loaded messages.js (front-end v8 – ad title from service + subject)"
+  );
 
   // -----------------------------
   // API base URL helper (Render vs local)
@@ -33,6 +35,9 @@
   let sentMessages = [];
   let allMessages = [];
   const currentUserId = getCurrentUserId();
+
+  // cache of service titles: { [id]: "title" }
+  const serviceTitleCache = {};
 
   // -----------------------------
   // Helpers
@@ -88,9 +93,9 @@
   }
 
   // -----------------------------
-  // API helpers (now send Authorization on GET too)
+  // API helpers (send Authorization on all calls)
   // -----------------------------
-  async function apiGet(path) {
+  function buildAuthHeaders() {
     let token = null;
     try {
       token = localStorage.getItem("token");
@@ -100,6 +105,11 @@
 
     const headers = { "Content-Type": "application/json" };
     if (token) headers.Authorization = `Bearer ${token}`;
+    return headers;
+  }
+
+  async function apiGet(path) {
+    const headers = buildAuthHeaders();
 
     const res = await fetch(`${API_URL}${path}`, {
       method: "GET",
@@ -111,7 +121,7 @@
     try {
       data = await res.json();
     } catch {
-      // ignore parse error, but still handle status
+      // ignore parse error
     }
 
     if (!res.ok) {
@@ -126,15 +136,7 @@
   }
 
   async function apiPost(path, body) {
-    let token = null;
-    try {
-      token = localStorage.getItem("token");
-    } catch {
-      token = null;
-    }
-
-    const headers = { "Content-Type": "application/json" };
-    if (token) headers.Authorization = `Bearer ${token}`;
+    const headers = buildAuthHeaders();
 
     const res = await fetch(`${API_URL}${path}`, {
       method: "POST",
@@ -162,15 +164,7 @@
   }
 
   async function apiDelete(path) {
-    let token = null;
-    try {
-      token = localStorage.getItem("token");
-    } catch {
-      token = null;
-    }
-
-    const headers = { "Content-Type": "application/json" };
-    if (token) headers.Authorization = `Bearer ${token}`;
+    const headers = buildAuthHeaders();
 
     const res = await fetch(`${API_URL}${path}`, {
       method: "DELETE",
@@ -231,6 +225,41 @@
   }
 
   // -----------------------------
+  // Load service titles for messages using /api/services/:id
+  // -----------------------------
+  async function hydrateServiceTitles(messages) {
+    const ids = new Set();
+
+    for (const m of messages) {
+      if (!m) continue;
+      const rawId = m.serviceId ?? m.service_id;
+      if (rawId == null) continue;
+      const num = Number(rawId);
+      if (!Number.isFinite(num)) continue;
+      if (serviceTitleCache[num]) continue; // already have it
+      ids.add(num);
+    }
+
+    if (!ids.size) return;
+
+    const tasks = Array.from(ids).map(async (id) => {
+      try {
+        const data = await apiGet(`/services/${encodeURIComponent(id)}`);
+        // Try to pull service object from various shapes
+        const svc = data.service || (data.data && data.data.service) || data;
+        const title = svc && (svc.title || svc.name);
+        if (title) {
+          serviceTitleCache[id] = title;
+        }
+      } catch (err) {
+        console.warn("[messages] failed to fetch service title for", id, err);
+      }
+    });
+
+    await Promise.all(tasks);
+  }
+
+  // -----------------------------
   // Fetch both inbox + sent once
   // -----------------------------
   async function fetchAllMessages() {
@@ -243,6 +272,9 @@
 
       inboxMessages = normalizeMessages(inboxRaw);
       sentMessages = normalizeMessages(sentRaw);
+
+      // fetch ad titles for any messages that have serviceId
+      await hydrateServiceTitles([...inboxMessages, ...sentMessages]);
 
       indexAllMessages();
       renderView("inbox");
@@ -371,24 +403,35 @@
     const partnerName = view === "inbox" ? senderName : receiverName || "User";
 
     const serviceIdRaw = m.serviceId ?? m.service_id ?? "";
-    const subjectRaw = m.subject || "";
+    const serviceIdNum =
+      serviceIdRaw === "" ? null : Number(serviceIdRaw);
+    const cachedTitle =
+      serviceIdNum != null && Number.isFinite(serviceIdNum)
+        ? serviceTitleCache[serviceIdNum] || ""
+        : "";
+    const serviceTitle = cachedTitle || "";
 
-    const adTitle = extractAdTitleFromSubject(subjectRaw);
+    const subjectRaw = m.subject || "";
+    const adTitleFromSubject = extractAdTitleFromSubject(subjectRaw);
 
     // 🔹 Decide what to show as the big heading on the card
     let cardTitle = "";
     let headerTitle = "";
 
-    if (adTitle) {
-      // Preferred: extracted ad title from subject
-      cardTitle = adTitle;
-      headerTitle = adTitle;
+    if (serviceTitle) {
+      // Best: actual ad title from the Service
+      cardTitle = serviceTitle;
+      headerTitle = serviceTitle;
+    } else if (adTitleFromSubject) {
+      // Next: extracted from subject (RE "Title")
+      cardTitle = adTitleFromSubject;
+      headerTitle = adTitleFromSubject;
     } else if (subjectRaw && subjectRaw.trim().length > 0) {
-      // Fallback: subject text
+      // Fallback: full subject
       cardTitle = subjectRaw.trim();
       headerTitle = cardTitle;
     } else {
-      // Old messages with no subject
+      // Old messages with no subject + no service title
       cardTitle = `Message from ${senderName}`;
       headerTitle = cardTitle;
     }
