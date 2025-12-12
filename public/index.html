@@ -240,7 +240,7 @@
        BOTTOM-CENTER BRAND BADGE
     ======================== */
     .bottom-brand {
-      position: absolute;
+      position: fixed; /* Changed to fixed position */
       left: 50%;
       bottom: 26px;
       transform: translateX(-50%);
@@ -248,7 +248,7 @@
       opacity: 0.28;
       z-index: 10;
       transition: opacity 0.2s ease, transform 0.2s ease;
-      pointer-events: none; /* so it never blocks clicks */
+      pointer-events: none; /* Ensures logo doesn't block any clickable items */
     }
 
     .bottom-brand img {
