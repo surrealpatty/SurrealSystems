@@ -36,7 +36,7 @@
       max-width: 1100px;
       padding: 20px 20px 24px;
       flex: 1 0 auto;            /* take remaining height so footer sits at bottom */
-      position: relative;
+      position: relative;        /* for the bottom logo badge */
     }
 
     .brand-row {
@@ -53,6 +53,7 @@
       width: 10px;
       height: 10px;
       border-radius: 999px;
+      /* gradient dot like your screenshot */
       background: linear-gradient(135deg, #22c55e, #3b82f6);
     }
 
@@ -236,17 +237,18 @@
     }
 
     /* =======================
-       BOTTOM-RIGHT BRAND BADGE
+       BOTTOM-CENTER BRAND BADGE
     ======================== */
     .bottom-brand {
-      position: fixed; /* Ensures the logo stays in the fixed position */
-      right: 30px; /* Distance from the right edge */
-      bottom: 30px; /* Distance from the bottom edge */
+      position: absolute;
+      left: 50%;
+      bottom: 26px;
+      transform: translateX(-50%);
       text-align: center;
       opacity: 0.28;
       z-index: 10;
       transition: opacity 0.2s ease, transform 0.2s ease;
-      pointer-events: none; /* So it doesn't block clicks */
+      pointer-events: none; /* so it never blocks clicks */
     }
 
     .bottom-brand img {
@@ -270,7 +272,7 @@
 
     .bottom-brand:hover {
       opacity: 0.36;
-      transform: translateY(-2px);
+      transform: translateX(-50%) translateY(-2px);
     }
 
     /* =======================
@@ -413,7 +415,7 @@
       </section>
     </div>
 
-    <!-- Bottom-right brand badge with CC logo + CodeCrowds text -->
+    <!-- Bottom-center brand badge with CC logo + CodeCrowds text -->
     <div class="bottom-brand">
       <img src="/codecrowds-cc-logo.png" alt="CodeCrowds logo" />
       <div class="bottom-brand-text">CODECROWDS</div>
