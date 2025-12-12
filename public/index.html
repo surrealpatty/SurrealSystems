@@ -237,28 +237,47 @@
     }
 
     /* =======================
-       BOTTOM-RIGHT LOGO IN BLANK SPACE
+       BOTTOM-CENTER BRAND BADGE
     ======================== */
     .bottom-brand {
       position: absolute;
-      right: 16px;
-      bottom: 16px;
-      opacity: 0.26;
+      left: 50%;
+      bottom: 10%; /* Adjusted from the bottom of the page */
+      transform: translateX(-50%);
+      text-align: center;
+      opacity: 0.28;
       z-index: 10;
       transition: opacity 0.2s ease, transform 0.2s ease;
       pointer-events: none; /* so it never blocks clicks */
     }
 
     .bottom-brand img {
-      width: 120px;
+      width: 160px;
       height: auto;
       display: block;
-      filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.8));
+      filter: drop-shadow(0 0 24px rgba(59, 130, 246, 0.85));
     }
 
     .bottom-brand:hover {
       opacity: 0.36;
-      transform: translateY(-2px);
+      transform: translateX(-50%) translateY(50%) scale(1.1);
+    }
+
+    .bottom-brand-text {
+      margin-top: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      background: linear-gradient(90deg, #4e54c8, #00aaff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .bottom-brand:hover {
+      opacity: 0.36;
+      transform: translateX(-50%) translateY(50%) scale(1.1);
     }
 
     /* =======================
@@ -401,9 +420,10 @@
       </section>
     </div>
 
-    <!-- Bottom-right logo badge -->
+    <!-- Bottom-center brand badge with CC logo + CodeCrowds text -->
     <div class="bottom-brand">
       <img src="/codecrowds-cc-logo.png" alt="CodeCrowds logo" />
+      <div class="bottom-brand-text">CODECROWDS</div>
     </div>
   </div>
 
