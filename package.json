@@ -1,7 +1,7 @@
 {
-  "name": "codecrowds",
+  "name": "surrealsystems",
   "version": "1.0.0",
-  "description": "CodeCrowds is a Fiverr-like platform where users can sell their skills, post services, and hire others for tasks.",
+  "description": "SurrealSystems is where great minds come together and ideas become realities.",
   "main": "src/index.js",
   "type": "commonjs",
   "scripts": {
@@ -51,7 +51,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/surrealpatty/CodeCrowds.git"
+    "url": "https://github.com/surrealpatty/SurrealSystems.git"
   },
   "keywords": [
     "fiverr",
@@ -65,7 +65,7 @@
   "author": "Patty U.",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/surrealpatty/CodeCrowds/issues"
+    "url": "https://github.com/surrealpatty/SurrealSystems/issues"
   },
-  "homepage": "https://github.com/surrealpatty/CodeCrowds#readme"
+  "homepage": "https://github.com/surrealpatty/SurrealSystemss#readme"
 }
