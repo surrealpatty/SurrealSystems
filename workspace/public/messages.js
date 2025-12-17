@@ -1,6 +1,6 @@
 /* public/messages.js */
 (() => {
-  const AUTO_HOST = "codecrowds.onrender.com";
+  const AUTO_HOST = "Surreal Systems.onrender.com";
 
   // choose API base URL intelligently
   const API_URL =

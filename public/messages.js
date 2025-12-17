@@ -10,7 +10,7 @@
   // -----------------------------
   // API base URL helper (Render vs local)
   // -----------------------------
-  const AUTO_HOST = "codecrowds.onrender.com";
+  const AUTO_HOST = "Surreal Systems.onrender.com";
 
   const API_URL =
     window.API_URL ||
@@ -659,7 +659,7 @@
 
     const subject = serviceTitleAttr
       ? `RE "${serviceTitleAttr}"`
-      : "Message from CodeCrowds";
+      : "Message from Surreal Systems";
 
     const payload = {
       receiverId: partnerId,

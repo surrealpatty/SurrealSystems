@@ -5,8 +5,8 @@ $ErrorActionPreference = 'Stop'
 
 # Config
 $baseUrl = 'http://localhost:10002'
-$dbContainer = 'codecrowds-db-1'
-$dbName = 'codecrowds_test'
+$dbContainer = 'Surreal Systems-db-1'
+$dbName = 'Surreal Systems_test'
 
 # Make unique suffix so we don't clash with prior runs
 $suffix = (Get-Date -UFormat %s)

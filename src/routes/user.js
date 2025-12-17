@@ -102,7 +102,7 @@ function sendError(res, message = 'Something went wrong', status = 500, details)
 }
 
 /* ------------------ Cookie settings ------------------ */
-const COOKIE_NAME = 'codecrowds_token';
+const COOKIE_NAME = 'Surreal Systems_token';
 const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day
 function cookieOptions() {
   return {

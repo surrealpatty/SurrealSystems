@@ -1,9 +1,9 @@
 # create-docker-files.ps1
-# Run this from the repo root (C:\Users\Patty\Desktop\Surreal Systems\CodeCrowds)
+# Run this from the repo root (C:\Users\Patty\Desktop\Surreal Systems\Surreal Systems)
 # It writes Dockerfile, docker-entrypoint.sh, and docker-compose.yml
 
 $DockerfileContent = @'
-# Dockerfile for CodeCrowds (production-friendly, installs dev deps at build time)
+# Dockerfile for Surreal Systems (production-friendly, installs dev deps at build time)
 FROM node:20-alpine
 
 WORKDIR /app

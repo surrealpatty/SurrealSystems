@@ -11,11 +11,11 @@ module.exports = function authenticateToken(req, res, next) {
     if (authHeader && typeof authHeader === 'string' && authHeader.startsWith('Bearer ')) {
       token = authHeader.slice('Bearer '.length).trim();
     } else {
-      // Fallback: try to read cookie named 'codecrowds_token' from Cookie header
+      // Fallback: try to read cookie named 'Surreal Systems_token' from Cookie header
       // (we avoid adding cookie-parser as a dependency and parse the header directly)
       const cookieHeader = req.headers.cookie || '';
       if (cookieHeader && typeof cookieHeader === 'string') {
-        const m = cookieHeader.match(/(?:^|;\s*)codecrowds_token=([^;]+)/);
+        const m = cookieHeader.match(/(?:^|;\s*)Surreal Systems_token=([^;]+)/);
         if (m && m[1]) {
           try {
             token = decodeURIComponent(m[1]);

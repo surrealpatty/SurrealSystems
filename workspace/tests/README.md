@@ -1,4 +1,4 @@
-# Integration tests — CodeCrowds
+# Integration tests — Surreal Systems
 
 This folder contains integration tests that exercise the main API flows.
 

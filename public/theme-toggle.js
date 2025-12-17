@@ -2,7 +2,7 @@
 // Handles light/dark mode switching using :root[data-theme]
 
 (function () {
-  const STORAGE_KEY = "codecrowds-theme";
+  const STORAGE_KEY = "Surreal Systems-theme";
   const root = document.documentElement;
 
   // Look for any checkbox with data-theme-toggle (you can have more than one)

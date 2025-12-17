@@ -192,7 +192,7 @@
       const friendly = makeFriendlyError(e);
       servicesList.innerHTML = `<p class="error">Failed to load services: ${esc(friendly)}</p>`;
       showDiag(
-        "Failed to load services. If you see CORS errors in the console, update CORS_ALLOWED_ORIGINS to include your frontend origin (e.g. https://codecrowds.onrender.com).",
+        "Failed to load services. If you see CORS errors in the console, update CORS_ALLOWED_ORIGINS to include your frontend origin (e.g. https://Surreal Systems.onrender.com).",
       );
     }
   }

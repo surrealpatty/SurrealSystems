@@ -1,5 +1,5 @@
 /* ============================================================================ 
-  CodeCrowds – shared client helpers (improved)
+  Surreal Systems – shared client helpers (improved)
 ============================================================================= */
 
 /* =============================== Auth keys =============================== */
@@ -8,7 +8,7 @@ const USER_ID_KEY = "userId";
 
 /* =============================== Theme keys ============================== */
 /* Single global theme key used on all pages (profile, services, messages, home) */
-const THEME_KEY = "codecrowds-theme";
+const THEME_KEY = "Surreal Systems-theme";
 
 /* ---------- Theme helpers ---------- */
 function getTheme() {

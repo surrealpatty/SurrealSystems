@@ -1,4 +1,4 @@
-# Dockerfile for CodeCrowds (production-friendly, installs dev deps at build time)
+# Dockerfile for Surreal Systems (production-friendly, installs dev deps at build time)
 FROM node:20-alpine
 
 WORKDIR /app

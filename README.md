@@ -1,6 +1,6 @@
-﻿# 🌐 CodeCrowds
+﻿# 🌐 Surreal Systems
 
-**CodeCrowds** is a Fiverr-like platform where users can sell their skills, post services, and hire others for tasks.  
+**Surreal Systems** is a Fiverr-like platform where users can sell their skills, post services, and hire others for tasks.  
 Built with **Node.js, Express, Sequelize**, and **PostgreSQL**, it connects freelancers and clients in a lightweight, modern web app.
 
 ---
@@ -41,7 +41,7 @@ Built with **Node.js, Express, Sequelize**, and **PostgreSQL**, it connects free
 ### 1️⃣ Clone the repository
 
 ```bash
-git clone https://github.com/surrealpatty/CodeCrowds.git
-cd CodeCrowds
+git clone https://github.com/surrealpatty/Surreal Systems.git
+cd Surreal Systems
 npm install
 ```

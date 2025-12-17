@@ -38,8 +38,8 @@ function baseConfig(envDbName) {
 }
 
 module.exports = {
-  development: baseConfig('codecrowds'),
-  test: baseConfig('codecrowds_test'),
+  development: baseConfig('Surreal Systems'),
+  test: baseConfig('Surreal Systems_test'),
   production: {
     url: process.env.DATABASE_URL,
     dialectOptions: dialectOptions(),
