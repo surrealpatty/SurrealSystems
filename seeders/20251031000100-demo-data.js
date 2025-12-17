@@ -1,4 +1,4 @@
-ï»¿/* eslint-disable no-console, node/no-extraneous-require, node/no-missing-require, no-process-exit */
+/* eslint-disable no-console, node/no-extraneous-require, node/no-missing-require, no-process-exit */
 'use strict';
 
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
         username: 'alice',
         email: 'alice@example.com',
         password: pwHash,
-        description: 'Alice â€” frontend reviewer',
+        description: 'Alice — frontend reviewer',
         tier: 'free',
         stripecustomerid: null,
         createdAt: now,
@@ -32,7 +32,7 @@ module.exports = {
         username: 'bob',
         email: 'bob@example.com',
         password: pwHash,
-        description: 'Bob â€” full-stack freelancer',
+        description: 'Bob — full-stack freelancer',
         tier: 'paid',
         stripecustomerid: null,
         createdAt: now,
@@ -42,7 +42,7 @@ module.exports = {
         username: 'carol',
         email: 'carol@example.com',
         password: pwHash,
-        description: 'Carol â€” early tester',
+        description: 'Carol — early tester',
         tier: 'free',
         stripecustomerid: null,
         createdAt: now,

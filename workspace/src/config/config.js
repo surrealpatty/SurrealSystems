@@ -35,8 +35,8 @@ function baseConfig(envDbName) {
 }
 
 module.exports = {
-  development: baseConfig('Surreal Systems'),
-  test: baseConfig('Surreal Systems_test'),
+  development: baseConfig('surrealsystems'),
+  test: baseConfig('surrealsystems_test'),
   production: {
     url: process.env.DATABASE_URL,
     dialectOptions: dialectOptions(),

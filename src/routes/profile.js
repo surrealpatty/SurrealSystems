@@ -1,4 +1,4 @@
-const API_URL = 'https://Surreal Systems.onrender.com';
+const API_URL = 'https://surrealsystems.onrender.com';
 
 // Load user info from localStorage
 const userId = localStorage.getItem('userId');

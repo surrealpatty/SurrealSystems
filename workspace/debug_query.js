@@ -1,4 +1,4 @@
-﻿// debug_query.js
+// debug_query.js
 const models = require('./src/models');
 const { sequelize } = models;
 const { QueryTypes } = require('sequelize');

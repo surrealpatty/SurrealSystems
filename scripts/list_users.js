@@ -1,4 +1,4 @@
-﻿/*
+/*
   scripts/list_users.js
   Lists last 10 users (id, username, email, tier, createdAt)
 */

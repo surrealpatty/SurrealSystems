@@ -1,5 +1,5 @@
-﻿/*
-  config/config.js — used by sequelize-cli
+/*
+  config/config.js � used by sequelize-cli
   Reads env vars and auto-detects SSL for Render/managed PG.
 */
 require('dotenv').config();
@@ -38,8 +38,8 @@ function baseConfig(envDbName) {
 }
 
 module.exports = {
-  development: baseConfig('Surreal Systems'),
-  test: baseConfig('Surreal Systems_test'),
+  development: baseConfig('surrealsystems'),
+  test: baseConfig('surrealsystems_test'),
   production: {
     url: process.env.DATABASE_URL,
     dialectOptions: dialectOptions(),

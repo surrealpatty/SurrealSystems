@@ -1,4 +1,4 @@
-﻿/* eslint-disable no-empty */
+/* eslint-disable no-empty */
 // debug_services.js
 require('dotenv').config();
 const { sequelize } = require('./src/config/database');
@@ -9,7 +9,7 @@ const models = require('./src/models');
   try {
     console.log('== DEBUG: connecting to DB with sequelize ==');
     await sequelize.authenticate();
-    console.log('✅ DB connected (sequelize.authenticate OK)\n');
+    console.log('? DB connected (sequelize.authenticate OK)\n');
 
     // Raw SQL rows
     const raw = await sequelize.query(
@@ -32,7 +32,7 @@ const models = require('./src/models');
       console.log('No user_id values found in those service rows.\n');
     }
 
-    // ORM query (Sequelize + association) — show owner if attached
+    // ORM query (Sequelize + association) � show owner if attached
     console.log('== ORM result: Service.findAll(...) with owner association ==');
     const orm = await models.Service.findAll({
       limit: 20,

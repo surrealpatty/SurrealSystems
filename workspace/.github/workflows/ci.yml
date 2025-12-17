@@ -1,4 +1,4 @@
-﻿name: CI
+name: CI
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
       postgres:
         image: postgres:15
         env:
-          POSTGRES_DB: Surreal Systems_test
+          POSTGRES_DB: surrealsystems_test
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
         ports:
@@ -60,7 +60,7 @@ jobs:
 
       - name: Configure DB & secrets for CI
         run: |
-          echo "DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/Surreal Systems_test" >> $GITHUB_ENV
+          echo "DATABASE_URL=postgres://postgres:postgres@127.0.0.1:5432/surrealsystems_test" >> $GITHUB_ENV
 
       - name: Ensure JWT secret (for tests)
         # Always run, and set a test default if no repo secret is present

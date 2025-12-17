@@ -1,4 +1,4 @@
-﻿require('dotenv').config(); // load .env if present
+require('dotenv').config(); // load .env if present
 
 (async () => {
   try {

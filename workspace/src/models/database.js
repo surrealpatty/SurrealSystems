@@ -34,7 +34,7 @@ if (process.env.DATABASE_URL) {
     !!process.env.DATABASE_URL; // defensive: if URL existed we'd have used it above
 
   sequelize = new Sequelize(
-    process.env.DB_NAME || 'Surreal Systems',
+    process.env.DB_NAME || 'surrealsystems',
     process.env.DB_USER || 'postgres',
     process.env.DB_PASSWORD || null,
     {

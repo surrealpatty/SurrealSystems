@@ -1,4 +1,4 @@
-﻿const m = require('./src/models');
+const m = require('./src/models');
 const { QueryTypes } = require('sequelize');
 (async () => {
   try {

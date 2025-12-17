@@ -1,4 +1,4 @@
-﻿/* eslint-disable no-empty */
+/* eslint-disable no-empty */
 // scripts/make-paid.js
 // Usage: node scripts/make-paid.js <userId> [status] [months]
 // Example: node scripts/make-paid.js 6 active 1

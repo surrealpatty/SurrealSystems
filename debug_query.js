@@ -1,4 +1,4 @@
-﻿/* eslint-disable no-empty */
+/* eslint-disable no-empty */
 // debug_query.js
 const models = require('./src/models');
 const { sequelize } = models;

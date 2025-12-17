@@ -1,7 +1,7 @@
 {
-  "name":"Surreal Systems-workspace",
+  "name":"surrealsystems-workspace",
   "version": "1.0.0",
-  "description": "Surreal Systems is a Fiverr-like platform where users can sell their skills, post services, and hire others for tasks.",
+  "description": "surrealsystems is a Fiverr-like platform where users can sell their skills, post services, and hire others for tasks.",
   "main": "src/index.js",
   "type": "commonjs",
   "scripts": {
@@ -45,7 +45,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/surrealpatty/Surreal Systems.git"
+    "url": "https://github.com/surrealpatty/surrealsystems.git"
   },
   "keywords": [
     "fiverr",
@@ -59,9 +59,9 @@
   "author": "Patty U.",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/surrealpatty/Surreal Systems/issues"
+    "url": "https://github.com/surrealpatty/surrealsystems/issues"
   },
-  "homepage": "https://github.com/surrealpatty/Surreal Systems#readme"
+  "homepage": "https://github.com/surrealpatty/surrealsystems#readme"
 }
 
 

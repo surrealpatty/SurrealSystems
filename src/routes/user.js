@@ -1,4 +1,4 @@
-ï»¿/* eslint-disable no-unused-vars */
+/* eslint-disable no-unused-vars */
 /* eslint-disable no-empty */
 // src/routes/user.js
 const express = require('express');
@@ -10,7 +10,7 @@ try {
 } catch (e) {
   try {
     bcrypt = require('bcryptjs');
-    console.warn('bcrypt not available â€” falling back to bcryptjs');
+    console.warn('bcrypt not available — falling back to bcryptjs');
   } catch (e2) {
     console.error('No bcrypt implementation available. Install "bcrypt" or "bcryptjs".');
     throw e2;
@@ -102,7 +102,7 @@ function sendError(res, message = 'Something went wrong', status = 500, details)
 }
 
 /* ------------------ Cookie settings ------------------ */
-const COOKIE_NAME = 'Surreal Systems_token';
+const COOKIE_NAME = 'surrealsystems_token';
 const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000; // 1 day
 function cookieOptions() {
   return {
@@ -207,7 +207,7 @@ router.post(
         where: email ? { email } : { username },
       });
 
-      // Debug logging (safe) â€” helpful if login fails. Remove or lower log level in production.
+      // Debug logging (safe) — helpful if login fails. Remove or lower log level in production.
       console.info('LOGIN ATTEMPT', {
         by: email ? 'email' : 'username',
         identifier: email || username,

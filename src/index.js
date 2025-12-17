@@ -1,4 +1,4 @@
-﻿// src/index.js
+// src/index.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -74,7 +74,7 @@ app.disable('x-powered-by');
 
 if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
   console.warn(
-    '⚠️ JWT_SECRET is not set. Authentication will fail when creating or verifying tokens.',
+    '?? JWT_SECRET is not set. Authentication will fail when creating or verifying tokens.',
   );
 }
 
@@ -114,7 +114,7 @@ if (allowedOrigins.length === 0 && process.env.FRONTEND_URL) {
     const f = normalizeOriginString(process.env.FRONTEND_URL || '');
     if (f) {
       allowedOrigins.push(f);
-      console.info('No CORS_ALLOWED_ORIGINS configured — added FRONTEND_URL to allowedOrigins:', f);
+      console.info('No CORS_ALLOWED_ORIGINS configured � added FRONTEND_URL to allowedOrigins:', f);
     }
   } catch (e) {
     /* ignore parse errors */
@@ -136,7 +136,7 @@ console.info('CORS allowedOrigins:', allowedOrigins.length ? allowedOrigins : '[
 
 if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
   console.warn(
-    '⚠️ CORS_ALLOWED_ORIGINS is empty while NODE_ENV=production — this will block browser requests from other origins.',
+    '?? CORS_ALLOWED_ORIGINS is empty while NODE_ENV=production � this will block browser requests from other origins.',
   );
 }
 
@@ -269,7 +269,7 @@ const PORT = process.env.PORT || 10000;
 async function startServer() {
   // DB connection with retries
   await testConnection();
-  console.log('✅ Database connected');
+  console.log('? Database connected');
 
   // Decide whether to ALTER or just SYNC, based on env.
   const useAlter =
@@ -277,16 +277,16 @@ async function startServer() {
     (process.env.DB_ALTER === 'true' || process.env.DB_SYNC_ALTER === 'true');
 
   if (useAlter) {
-    console.log('⚠️ Running sequelize.sync({ alter: true }) - development only');
+    console.log('?? Running sequelize.sync({ alter: true }) - development only');
     await sequelize.sync({ alter: true });
   } else {
-    console.log('ℹ️ Running sequelize.sync() to ensure tables exist');
+    console.log('?? Running sequelize.sync() to ensure tables exist');
     await sequelize.sync();
   }
 
   if (require.main === module) {
     const server = app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
+      console.log(`?? Server running on http://localhost:${PORT}`);
     });
     return server;
   }
@@ -306,7 +306,7 @@ module.exports = { app, startServer };
 
 if (require.main === module) {
   startServer().catch((err) => {
-    console.error('❌ DB init error:', err && err.message ? err.message : err);
+    console.error('? DB init error:', err && err.message ? err.message : err);
     throw new Error('Exiting with status 1');
   });
 }

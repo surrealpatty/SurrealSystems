@@ -1,4 +1,4 @@
-﻿/* eslint-disable no-console, node/no-extraneous-require, node/no-missing-require, no-process-exit */
+/* eslint-disable no-console, node/no-extraneous-require, node/no-missing-require, no-process-exit */
 'use strict';
 
 const bcrypt = require('bcrypt');

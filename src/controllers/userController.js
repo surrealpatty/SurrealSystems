@@ -1,4 +1,4 @@
-﻿// src/controllers/userController.js
+// src/controllers/userController.js
 const { User, Service } = require('../models');
 const bcrypt = require('bcryptjs'); // use bcryptjs to avoid native build issues
 const { promisify } = require('util');
@@ -59,7 +59,7 @@ const register = async (req, res) => {
       expiresIn: '1d',
     });
 
-    // ✓ Always return token+user on success
+    // ? Always return token+user on success
     res.status(201).json({ token, user: toSafeUser(user) });
   } catch (err) {
     console.error('Register error:', err);
