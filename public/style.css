@@ -498,3 +498,35 @@ button[style*="background"],
   color: #111827 !important;
   border-color: #e2e8f0 !important;
 }
+/* ================================
+   FINAL: Color-only overrides
+   (keep layout the same)
+================================ */
+
+/* Missing token used by other pages */
+:root{
+  --accent-soft: rgba(124, 58, 237, 0.14);
+  --accent-soft-2: rgba(168, 85, 247, 0.14);
+}
+
+/* Force the SAME Surreal purple background on ALL pages (beats page <style>) */
+html, body{
+  background: radial-gradient(
+    circle at top left,
+    #1a0b2e 0,
+    #0b0313 55%,
+    #07020e 75%,
+    #000000 100%
+  ) !important;
+}
+
+/* Light mode background (still Surreal-purple, no blue) */
+:root[data-theme="light"] html,
+:root[data-theme="light"] body{
+  background: radial-gradient(
+    circle at top,
+    #f5f0ff 0,
+    #ede9fe 45%,
+    #ffffff 100%
+  ) !important;
+}
