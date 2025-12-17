@@ -6,60 +6,19 @@
   <title>Surreal Systems – Register</title>
   <meta name="description" content="Create your Surreal Systems account." />
 
-  <!-- IMPORTANT: now the page uses your global theme -->
-  <link rel="stylesheet" href="style.css?v=1" />
+  <!-- ✅ Force correct file + bust cache -->
+  <link rel="stylesheet" href="/style.css?v=2" />
 
-  <!-- Layout-only page tweaks (NO colours here) -->
   <style>
-    body{
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-    }
+    body{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;}
+    .page{width:100%;max-width:1100px;padding:20px 20px 24px;flex:1 0 auto;}
+    .brand-row{display:flex;align-items:center;gap:8px;margin-bottom:20px;font-weight:600;font-size:1rem;color:var(--text);}
+    .brand-dot{width:10px;height:10px;border-radius:999px;background:linear-gradient(135deg,var(--brand-a),var(--brand-b));box-shadow:0 0 18px rgba(192,132,252,0.35);}
+    .layout{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:start;}
+    .pitch,.card{border-radius:24px;}
+    .pitch-title{margin:0 0 8px;}
+    .pitch-subtitle{margin:0 0 20px;}
 
-    .page{
-      width:100%;
-      max-width:1100px;
-      padding:20px 20px 24px;
-      flex:1 0 auto;
-    }
-
-    .brand-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:20px;
-      font-weight:600;
-      font-size:1rem;
-      color:var(--text);
-    }
-
-    .brand-dot{
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-      box-shadow: 0 0 18px rgba(192,132,252,0.35);
-    }
-
-    .layout{
-      display:grid;
-      grid-template-columns:1fr 1fr;
-      gap:28px;
-      align-items:start;
-    }
-
-    /* Make these sections use your global .card look */
-    .pitch,
-    .card{
-      border-radius:24px;
-    }
-
-    .pitch-title{ margin:0 0 8px; }
-    .pitch-subtitle{ margin:0 0 20px; }
-
-    /* Keep the “items” as mini cards using theme tokens */
     .pitch-item{
       background: var(--surface-2);
       border: 1px solid var(--border);
@@ -67,8 +26,8 @@
       padding:12px 14px;
       margin-bottom:10px;
     }
-    .pitch-item h3{ margin:0 0 4px; }
-    .pitch-item p{ margin:0; }
+    .pitch-item h3{margin:0 0 4px;}
+    .pitch-item p{margin:0;}
 
     .badge-premium{
       margin-top:8px;
@@ -83,14 +42,12 @@
       color: var(--text);
     }
 
-    .field{ margin-top:10px; display:flex; flex-direction:column; gap:6px; }
-    .field-label-row{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; }
-    .hint{ font-size:0.78rem; color:var(--muted); }
+    .field{margin-top:10px;display:flex;flex-direction:column;gap:6px;}
+    .field-label-row{display:flex;justify-content:space-between;align-items:baseline;gap:8px;}
+    .hint{font-size:0.78rem;color:var(--muted);}
+    .password-row{display:flex;gap:10px;align-items:center;}
+    .password-row input{flex:1;}
 
-    .password-row{ display:flex; gap:10px; align-items:center; }
-    .password-row input{ flex:1; }
-
-    /* make toggle button match theme without hardcoding colours */
     .toggle-password{
       padding:9px 12px;
       border-radius:999px;
@@ -101,19 +58,12 @@
       font-size:0.85rem;
     }
 
-    .meta-row{
-      margin-top:4px;
-      display:flex;
-      justify-content:flex-end;
-      font-size:0.78rem;
-      color:var(--muted);
-    }
-
-    .w-full{ width:100%; }
+    .meta-row{margin-top:4px;display:flex;justify-content:flex-end;font-size:0.78rem;color:var(--muted);}
+    .w-full{width:100%;}
 
     @media (max-width:960px){
-      .layout{ grid-template-columns:1fr; }
-      .card{ margin-top:16px; }
+      .layout{grid-template-columns:1fr;}
+      .card{margin-top:16px;}
     }
   </style>
 </head>
@@ -126,12 +76,9 @@
     </div>
 
     <div class="layout">
-      <!-- LEFT COLUMN -->
       <section class="card pitch">
         <h1 class="pitch-title">Offer your coding skills to the world.</h1>
-        <p class="pitch-subtitle">
-          Create posts, connect with developers, and get noticed by clients worldwide.
-        </p>
+        <p class="pitch-subtitle">Create posts, connect with developers, and get noticed by clients worldwide.</p>
 
         <div class="pitch-item">
           <h3>Offer Your Services</h3>
@@ -150,7 +97,6 @@
         </div>
       </section>
 
-      <!-- RIGHT COLUMN -->
       <section class="card" aria-labelledby="register-heading">
         <h2 id="register-heading">Create your account</h2>
         <p>Join Surreal Systems to create posts, manage your messages, and grow your projects.</p>
@@ -161,28 +107,12 @@
               <label for="registerUsername">Username</label>
               <span class="hint">3–32 characters</span>
             </div>
-            <input
-              id="registerUsername"
-              name="username"
-              type="text"
-              placeholder="e.g. dev_ally"
-              autocomplete="username"
-              required
-              minlength="3"
-              maxlength="32"
-            />
+            <input id="registerUsername" name="username" type="text" placeholder="e.g. dev_ally" autocomplete="username" required minlength="3" maxlength="32" />
           </div>
 
           <div class="field">
             <label for="registerEmail">Email</label>
-            <input
-              id="registerEmail"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              autocomplete="email"
-              required
-            />
+            <input id="registerEmail" name="email" type="email" placeholder="you@example.com" autocomplete="email" required />
           </div>
 
           <div class="field">
@@ -192,18 +122,8 @@
             </div>
 
             <div class="password-row">
-              <input
-                id="registerPassword"
-                name="password"
-                type="password"
-                placeholder="Create a strong password"
-                autocomplete="new-password"
-                required
-                minlength="8"
-              />
-              <button type="button" class="toggle-password" id="togglePassword" aria-pressed="false">
-                Show
-              </button>
+              <input id="registerPassword" name="password" type="password" placeholder="Create a strong password" autocomplete="new-password" required minlength="8" />
+              <button type="button" class="toggle-password" id="togglePassword" aria-pressed="false">Show</button>
             </div>
 
             <div id="passwordStrength" class="hint" aria-live="polite">
@@ -212,27 +132,16 @@
           </div>
 
           <div class="field">
-            <label for="registerDescription">
-              Tell us about yourself <span class="hint">(optional)</span>
-            </label>
-            <textarea
-              id="registerDescription"
-              name="description"
-              rows="4"
-              maxlength="400"
-              placeholder="What do you offer? What are your skills?"
-            ></textarea>
+            <label for="registerDescription">Tell us about yourself <span class="hint">(optional)</span></label>
+            <textarea id="registerDescription" name="description" rows="4" maxlength="400" placeholder="What do you offer? What are your skills?"></textarea>
             <div class="meta-row"><span id="descCounter">0 / 400</span></div>
           </div>
 
-          <!-- Uses your global button gradient -->
           <button id="submitBtn" class="w-full" type="submit">Create account</button>
 
           <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
 
-          <p class="subtext">
-            Already have an account? <a href="login.html">Log in</a>
-          </p>
+          <p class="subtext">Already have an account? <a href="login.html">Log in</a></p>
         </form>
       </section>
     </div>

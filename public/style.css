@@ -443,3 +443,57 @@ button,
 @media (max-width: 960px){
   .bottom-brand{ display:none; }
 }
+/* =========================================================
+   ABSOLUTE FORCE PURPLE (wins vs older css + most inline)
+   Put at VERY BOTTOM of public/style.css
+   ========================================================= */
+
+button,
+a.btn,
+.btn,
+input[type="button"],
+input[type="submit"],
+.edit-btn,
+.delete-btn,
+.create-btn,
+.message-btn,
+.reply-btn,
+.send-btn,
+.tab-btn,
+.received,
+.sent,
+#editProfileBtn,
+#messageBtn,
+#createServiceBtn,
+#refreshBtn {
+  background: var(--btn-gradient) !important;
+  background-image: var(--btn-gradient) !important;
+  color: var(--btn-text) !important;
+  border-color: transparent !important;
+}
+
+/* if any buttons are using background-color directly */
+button[style*="background"],
+.btn[style*="background"]{
+  background: var(--btn-gradient) !important;
+  background-image: var(--btn-gradient) !important;
+  color: var(--btn-text) !important;
+}
+
+/* Common “secondary” pills */
+.btn-secondary,
+.btn-outline,
+.pill,
+.pill-btn {
+  border: 1px solid var(--border) !important;
+  background: rgba(15,23,42,0.35) !important;
+  color: var(--text) !important;
+}
+:root[data-theme="light"] .btn-secondary,
+:root[data-theme="light"] .btn-outline,
+:root[data-theme="light"] .pill,
+:root[data-theme="light"] .pill-btn {
+  background: #ffffff !important;
+  color: #111827 !important;
+  border-color: #e2e8f0 !important;
+}
