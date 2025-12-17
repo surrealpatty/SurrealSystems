@@ -8,25 +8,26 @@
 
   <style>
     /* =======================
-       PAGE BACKGROUND
+       PAGE BACKGROUND (purple)
     ======================== */
     body {
       margin: 0;
-      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
-        "Segoe UI", sans-serif;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       min-height: 100vh;
+
       background: radial-gradient(
         circle at top left,
-        #111827 0,
-        #020617 55%,
-        #020617 75%,
+        #1a0b2e 0,
+        #0b0313 55%,
+        #07020e 75%,
         #000000 100%
       );
+
       display: flex;
-      flex-direction: column;     /* stack page + footer vertically */
-      align-items: center;        /* center page horizontally */
+      flex-direction: column;
+      align-items: center;
       justify-content: flex-start;
-      color: #e5e7eb;
+      color: #f1eefb;
     }
 
     /* =======================
@@ -36,7 +37,7 @@
       width: 100%;
       max-width: 1100px;
       padding: 20px 20px 24px;
-      flex: 1 0 auto;            /* take remaining height so footer sits at bottom */
+      flex: 1 0 auto;
     }
 
     .brand-row {
@@ -46,104 +47,111 @@
       margin-bottom: 20px;
       font-weight: 600;
       font-size: 1rem;
-      color: #e5e7eb;
+      color: #f1eefb;
     }
 
     .brand-dot {
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      background: linear-gradient(135deg, #22c55e, #3b82f6);
+
+      /* ✅ purple dot */
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      box-shadow: 0 0 18px rgba(192, 132, 252, 0.35);
     }
 
-    .brand-text {
-      letter-spacing: 0.01em;
-    }
+    .brand-text { letter-spacing: 0.01em; }
 
     .layout {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 28px;
-      /* let each column size itself; no stretching */
       align-items: start;
     }
 
     /* =======================
-       LEFT MARKETING PANEL (same as login)
+       LEFT MARKETING PANEL
     ======================== */
     .pitch {
-      background: rgba(15, 23, 42, 0.95);
+      background: rgba(16, 8, 28, 0.92);
       border-radius: 24px;
       padding: 24px;
       box-shadow: 0 35px 100px rgba(0, 0, 0, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.25);
+      border: 1px solid rgba(186, 160, 210, 0.22);
     }
 
     .pitch-title {
       font-size: 1.9rem;
-      margin-bottom: 8px;
+      margin: 0 0 8px;
+      color: #f1eefb;
     }
 
     .pitch-subtitle {
-      color: #aeb6c4;
-      margin-bottom: 20px;
+      color: rgba(232, 224, 255, 0.72);
+      margin: 0 0 20px;
     }
 
     .pitch-item {
-      background: rgba(10, 15, 32, 0.9);
+      background: rgba(11, 3, 19, 0.85);
       padding: 12px 14px;
       border-radius: 16px;
       margin-bottom: 10px;
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      border: 1px solid rgba(186, 160, 210, 0.16);
       font-size: 0.95rem;
     }
 
     .pitch-item h3 {
       margin: 0 0 4px;
       font-size: 1rem;
+      color: #f1eefb;
+    }
+
+    .pitch-item p {
+      margin: 0;
+      color: rgba(232, 224, 255, 0.78);
     }
 
     .badge-premium {
       margin-top: 8px;
-      background: rgba(99, 102, 241, 0.25);
+      background: rgba(124, 58, 237, 0.22);
+      border: 1px solid rgba(168, 85, 247, 0.25);
       display: inline-flex;
       align-items: center;
       gap: 7px;
       padding: 5px 11px;
       border-radius: 999px;
       font-size: 0.82rem;
+      color: rgba(241, 238, 251, 0.95);
     }
 
     /* =======================
        REGISTER CARD (RIGHT)
-       — tightened so it's shorter
     ======================== */
     .card {
-      background: rgba(15, 23, 42, 0.97);
+      background: rgba(16, 8, 28, 0.94);
       box-shadow: 0 35px 100px rgba(0, 0, 0, 0.9);
-      padding: 20px 22px;  /* was 24px – slightly smaller */
+      padding: 20px 22px;
       border-radius: 24px;
-      border: 1px solid rgba(148, 163, 184, 0.25);
+      border: 1px solid rgba(186, 160, 210, 0.22);
     }
 
     .card h2 {
       margin: 0 0 6px;
       font-size: 1.45rem;
       font-weight: 600;
+      color: #f1eefb;
     }
 
     .card > p {
-      color: #9ba3b4;
+      color: rgba(232, 224, 255, 0.72);
       margin: 0 0 12px;
       font-size: 0.94rem;
     }
 
-    form {
-      margin-top: 6px;
-    }
+    form { margin-top: 6px; }
 
     .field {
-      margin-top: 8px;       /* was 10px */
+      margin-top: 8px;
       display: flex;
       flex-direction: column;
       gap: 5px;
@@ -157,21 +165,19 @@
       gap: 8px;
     }
 
-    .field label {
-      color: #cbd5f5;
-    }
+    .field label { color: rgba(232, 224, 255, 0.92); }
 
     .hint {
       font-size: 0.78rem;
-      color: #9ca3af;
+      color: rgba(184, 169, 214, 0.85);
     }
 
     .field input,
     .field textarea {
-      padding: 9px 13px;     /* slightly smaller */
+      padding: 9px 13px;
       border-radius: 14px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
-      background: #050a18;
+      border: 1px solid rgba(186, 160, 210, 0.40);
+      background: #0b0313;
       color: #ffffff;
       font-size: 0.9rem;
       outline: none;
@@ -179,18 +185,18 @@
 
     .field input::placeholder,
     .field textarea::placeholder {
-      color: #6b7280;
+      color: rgba(184, 169, 214, 0.70);
     }
 
     .field input:focus,
     .field textarea:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 10px rgba(59, 130, 246, 0.55);
+      border-color: rgba(168, 85, 247, 0.90);
+      box-shadow: 0 0 12px rgba(192, 132, 252, 0.55);
     }
 
     .field textarea {
       resize: vertical;
-      min-height: 80px;      /* was 96px */
+      min-height: 80px;
     }
 
     .password-row {
@@ -199,15 +205,13 @@
       align-items: center;
     }
 
-    .password-row input {
-      flex: 1;
-    }
+    .password-row input { flex: 1; }
 
     .toggle-password {
-      background: #020617;
+      background: #0b0313;
       border-radius: 999px;
       padding: 7px 11px;
-      border: 1px solid rgba(148, 163, 184, 0.6);
+      border: 1px solid rgba(186, 160, 210, 0.40);
       cursor: pointer;
       color: #fff;
       font-size: 0.8rem;
@@ -215,40 +219,39 @@
       transition: transform 0.12s ease, background 0.15s ease-in-out;
     }
 
-    .toggle-password:hover {
-      background: #02081f;
-    }
+    .toggle-password:hover { background: #12041f; }
 
     .meta-row {
-      margin-top: 2px;      /* was 4px */
+      margin-top: 2px;
       display: flex;
       justify-content: flex-end;
       font-size: 0.78rem;
-      color: #9ca3af;
+      color: rgba(184, 169, 214, 0.85);
     }
 
     #passwordStrength {
-      margin-top: 2px;      /* was 4px */
+      margin-top: 2px;
       font-size: 0.8rem;
-      color: #9ca3af;
+      color: rgba(184, 169, 214, 0.85);
     }
 
+    /* ✅ PURPLE BUTTON */
     .primary-btn {
       width: 100%;
-      margin-top: 12px;     /* was 14px */
-      padding: 10px 16px;   /* a touch shorter */
-      background-image: linear-gradient(90deg, #3b82f6, #22c55e);
+      margin-top: 12px;
+      padding: 10px 16px;
+      background-image: linear-gradient(90deg, #7c3aed, #a855f7);
       border-radius: 999px;
       border: none;
       cursor: pointer;
       color: #ffffff;
-      font-weight: 600;
+      font-weight: 700;
       font-size: 1rem;
       transition: transform 0.12s ease, filter 0.15s ease;
     }
 
     .primary-btn:hover {
-      filter: brightness(1.05);
+      filter: brightness(1.06);
       transform: translateY(-1px);
     }
 
@@ -258,19 +261,17 @@
     }
 
     .subtext {
-      margin-top: 8px;     /* was 10px */
+      margin-top: 8px;
       font-size: 0.9rem;
-      color: #94a3b8;
+      color: rgba(232, 224, 255, 0.75);
     }
 
     .subtext a {
-      color: #4dabff;
+      color: #c084fc;
       text-decoration: none;
     }
 
-    .subtext a:hover {
-      text-decoration: underline;
-    }
+    .subtext a:hover { text-decoration: underline; }
 
     .message {
       margin-top: 6px;
@@ -278,13 +279,8 @@
       min-height: 1em;
     }
 
-    .message--error {
-      color: #ef4444;
-    }
-
-    .message--success {
-      color: #22c55e;
-    }
+    .message--error { color: #ef4444; }
+    .message--success { color: #22c55e; }
 
     /* =======================
        FOOTER
@@ -294,7 +290,7 @@
       text-align: center;
       padding: 10px 0 14px;
       font-size: 0.85rem;
-      color: #9ca3af;
+      color: rgba(232, 224, 255, 0.62);
     }
 
     .footer-inner {
@@ -306,45 +302,27 @@
        RESPONSIVE
     ======================== */
     @media (max-height: 720px) {
-      .page {
-        padding-top: 12px;
-      }
-
-      .pitch,
-      .card {
-        padding: 18px 18px;
-      }
-
-      .pitch-title {
-        font-size: 1.7rem;
-      }
+      .page { padding-top: 12px; }
+      .pitch, .card { padding: 18px 18px; }
+      .pitch-title { font-size: 1.7rem; }
     }
 
     @media (max-width: 960px) {
-      body {
-        align-items: flex-start;
-      }
-
-      .layout {
-        grid-template-columns: 1fr;
-      }
-
-      .card {
-        margin-top: 16px;
-      }
+      body { align-items: flex-start; }
+      .layout { grid-template-columns: 1fr; }
+      .card { margin-top: 16px; }
     }
   </style>
 </head>
+
 <body>
   <div class="page">
-    <!-- Brand row -->
     <div class="brand-row">
       <span class="brand-dot"></span>
       <span class="brand-text">Surreal Systems</span>
     </div>
 
     <div class="layout">
-      <!-- LEFT COLUMN – SAME AS LOGIN -->
       <section class="pitch">
         <h1 class="pitch-title">Offer your coding skills to the world.</h1>
         <p class="pitch-subtitle">
@@ -358,10 +336,7 @@
 
         <div class="pitch-item">
           <h3>Connect &amp; Collaborate</h3>
-          <p>
-            Rate and interact with other developers, build credibility, and grow your
-            professional network.
-          </p>
+          <p>Rate and interact with other developers, build credibility, and grow your professional network.</p>
         </div>
 
         <div class="pitch-item">
@@ -371,7 +346,6 @@
         </div>
       </section>
 
-      <!-- RIGHT COLUMN – REGISTER -->
       <section class="card" aria-labelledby="register-heading">
         <h2 id="register-heading">Create your account</h2>
         <p>Join Surreal Systems to create posts, manage your messages, and grow your projects.</p>
@@ -382,28 +356,15 @@
               <label for="registerUsername">Username</label>
               <span class="hint">3–32 characters</span>
             </div>
-            <input
-              id="registerUsername"
-              name="username"
-              type="text"
-              placeholder="e.g. dev_ally"
-              autocomplete="username"
-              required
-              minlength="3"
-              maxlength="32"
-            />
+            <input id="registerUsername" name="username" type="text"
+              placeholder="e.g. dev_ally" autocomplete="username"
+              required minlength="3" maxlength="32" />
           </div>
 
           <div class="field">
             <label for="registerEmail">Email</label>
-            <input
-              id="registerEmail"
-              name="email"
-              type="email"
-              placeholder="you@example.com"
-              autocomplete="email"
-              required
-            />
+            <input id="registerEmail" name="email" type="email"
+              placeholder="you@example.com" autocomplete="email" required />
           </div>
 
           <div class="field">
@@ -411,26 +372,15 @@
               <label for="registerPassword">Password</label>
               <span class="hint">At least 8 characters</span>
             </div>
+
             <div class="password-row">
-              <input
-                id="registerPassword"
-                name="password"
-                type="password"
+              <input id="registerPassword" name="password" type="password"
                 placeholder="Create a strong password"
-                autocomplete="new-password"
-                required
-                minlength="8"
-              />
-              <button
-                type="button"
-                class="toggle-password"
-                id="togglePassword"
-                aria-pressed="false"
-                title="Show password"
-              >
-                Show
-              </button>
+                autocomplete="new-password" required minlength="8" />
+              <button type="button" class="toggle-password" id="togglePassword"
+                aria-pressed="false" title="Show password">Show</button>
             </div>
+
             <div id="passwordStrength" aria-live="polite">
               Use at least 8 characters with a mix of letters, numbers, and symbols.
             </div>
@@ -440,39 +390,23 @@
             <label for="registerDescription">
               Tell us about yourself <span class="hint">(optional)</span>
             </label>
-            <textarea
-              id="registerDescription"
-              name="description"
-              rows="4"
-              maxlength="400"
-              placeholder="What do you offer? What are your skills?"
-            ></textarea>
-            <div class="meta-row">
-              <span id="descCounter">0 / 400</span>
-            </div>
+            <textarea id="registerDescription" name="description" rows="4" maxlength="400"
+              placeholder="What do you offer? What are your skills?"></textarea>
+            <div class="meta-row"><span id="descCounter">0 / 400</span></div>
           </div>
 
-          <button id="submitBtn" class="primary-btn" type="submit">
-            Create account
-          </button>
+          <button id="submitBtn" class="primary-btn" type="submit">Create account</button>
 
-          <p
-            id="registerMessage"
-            class="message"
-            role="status"
-            aria-live="polite"
-          ></p>
+          <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
 
           <p class="subtext">
-            Already have an account?
-            <a href="login.html">Log in</a>
+            Already have an account? <a href="login.html">Log in</a>
           </p>
         </form>
       </section>
     </div>
   </div>
 
-  <!-- Shared register / show-password logic -->
   <script src="/register.js" defer></script>
 
   <footer class="site-footer">
