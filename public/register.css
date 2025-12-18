@@ -496,3 +496,50 @@ textarea:focus {
   background: rgba(0, 0, 0, 0.18);
   opacity: 1;
 }
+/* =========================================
+   Register page: remove leftover BLUE accents
+   and match the Login page colours
+========================================= */
+
+/* Big left headline + right panel title -> white */
+.pitch-title,
+.pitch h1,
+.pitch h2,
+.left h1,
+.left h2,
+.card h1,
+.card h2,
+.form-card h1,
+.form-card h2,
+.right h1,
+.right h2,
+h1,
+h2 {
+  color: var(--text) !important;
+  text-shadow: none !important;
+}
+
+/* If any “accent” class is forcing blue, force it purple */
+.accent,
+.highlight,
+.title-accent {
+  color: var(--accent, #c084fc) !important;
+}
+
+/* Make sure helper text isn’t blue */
+small,
+.hint,
+.helper,
+.meta,
+.section-subtle {
+  color: var(--muted) !important;
+}
+
+/* (Optional) focus ring purple, not blue */
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: rgba(124, 58, 237, 0.75) !important;
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25) !important;
+  outline: none !important;
+}
