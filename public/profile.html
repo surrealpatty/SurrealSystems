@@ -14,603 +14,363 @@
       rel="stylesheet"
     />
 
-    <!-- Global styles -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com">
+    <!-- ✅ Global theme first -->
+    <link rel="stylesheet" href="/style.css" />
+    <!-- ✅ Profile layout tweaks (optional if you have profile.css; keep if you do) -->
+    <link rel="stylesheet" href="/profile.css" />
 
     <style>
-      :root {
-        --bg: #020617;
-        --border-subtle: #1f2937;
-        --accent: #3b82f6;
-        --accent-soft: rgba(59, 130, 246, 0.12);
-        --text-main: #e5e7eb;
-        --text-muted: #9ca3af;
-        --radius-xl: 1.25rem;
+      /* Layout-only tweaks that won't fight style.css colors */
+
+      body.dashboard{
+        margin:0;
+        min-height:100vh;
+        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       }
 
-      * {
-        box-sizing: border-box;
+      .profile-wrapper{
+        max-width:1100px;
+        margin:0 auto;
+        padding:24px 16px 40px;
       }
 
-      body.dashboard {
-        margin: 0;
-        min-height: 100vh;
-        font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
-          "Segoe UI", sans-serif;
+      .profile-header{
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        margin-bottom:20px;
       }
 
-      /* BACKGROUND + BASE TEXT COLOR */
-      body.dashboard.profile-dark {
-        background: radial-gradient(
-          circle at top,
-          #1e293b 0,
-          #020617 45%,
-          #000 100%
-        );
-        color: var(--text-main);
+      .profile-brand{
+        display:inline-flex;
+        align-items:center;
+        gap:0.5rem;
+        text-decoration:none;
+        font-weight:600;
+        font-size:1.1rem;
+        color: var(--text);
       }
 
-      body.dashboard.profile-light {
-        background: radial-gradient(
-          circle at top,
-          #eef2ff 0,
-          #e0f2fe 45%,
-          #f9fafb 100%
-        );
-        color: #020617;
-      }
-
-      .profile-wrapper {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 24px 16px 40px;
-      }
-
-      .profile-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-      }
-
-      .profile-brand {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-        font-weight: 600;
-        font-size: 1.1rem;
-      }
-
-      .profile-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 999px;
+      .profile-dot{
+        width:10px;
+        height:10px;
+        border-radius:999px;
         background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
       }
 
-      /* shared pill look - base shape, blur in style.css */
-      .profile-user-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        padding: 0.4rem 0.8rem;
-        border-radius: 999px;
-        border: 1px solid rgba(148, 163, 184, 0.6);
-        font-size: 0.85rem;
+      .profile-user-pill{
+        display:inline-flex;
+        align-items:center;
+        gap:0.5rem;
+        padding:0.4rem 0.8rem;
+        border-radius:999px;
+        border:1px solid var(--border);
+        font-size:0.85rem;
+        background: rgba(15,23,42,0.35);
+        color: var(--text);
+      }
+      :root[data-theme="light"] .profile-user-pill{
+        background:#ffffff;
       }
 
-      .profile-avatar {
-        width: 30px;
-        height: 30px;
-        border-radius: 999px;
+      .profile-avatar{
+        width:30px;
+        height:30px;
+        border-radius:999px;
         background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        color: #020617;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        font-weight:600;
+        color:#ffffff;
       }
 
-      .profile-layout {
-        display: grid;
-        grid-template-columns: 230px minmax(0, 1fr);
-        gap: 20px;
+      .profile-layout{
+        display:grid;
+        grid-template-columns:230px minmax(0,1fr);
+        gap:20px;
       }
 
-      @media (max-width: 820px) {
-        .profile-layout {
-          grid-template-columns: minmax(0, 1fr);
-        }
-
-        .profile-user-pill {
-          display: none;
-        }
+      @media (max-width:820px){
+        .profile-layout{ grid-template-columns:minmax(0,1fr); }
+        .profile-user-pill{ display:none; }
       }
 
-      /* SIDEBAR + CARD - BASE SHAPE ONLY */
-      .sidebar {
-        border-radius: var(--radius-xl);
-        padding: 14px 12px 16px;
-        border: 1px solid var(--border-subtle);
+      /* Use your theme cards */
+      .sidebar{
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        padding:14px 12px 16px;
+      }
+      :root[data-theme="light"] .sidebar{ background: var(--surface); }
+
+      .card{
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--border);
+        background: var(--surface-2);
+        padding:18px 16px 20px;
+        color: var(--text);
+        box-shadow: var(--shadow-1);
+      }
+      :root[data-theme="light"] .card{ background: var(--surface); }
+
+      .sidebar-title{
+        font-size:0.85rem;
+        text-transform:uppercase;
+        letter-spacing:0.08em;
+        margin:0 0 10px;
+        color: var(--muted);
       }
 
-      .card {
-        border-radius: var(--radius-xl);
-        padding: 18px 16px 20px;
-        border: 1px solid var(--border-subtle);
+      .nav-list{
+        list-style:none;
+        padding:0;
+        margin:0;
+        display:flex;
+        flex-direction:column;
+        gap:6px;
       }
 
-      /* DARK MODE FILL */
-      body.profile-dark .sidebar,
-      body.profile-dark .card,
-      body.profile-dark .services-empty,
-      body.profile-dark .profile-service-card,
-      body.profile-dark .settings-item {
-        background: rgba(15, 23, 42, 0.96);
-        color: var(--text-main);
-        border-color: var(--border-subtle);
-      }
-
-      body.profile-dark .services-empty,
-      body.profile-dark .profile-service-card,
-      body.profile-dark .settings-item {
-        background: #020617;
-      }
-
-      /* LIGHT MODE FILL */
-      body.profile-light .sidebar,
-      body.profile-light .card,
-      body.profile-light .services-empty,
-      body.profile-light .profile-service-card,
-      body.profile-light .settings-item {
-        background: #ffffff;
-        color: #020617;
-        border-color: #e2e8f0;
-      }
-
-      body.profile-light .services-empty {
-        background: #f9fafb;
-        color: #4b5563;
-      }
-
-      .sidebar-title {
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-        margin: 0 0 10px;
-      }
-
-      .nav-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-      }
-
-      .nav-link {
-        display: block;
-        padding: 8px 10px;
-        border-radius: 999px;
-        font-size: 0.9rem;
-        text-decoration: none;
-        border: 1px solid transparent;
+      .nav-link{
+        display:block;
+        padding:8px 10px;
+        border-radius:999px;
+        font-size:0.9rem;
+        text-decoration:none;
+        border:1px solid transparent;
+        color: var(--text);
         transition: background 0.15s ease, border-color 0.15s ease;
       }
 
-      body.profile-dark .profile-brand,
-      body.profile-dark .nav-link,
-      body.profile-dark .profile-email {
-        color: var(--text-main);
+      .nav-link:hover{
+        background: rgba(15,23,42,0.25);
+        border-color: var(--border);
+      }
+      :root[data-theme="light"] .nav-link:hover{
+        background:#f5f0ff;
       }
 
-      body.profile-light .profile-brand,
-      body.profile-light .nav-link,
-      body.profile-light .profile-email {
-        color: #111827;
+      .nav-link--active{
+        background: rgba(124,58,237,0.18);
+        border-color: rgba(168,85,247,0.75);
       }
 
-      body.profile-dark .nav-link:hover {
-        background: rgba(15, 23, 42, 0.9);
-        border-color: rgba(55, 65, 81, 0.9);
+      .nav-link--danger{ color:#fecaca; }
+      :root[data-theme="light"] .nav-link--danger{ color:#b91c1c; }
+
+      .content-column{
+        display:flex;
+        flex-direction:column;
+        gap:16px;
       }
 
-      body.profile-light .nav-link:hover {
-        background: #e5edff;
-        border-color: #c7d2fe;
+      .profile-row{ margin-top:8px; margin-bottom:6px; }
+
+      .profile-label{
+        font-size:0.78rem;
+        text-transform:uppercase;
+        letter-spacing:0.06em;
+        color: var(--muted);
       }
 
-      .nav-link--active {
-        background: var(--accent-soft);
-        border-color: rgba(59, 130, 246, 0.8);
+      .profile-value{
+        font-size:0.95rem;
+        font-weight:500;
       }
 
-      body.profile-light .nav-link--active {
-        background: #e0ecff;
-        border-color: #60a5fa;
-        color: #1d4ed8;
+      .profile-row--name .profile-value{
+        font-size:1.25rem;
+        font-weight:700;
+        letter-spacing:-0.01em;
       }
 
-      .nav-link--danger {
-        color: #fecaca;
+      .btn-row{
+        display:flex;
+        flex-wrap:wrap;
+        gap:8px;
+        margin-top:10px;
+        align-items:center;
       }
 
-      body.profile-light .nav-link--danger {
-        color: #b91c1c;
+      /* Use your global .btn button styling */
+      .btn{
+        display:inline-flex;
+        align-items:center;
+        justify-content:center;
+        padding:0.55rem 0.95rem;
+        border-radius:999px;
+        font-size:0.88rem;
+        font-weight:600;
+        cursor:pointer;
+        border:none;
+        text-decoration:none;
       }
 
-      .content-column {
-        display: flex;
-        flex-direction: column;
-        gap: 16px;
-      }
-
-      .profile-row {
-        margin-top: 8px;
-        margin-bottom: 6px;
-      }
-
-      .profile-label {
-        font-size: 0.78rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-      }
-
-      .profile-value {
-        font-size: 0.95rem;
-        font-weight: 500;
-      }
-
-      /* SPECIAL STYLE for DISPLAY NAME row */
-      .profile-row--name .profile-value {
-        font-size: 1.25rem;
-        font-weight: 700;
-        letter-spacing: -0.01em;
-      }
-
-      body.profile-dark .profile-row--name .profile-value {
-        color: #f9fafb;
-      }
-
-      body.profile-light .profile-row--name .profile-value {
-        color: #111827;
-      }
-
-      body.profile-dark .profile-label,
-      body.profile-dark .profile-edit-label,
-      body.profile-dark .settings-subtitle,
-      body.profile-dark .profile-edit-hint {
-        color: var(--text-muted);
-      }
-
-      body.profile-light .profile-label,
-      body.profile-light .profile-edit-label,
-      body.profile-light .settings-subtitle,
-      body.profile-light .profile-edit-hint {
-        color: #4b5563;
-      }
-
-      .btn-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 10px;
-        align-items: center;
-      }
-
-      .btn {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0.55rem 0.95rem;
-        border-radius: 999px;
-        font-size: 0.88rem;
-        font-weight: 600;
-        cursor: pointer;
-        border: none;
-        text-decoration: none;
-      }
-
-      .btn-primary {
+      .btn-primary{
         background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-        color: #020617;
+        color:#ffffff;
       }
 
-      .btn-primary:hover {
-        filter: brightness(1.06);
-      }
-
-      .btn-muted {
+      .btn-muted{
         background: transparent;
-        border: 1px solid rgba(148, 163, 184, 0.7);
+        border:1px solid var(--border);
+        color: var(--muted);
       }
 
-      body.profile-dark .btn-muted {
-        color: var(--text-muted);
+      .services-empty{
+        margin-top:6px;
+        padding:0.65rem 0.75rem;
+        border-radius:0.9rem;
+        font-size:0.85rem;
+        border:1px solid var(--border);
+        background: rgba(15,23,42,0.35);
+        color: var(--muted);
+      }
+      :root[data-theme="light"] .services-empty{
+        background:#ffffff;
       }
 
-      body.profile-light .btn-muted {
-        color: #374151;
-        background: #f9fafb;
-        border-color: #d1d5db;
+      .is-hidden{ display:none !important; }
+
+      .profile-edit,
+      .service-panel{
+        margin-top:14px;
+        padding-top:12px;
+        border-top:1px solid var(--border);
+        display:flex;
+        flex-direction:column;
+        gap:12px;
       }
 
-      body.profile-light .btn-muted:hover {
-        background: #e5e7eb;
-      }
-
-      /* ðŸ”¥ FORCE EDIT PROFILE BUTTON TO MATCH DARK-MODE STYLE IN BOTH THEMES */
-      #editProfileBtn {
-        background-image: linear-gradient(135deg, var(--brand-a), var(--brand-b)) !important;
-        color: #ffffff !important;
-        border-radius: 999px;
-        padding: 0.6rem 1.7rem;
-        box-shadow: 0 12px 30px rgba(15, 23, 42, 0.35);
-        transition: transform 0.15s ease, box-shadow 0.15s ease,
-          filter 0.15s ease;
-      }
-
-      #editProfileBtn:hover {
-        filter: brightness(1.06);
-        transform: translateY(-1px);
-        box-shadow: 0 16px 40px rgba(15, 23, 42, 0.45);
-      }
-
-      #editProfileBtn:active {
-        transform: translateY(0);
-        filter: brightness(0.97);
-        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.3);
-      }
-      /* ðŸ”¥ END EDIT PROFILE OVERRIDE */
-
-      .services-empty {
-        margin-top: 6px;
-        padding: 0.65rem 0.75rem;
-        border-radius: 0.9rem;
-        font-size: 0.85rem;
-      }
-
-      .profile-footer {
-        text-align: center;
-        margin-top: 18px;
-        font-size: 0.8rem;
-      }
-
-      .is-hidden {
-        display: none !important;
-      }
-
-      .profile-edit {
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid rgba(148, 163, 184, 0.4);
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      .profile-edit-row {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
+      .profile-edit-row{
+        display:flex;
+        flex-direction:column;
+        gap:6px;
       }
 
       .profile-edit-input,
-      .profile-edit-textarea {
-        width: 100%;
-        padding: 8px 10px;
-        border-radius: 8px;
-        border: 1px solid #374151;
-        font-family: inherit;
-        font-size: 0.95rem;
+      .profile-edit-textarea{
+        width:100%;
       }
 
-      body.profile-dark .profile-edit-input,
-      body.profile-dark .profile-edit-textarea {
-        background: #020617;
-        color: var(--text-main);
-      }
-
-      body.profile-light .profile-edit-input,
-      body.profile-light .profile-edit-textarea {
-        background: #ffffff;
-        color: #111827;
-        border-color: #d1d5db;
-      }
-
-      .profile-edit-input:focus,
-      .profile-edit-textarea:focus {
-        outline: none;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.5);
-      }
-
-      .profile-edit-actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 4px;
-      }
-
-      .service-panel {
-        margin-top: 14px;
-        padding-top: 12px;
-        border-top: 1px solid rgba(148, 163, 184, 0.4);
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-
-      #profileServicesList {
-        margin-top: 12px;
-        display: grid;
+      #profileServicesList{
+        margin-top:12px;
+        display:grid;
         grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-        gap: 12px;
+        gap:12px;
       }
 
-      .profile-service-card {
-        border-radius: 0.9rem;
-        padding: 10px 12px;
-        font-size: 0.9rem;
+      .profile-service-card,
+      .settings-item{
+        border-radius:0.9rem;
+        padding:10px 12px;
+        font-size:0.9rem;
+        border:1px solid var(--border);
+        background: rgba(15,23,42,0.35);
+      }
+      :root[data-theme="light"] .profile-service-card,
+      :root[data-theme="light"] .settings-item{
+        background:#ffffff;
       }
 
-      .profile-service-title {
-        font-weight: 600;
-        margin-bottom: 4px;
+      .profile-service-title{ font-weight:600; margin-bottom:4px; }
+      .profile-service-meta{ font-size:0.83rem; color: var(--muted); }
+
+      .settings-subtitle{
+        margin:0 0 12px;
+        font-size:0.9rem;
+        color: var(--muted);
       }
 
-      .profile-service-meta {
-        font-size: 0.83rem;
-      }
-
-      body.profile-dark .profile-service-meta {
-        color: #9ca3af;
-      }
-
-      body.profile-light .profile-service-meta {
-        color: #6b7280;
-      }
-
-      .card-settings h2 {
-        margin-top: 0;
-        margin-bottom: 4px;
-        font-size: 1.25rem;
-      }
-
-      .settings-subtitle {
-        margin: 0 0 12px;
-        font-size: 0.9rem;
-      }
-
-      .settings-grid {
-        display: grid;
+      .settings-grid{
+        display:grid;
         grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-        gap: 12px;
-        margin-top: 8px;
+        gap:12px;
+        margin-top:8px;
       }
 
-      .settings-item {
-        border-radius: 0.9rem;
-        padding: 10px 12px;
-        font-size: 0.9rem;
-      }
+      .settings-item h3{ margin:0 0 4px; font-size:0.95rem; }
+      .settings-item p{ margin:0 0 8px; font-size:0.85rem; color: var(--muted); }
 
-      .settings-item h3 {
-        margin: 0 0 4px;
-        font-size: 0.95rem;
-      }
+      .settings-item.danger h3{ color: var(--danger); }
 
-      .settings-item p {
-        margin: 0 0 8px;
-        font-size: 0.85rem;
+      .switch{
+        position:relative;
+        display:inline-block;
+        width:40px;
+        height:22px;
       }
-
-      .settings-item.danger h3 {
-        color: #fecaca;
+      .switch input{
+        opacity:0;
+        width:0;
+        height:0;
       }
-
-      body.profile-light .settings-item.danger h3 {
-        color: #b91c1c;
+      .slider{
+        position:absolute;
+        cursor:pointer;
+        inset:0;
+        background-color: rgba(148,163,184,0.35);
+        transition:0.2s;
+        border-radius:999px;
+        border:1px solid var(--border);
       }
-
-      /* Toggle switch (shared) */
-      .switch {
-        position: relative;
-        display: inline-block;
-        width: 40px;
-        height: 22px;
+      .slider:before{
+        position:absolute;
+        content:"";
+        height:16px;
+        width:16px;
+        left:3px;
+        bottom:3px;
+        background-color:#f9fafb;
+        transition:0.2s;
+        border-radius:50%;
       }
-
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-
-      .slider {
-        position: absolute;
-        cursor: pointer;
-        inset: 0;
-        background-color: #374151;
-        transition: 0.2s;
-        border-radius: 999px;
-      }
-
-      .slider:before {
-        position: absolute;
-        content: "";
-        height: 16px;
-        width: 16px;
-        left: 3px;
-        bottom: 3px;
-        background-color: #f9fafb;
-        transition: 0.2s;
-        border-radius: 50%;
-      }
-
-      .switch input:checked + .slider {
+      .switch input:checked + .slider{
         background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+        border-color: transparent;
       }
-
-      .switch input:checked + .slider:before {
+      .switch input:checked + .slider:before{
         transform: translateX(16px);
       }
 
-      /* Theme toggle next to Edit Profile */
-      .theme-toggle-wrapper {
-        margin-left: auto;
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
+      .theme-toggle-wrapper{
+        margin-left:auto;
+        display:inline-flex;
+        align-items:center;
+        gap:8px;
+      }
+      .theme-toggle-label{
+        font-size:0.8rem;
+        color: var(--muted);
       }
 
-      .theme-toggle-label {
-        font-size: 0.8rem;
-        color: var(--text-muted);
-      }
-
-      body.profile-light .theme-toggle-label {
-        color: #4b5563;
-      }
-
-      /* tiny utility for small buttons inside cards */
-      .btn-small {
-        padding: 0.3rem 0.6rem;
-        font-size: 0.78rem;
-      }
-
-      .profile-service-actions {
-        display: flex;
-        gap: 6px;
-        margin-top: 8px;
-      }
-
-      /* =====================================================
-         FINAL: DELETE ACCOUNT BUTTON (red, light & dark)
-         ===================================================== */
-      #deleteAccountBtn {
+      /* Delete account button */
+      #deleteAccountBtn{
         background: transparent !important;
-        color: #dc2626 !important;
-        border: 2px solid #dc2626 !important;
+        color: var(--danger) !important;
+        border: 2px solid var(--danger) !important;
         font-weight: 600;
       }
-
-      #deleteAccountBtn:hover {
-        background: rgba(220, 38, 38, 0.12) !important;
-        box-shadow: 0 0 8px rgba(220, 38, 38, 0.35);
+      #deleteAccountBtn:hover{
+        background: rgba(255,77,79,0.12) !important;
+        box-shadow: 0 0 8px rgba(255,77,79,0.35);
+      }
+      #deleteAccountBtn:active{
+        background: rgba(255,77,79,0.25) !important;
+        color:#ffffff !important;
       }
 
-      #deleteAccountBtn:active {
-        background: rgba(220, 38, 38, 0.25) !important;
-        color: #ffffff !important;
+      .profile-footer{
+        text-align:center;
+        margin-top:18px;
+        font-size:0.8rem;
+        color: var(--muted);
       }
     </style>
   </head>
 
-  <!-- add profile-dark so it starts in dark mode, JS will toggle class -->
+  <!-- Keep these classes for your existing JS toggle logic -->
   <body class="dashboard profile-page profile-dark">
     <div class="profile-wrapper">
       <header class="profile-header">
@@ -619,7 +379,6 @@
           <span>Surreal Systems</span>
         </a>
 
-        <!-- Top-right user pill -->
         <div class="profile-user-pill" id="topUserChip">
           <div class="profile-avatar" id="topUserAvatar">Q</div>
           <span class="profile-email" id="topUserEmail">you@example.com</span>
@@ -627,21 +386,17 @@
       </header>
 
       <div class="profile-layout">
-        <!-- SIDEBAR NAV -->
         <aside class="sidebar">
           <p class="sidebar-title">Dashboard</p>
           <ul class="nav-list">
             <li><a href="index.html" class="nav-link">Home</a></li>
-            <li>
-              <a href="profile.html" class="nav-link nav-link--active">Profile</a>
-            </li>
+            <li><a href="profile.html" class="nav-link nav-link--active">Profile</a></li>
             <li><a href="services.html" class="nav-link">Services</a></li>
             <li><a href="messages.html" class="nav-link">Messages</a></li>
             <li><a href="login.html" class="nav-link nav-link--danger">Logout</a></li>
           </ul>
         </aside>
 
-        <!-- MAIN CONTENT -->
         <main class="content-column">
           <section class="card">
             <div id="profileView">
@@ -652,9 +407,7 @@
 
               <div class="profile-row">
                 <div class="profile-label">Email</div>
-                <div class="profile-value" id="profileEmailMain">
-                  you@example.com
-                </div>
+                <div class="profile-value" id="profileEmailMain">you@example.com</div>
               </div>
 
               <div class="profile-row">
@@ -686,74 +439,42 @@
 
             <form id="profileEditForm" class="profile-edit is-hidden">
               <div class="profile-edit-row">
-                <label for="editDisplayName" class="profile-edit-label"
-                  >Display name</label
-                >
-                <input
-                  type="text"
-                  id="editDisplayName"
-                  class="profile-edit-input"
-                  maxlength="64"
-                />
+                <label for="editDisplayName" class="profile-label">Display name</label>
+                <input type="text" id="editDisplayName" class="profile-edit-input" maxlength="64" />
               </div>
 
               <div class="profile-edit-row">
-                <label for="editEmail" class="profile-edit-label">Email</label>
-                <input
-                  type="email"
-                  id="editEmail"
-                  class="profile-edit-input"
-                  required
-                />
+                <label for="editEmail" class="profile-label">Email</label>
+                <input type="email" id="editEmail" class="profile-edit-input" required />
               </div>
 
               <div class="profile-edit-row">
-                <label for="editDescription" class="profile-edit-label"
-                  >Description</label
-                >
-                <textarea
-                  id="editDescription"
-                  class="profile-edit-textarea"
-                  rows="4"
-                ></textarea>
-                <p class="profile-edit-hint">
-                  This appears on your public profile. Keep it short and clear.
-                </p>
+                <label for="editDescription" class="profile-label">Description</label>
+                <textarea id="editDescription" class="profile-edit-textarea" rows="4"></textarea>
+                <p class="settings-subtitle">This appears on your public profile. Keep it short and clear.</p>
               </div>
 
-              <div class="profile-edit-actions">
+              <div class="btn-row">
                 <button type="submit" class="btn btn-primary">Save changes</button>
-                <button type="button" class="btn btn-muted" id="cancelEditBtn">
-                  Cancel
-                </button>
+                <button type="button" class="btn btn-muted" id="cancelEditBtn">Cancel</button>
               </div>
             </form>
           </section>
 
           <section class="card card-settings is-hidden" id="accountSettingsCard">
             <h2>Account settings</h2>
-            <p class="settings-subtitle">
-              Manage your account preferences and security.
-            </p>
+            <p class="settings-subtitle">Manage your account preferences and security.</p>
 
             <div class="settings-grid">
               <div class="settings-item">
                 <h3>Change password</h3>
                 <p>Update your password to keep your account secure.</p>
-                <button
-                  type="button"
-                  class="btn btn-muted"
-                  id="changePasswordBtn"
-                >
-                  Change password
-                </button>
+                <button type="button" class="btn btn-muted" id="changePasswordBtn">Change password</button>
               </div>
 
               <div class="settings-item">
                 <h3>Email notifications</h3>
-                <p>
-                  Allow Surreal Systems to email you about new messages and updates.
-                </p>
+                <p>Allow Surreal Systems to email you about new messages and updates.</p>
                 <label class="switch" aria-label="Email notifications">
                   <input type="checkbox" id="emailNotificationsToggle" />
                   <span class="slider"></span>
@@ -763,24 +484,17 @@
               <div class="settings-item danger">
                 <h3>Delete account</h3>
                 <p>This will permanently delete your account and all data.</p>
-                <button
-                  type="button"
-                  class="btn btn-muted"
-                  id="deleteAccountBtn"
-                >
-                  Delete account
-                </button>
+                <button type="button" class="btn btn-muted" id="deleteAccountBtn">Delete account</button>
               </div>
             </div>
           </section>
 
           <section class="card">
             <h2>Your services</h2>
-            <p>Once you start posting, your services will appear here.</p>
+            <p class="settings-subtitle">Once you start posting, your services will appear here.</p>
 
             <div id="profileServicesEmpty" class="services-empty">
-              You donâ€™t have any services yet. Create one to start attracting
-              clients.
+              You don’t have any services yet. Create one to start attracting clients.
             </div>
 
             <div id="profileServicesList"></div>
@@ -793,53 +507,23 @@
 
             <form id="createServiceForm" class="service-panel is-hidden">
               <div class="profile-edit-row">
-                <label for="serviceTitle" class="profile-edit-label"
-                  >Service title</label
-                >
-                <input
-                  type="text"
-                  id="serviceTitle"
-                  class="profile-edit-input"
-                  maxlength="100"
-                  required
-                />
+                <label for="serviceTitle" class="profile-label">Service title</label>
+                <input type="text" id="serviceTitle" class="profile-edit-input" maxlength="100" required />
               </div>
 
               <div class="profile-edit-row">
-                <label for="servicePrice" class="profile-edit-label"
-                  >Price (USD)</label
-                >
-                <input
-                  type="number"
-                  id="servicePrice"
-                  class="profile-edit-input"
-                  min="5"
-                  step="1"
-                  required
-                />
+                <label for="servicePrice" class="profile-label">Price (USD)</label>
+                <input type="number" id="servicePrice" class="profile-edit-input" min="5" step="1" required />
               </div>
 
               <div class="profile-edit-row">
-                <label for="serviceDescription" class="profile-edit-label">
-                  Description
-                </label>
-                <textarea
-                  id="serviceDescription"
-                  class="profile-edit-textarea"
-                  rows="4"
-                  required
-                ></textarea>
+                <label for="serviceDescription" class="profile-label">Description</label>
+                <textarea id="serviceDescription" class="profile-edit-textarea" rows="4" required></textarea>
               </div>
 
-              <div class="profile-edit-actions">
+              <div class="btn-row">
                 <button type="submit" class="btn btn-primary">Save service</button>
-                <button
-                  type="button"
-                  class="btn btn-muted"
-                  id="cancelCreateServiceBtn"
-                >
-                  Cancel
-                </button>
+                <button type="button" class="btn btn-muted" id="cancelCreateServiceBtn">Cancel</button>
               </div>
             </form>
           </section>
@@ -851,12 +535,10 @@
       </footer>
     </div>
 
-    <!-- Shared scripts -->
     <script src="init.js" defer></script>
     <script src="script.js" defer></script>
     <script src="profile.js" defer></script>
 
-    <!-- FINAL OVERRIDE: after everything has run, force pill to match DISPLAY NAME -->
     <script>
       setTimeout(function () {
         var nameEl = document.getElementById("profileName");
@@ -874,8 +556,3 @@
     </script>
   </body>
 </html>
-
-
-
-
-
