@@ -1,8 +1,17 @@
 /* public/services.css
-   Services page: keep functionality (grid, modal, toast)
-   BUT do NOT override html/body background or .container styling.
+   Services page (Surreal Systems) — layout + modal + toast ONLY.
+   NO html/body background. NO .container styling. NO global button styling.
    style.css owns the theme.
 */
+
+/* ---------- Reset helpers ---------- */
+*,
+*::before,
+*::after { box-sizing: border-box; }
+
+html, body, .container, .card, .row, .meta-row { min-width: 0; }
+
+img, video { max-width: 100%; height: auto; display: block; }
 
 /* ---------- Visually Hidden ---------- */
 .sr-only{
@@ -16,52 +25,34 @@
   border:0;
 }
 
-/* ---------- Page spacing wrapper (if your HTML uses it) ---------- */
-.profile-wrapper{
-  max-width: var(--max-width);
-  margin: 0 auto;
-  padding: 24px 16px 40px;
-}
-
-/* ---------- Controls (search + sort) ---------- */
+/* ---------- Controls / actions ---------- */
 .controls{
   display:flex;
   gap:10px;
   justify-content:flex-start;
-  align-items:center;
   flex-wrap:wrap;
   margin-top: 6px;
 }
 
-.controls input{
-  width: min(360px, 100%);
-}
+.controls input{ width: min(360px, 100%); }
 
-/* Keep selects/inputs consistent (style.css already styles inputs) */
-.controls input,
-.controls select{
-  max-width:100%;
-}
-
-/* ---------- Actions rows ---------- */
 .actions-row{
   display:flex;
   gap:10px;
   justify-content:flex-start;
-  align-items:center;
   flex-wrap:wrap;
 }
 
-/* ---------- Services Grid ---------- */
+/* ---------- Services grid ---------- */
 #services-list{
   display:grid;
-  grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   gap:20px;
-  margin-top: 12px;
   align-items:start;
+  margin-top: 12px;
 }
 
-/* ---------- Service Card (match index glass cards) ---------- */
+/* ---------- Service card: match index glass ---------- */
 .service-card{
   background: var(--surface-2);
   border: 1px solid var(--border);
@@ -71,11 +62,13 @@
   color: var(--text);
   text-align:left;
   transition: transform 200ms ease, box-shadow 200ms ease;
+  overflow-wrap:anywhere;
+  word-break:break-word;
+  -webkit-hyphens:auto;
+  hyphens:auto;
 }
 
-:root[data-theme="light"] .service-card{
-  background: var(--surface);
-}
+:root[data-theme="light"] .service-card{ background: var(--surface); }
 
 .service-card:hover{
   transform: translateY(-6px);
@@ -88,17 +81,14 @@
   font-size: 1.1rem;
 }
 
-.service-card p{
-  margin:6px 0;
-  color: var(--muted);
-}
+.service-card p{ margin:6px 0; color: var(--muted); }
 
 .service-card .username{
-  font-style:italic;
-  opacity:0.9;
+  font-style: italic;
+  opacity: 0.9;
 }
 
-/* Small layout tune for the message button area */
+/* button row inside cards (style.css styles buttons) */
 .card-actions{
   margin-top:10px;
   display:flex;
@@ -106,6 +96,18 @@
   flex-wrap:wrap;
   align-items:center;
 }
+
+/* ---------- New service editor section ---------- */
+.new-service{
+  display:none;
+  flex-direction:column;
+  gap:10px;
+  margin-top:10px;
+  text-align:left;
+}
+.new-service.show-flex{ display:flex; }
+
+.input-number{ max-width:200px; }
 
 /* ---------- Spinner ---------- */
 .spinner{
@@ -119,9 +121,7 @@
 }
 @keyframes spin{ to{ transform: rotate(360deg); } }
 
-/* ---------- Modal ---------- */
-/* NOTE: style.css already defines #messageModal too.
-   This keeps it themed and consistent. */
+/* ---------- Message modal ---------- */
 #messageModal{
   display:none;
   position:fixed;
@@ -150,18 +150,13 @@
 
 :root[data-theme="light"] #messageModal .modal-content,
 :root[data-theme="light"] .modal-content{
-  background: #ffffff;
+  background:#ffffff;
   color:#111827;
   border-color:#e2e8f0;
 }
 
-/* Defensive wrapper (extensions like Grammarly) */
-.field-wrap{
-  position:relative;
-  width:100%;
-}
+.field-wrap{ position:relative; width:100%; }
 
-/* Textarea inside modal */
 #messageContent{
   display:block;
   width:100%;
@@ -178,14 +173,11 @@
   box-sizing:border-box;
 }
 
-#messageContent::placeholder{
-  color: var(--input-placeholder);
-}
+#messageContent::placeholder{ color: var(--input-placeholder); }
 
-/* Inline error beneath textarea */
 .error-inline{
   margin:4px 2px 0;
-  color:#ff4d4f;
+  color: var(--danger);
   font-size:0.9rem;
 }
 
@@ -195,7 +187,6 @@
   justify-content:flex-end;
   flex-wrap:wrap;
 }
-
 .modal-meta{
   display:flex;
   justify-content:flex-end;
@@ -227,13 +218,10 @@
   transform:translateX(-50%) translateY(-6px);
 }
 
-/* ---------- Attempt list ---------- */
-.attempt-list{
-  margin: 6px 0 0 18px;
-}
+/* Attempt list */
+.attempt-list{ margin: 6px 0 0 18px; }
 
-/* ---------- IMPORTANT: hide the stray bottom-left composer ---------- */
-/* You should only see the modal (#messageModal) when messaging */
+/* IMPORTANT: hide stray bottom-left composer if old HTML exists */
 #messageBox,
 #messageForm,
 #messageSection,
@@ -242,7 +230,7 @@
   display:none !important;
 }
 
-/* ---------- Responsive ---------- */
+/* Responsive */
 @media (max-width: 480px){
-  .profile-wrapper{ padding: 18px 12px 32px; }
+  .container{ width:94%; }
 }

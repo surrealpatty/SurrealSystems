@@ -1,336 +1,198 @@
 /* public/messages.css
-   Dark-friendly layout for the messages page
-   (works with the global dashboard styles in public/style.css)
+   Messages page — Surreal purple theme compatible
+   NO html/body background. Use style.css variables.
 */
 
-/* Wrapper that sits in the right column next to the sidebar */
-.messages-wrapper {
+/* wrapper */
+.messages-wrapper{
   max-width: 1100px;
   margin: 0 auto;
   padding: 8px 0 32px;
 }
 
-/* Main card that holds the header, tabs, and list */
-.messages-card {
+/* main panel */
+.messages-card{
   border-radius: 1.25rem;
-  border: 1px solid #1f2937;
-  background: rgba(15, 23, 42, 0.96);
+  border: 1px solid var(--border);
+  background: var(--surface-2);
   padding: 18px 18px 22px;
-  color: #e5e7eb;
+  color: var(--text);
+  box-shadow: var(--shadow-1);
 }
 
-/* Header text "Your messages" */
-.messages-header-title {
-  margin: 0 0 4px;
-  font-size: 1.2rem;
-  font-weight: 600;
+:root[data-theme="light"] .messages-card{
+  background: var(--surface);
 }
 
-/* Small helper text under the title (if used) */
-.messages-header-subtitle {
-  margin: 0;
-  font-size: 0.85rem;
-  color: #9ca3af;
+/* header */
+.messages-header-title{
+  margin:0 0 4px;
+  font-size:1.2rem;
+  font-weight:600;
 }
 
-/* Top right chip with the user email */
-.messages-user-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.65);
-  background: rgba(15, 23, 42, 0.96);
-  font-size: 0.85rem;
+.messages-header-subtitle{
+  margin:0;
+  font-size:0.85rem;
+  color: var(--muted);
 }
 
-/* Tab bar (Received / Sent) */
-.tabbar {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  margin-bottom: 12px;
+.messages-user-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:0.5rem;
+  padding:0.35rem 0.7rem;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background: rgba(15,23,42,0.35);
+  font-size:0.85rem;
+  color: var(--text);
+}
+:root[data-theme="light"] .messages-user-chip{
+  background:#ffffff;
 }
 
-/* ============================================================
-   TABS — Received + Sent (same style as Edit Profile)
-   ============================================================ */
+/* tabs */
+.tabbar{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:flex-start;
+  align-items:center;
+  gap:8px;
+  margin-top:10px;
+  margin-bottom:12px;
+}
 
-/* Default tab style (both themes) */
-.tab {
-  padding: 9px 22px;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-
+.tab{
+  padding:9px 22px;
+  border-radius:999px;
+  font-size:0.9rem;
+  font-weight:600;
+  cursor:pointer;
   background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-  border: none;
-  color: #ffffff;
-
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.45);
-  transition:
-    background 0.16s ease,
-    box-shadow 0.16s ease,
-    transform 0.1s ease,
-    opacity 0.16s ease;
+  border:none;
+  color:#ffffff;
+  box-shadow: 0 10px 22px rgba(15,23,42,0.45);
+  transition: box-shadow 0.16s ease, transform 0.1s ease, opacity 0.16s ease;
 }
-
-/* Hover */
-.tab:hover {
+.tab:hover{
   transform: translateY(-1px);
-  box-shadow: 0 14px 26px rgba(15, 23, 42, 0.55);
+  box-shadow: 0 14px 26px rgba(15,23,42,0.55);
 }
-
-/* Active tab – same gradient, slightly stronger pop */
-.tab.active {
+.tab.active{
   transform: translateY(-1px);
-  box-shadow: 0 16px 30px rgba(15, 23, 42, 0.65);
+  box-shadow: 0 16px 30px rgba(15,23,42,0.65);
 }
 
-/* Disabled state (if ever used) */
-.tab[disabled] {
-  opacity: 0.55;
-  cursor: default;
-  box-shadow: none;
-}
-
-/* Light mode uses the SAME gradient */
-body.dashboard.profile-light .tab {
-  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-  color: #ffffff;
-  border: none;
-}
-
-/* ============================================================
-   REPLY/DELETE BUTTONS (DARK MODE)
-   ============================================================ */
-
-.conversation-footer button {
-  padding: 8px 14px;
-  font-size: 0.9rem;
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  cursor: pointer;
-  background: rgba(15, 23, 42, 0.75);
-  color: #e5e7eb;
-  transition:
-    background 0.16s ease,
-    border-color 0.16s ease,
-    color 0.16s ease,
-    transform 0.1s ease;
-}
-
-.conversation-footer button:hover {
-  background: rgba(55, 65, 81, 0.9);
-  border-color: rgba(156, 163, 175, 0.95);
-}
-
-/* DELETE BUTTON – DARK MODE: red text/border */
-.conversation-footer .delete-btn {
-  color: #dc2626;
-  border-color: #dc2626;
-  font-weight: 600;
-}
-
-.conversation-footer .delete-btn:hover {
-  background: #dc2626;
-  color: #ffffff;
-  border-color: #dc2626;
-}
-
-/* ============================================================
-   LIGHT MODE OVERRIDES (profile-light)
-   ============================================================ */
-
-body.dashboard.profile-light .messages-card {
-  background: #f9fbff;
-  border-color: rgba(209, 213, 219, 0.9);
-  color: #111827;
-}
-
-/* Default light-mode style for footer buttons */
-body.dashboard.profile-light .conversation-footer button {
-  background: #ffffff;
-  color: #4b5563;
-  border-color: rgba(148, 163, 184, 0.7);
-}
-
-body.dashboard.profile-light .conversation-footer button:hover {
-  background: #f3f4f6;
-  border-color: rgba(156, 163, 175, 0.95);
-}
-
-/* REPLY in light mode = soft light-blue pill */
-body.dashboard.profile-light .conversation-footer button:first-child {
-  background: rgba(59, 130, 246, 0.15);
-  border-color: rgba(59, 130, 246, 0.35);
-  color: #3b82f6;
-  font-weight: 600;
-}
-
-body.dashboard.profile-light .conversation-footer button:first-child:hover {
-  background: rgba(59, 130, 246, 0.25);
-  border-color: rgba(59, 130, 246, 0.55);
-}
-
-/* DELETE in light mode = SAME BLUE BG, but red text/border */
-body.dashboard.profile-light .conversation-footer .delete-btn {
-  background: rgba(59, 130, 246, 0.15); /* match Reply background */
-  border-color: #dc2626;
-  color: #dc2626;
-  font-weight: 600;
-}
-
-body.dashboard.profile-light .conversation-footer .delete-btn:hover {
-  background: #dc2626;
-  color: #ffffff;
-  border-color: #dc2626;
-}
-
-/* Messages grid/list */
-#messages-list {
-  display: grid;
+/* list grid */
+#messages-list{
+  display:grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 14px;
-  margin-top: 8px;
+  gap:14px;
+  margin-top:8px;
 }
 
-/* ------------------------------------------------------------------
-   INDIVIDUAL CONVERSATION CARDS
-------------------------------------------------------------------- */
-.message-card {
-  background: #020617;
+/* conversation card */
+.message-card{
+  background: var(--surface-2);
   border-radius: 1rem;
   padding: 14px 13px 12px;
-  border: 1px solid #1f2937;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
-  color: #e5e7eb;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  text-align: left;
-  cursor: pointer;
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.45);
+  color: var(--text);
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  text-align:left;
+  cursor:pointer;
   transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
-.message-card:hover {
+:root[data-theme="light"] .message-card{
+  background: var(--surface);
+}
+
+.message-card:hover{
   transform: translateY(-6px);
-  border-color: rgba(59, 130, 246, 0.9);
-  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.95);
+  border-color: rgba(168,85,247,0.75);
+  box-shadow: 0 18px 40px rgba(15,23,42,0.75);
 }
 
-/* Title inside each card */
-#messages-list .message-title {
-  margin: 0;
-  font-size: 0.95rem;
+#messages-list .message-title{
+  margin:0;
+  font-size:0.95rem;
+  font-weight:600;
+  color: var(--text);
+}
+
+#messages-list .message-meta{
+  margin:2px 0 6px;
+  font-size:0.8rem;
+  color: var(--muted);
+}
+
+#messages-list p{
+  margin:0;
+  font-size:0.9rem;
+  color: var(--text);
+}
+
+#messages-list .timestamp{
+  margin-top:6px;
+  font-size:0.78rem;
+  color: var(--muted);
+}
+
+/* footer buttons */
+.conversation-footer{
+  margin-top:10px;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.conversation-footer button{
+  padding:8px 14px;
+  font-size:0.9rem;
+  border-radius:999px;
+  border:1px solid var(--border);
+  cursor:pointer;
+  background: rgba(15,23,42,0.45);
+  color: var(--text);
+}
+
+.conversation-footer button:hover{
+  background: rgba(15,23,42,0.65);
+  border-color: rgba(168,85,247,0.55);
+}
+
+/* delete button */
+.conversation-footer .delete-btn{
+  color: var(--danger);
+  border-color: var(--danger);
   font-weight: 600;
-  color: #e5e7eb;
 }
 
-/* "From xyz" + timestamp line */
-#messages-list .message-meta {
-  margin: 2px 0 6px;
-  font-size: 0.8rem;
-  color: #9ca3af;
+.conversation-footer .delete-btn:hover{
+  background: var(--danger);
+  color:#ffffff;
+  border-color: var(--danger);
 }
 
-#messages-list p {
-  margin: 0;
-  font-size: 0.9rem;
-  color: #e5e7eb;
-}
-
-#messages-list .timestamp {
-  margin-top: 6px;
-  font-size: 0.78rem;
-  color: #9ca3af;
-}
-
-/* Conversation footer (Reply + Delete buttons) */
-.conversation-footer {
-  margin-top: 10px;
-  display: flex;
-  gap: 8px;
-}
-
-/* Status text states */
+/* status text */
 .loading,
 .empty,
-.error {
+.error{
   grid-column: 1 / -1;
-  text-align: center;
-  font-size: 0.9rem;
+  text-align:center;
+  font-size:0.9rem;
 }
-
 .loading,
-.empty {
-  color: #9ca3af;
-}
+.empty{ color: var(--muted); }
+.error{ color: #fecaca; }
 
-.error {
-  color: #fecaca;
-}
-
-/* Small screens */
-@media (max-width: 600px) {
-  .messages-card {
-    padding: 14px 12px 18px;
-  }
-
-  .tabbar {
-    justify-content: flex-start;
-  }
-
-  #messages-list {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ============================================================
-   DELETE ACCOUNT BUTTON (WORKS FOR LIGHT + DARK MODE)
-   ============================================================ */
-
-/* Make the DELETE ACCOUNT title red */
-.settings-card:nth-of-type(3) h3 {
-  color: var(--danger) !important;
-}
-
-/* Style the DELETE ACCOUNT button */
-.settings-card:nth-of-type(3) button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-
-  padding: 10px 18px;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 999px;
-
-  background: transparent !important;
-  color: var(--danger) !important;
-  border: 2px solid var(--danger) !important;
-
-  cursor: pointer;
-  transition:
-    background 0.18s ease,
-    color 0.18s ease,
-    box-shadow 0.18s ease;
-}
-
-/* Hover state */
-.settings-card:nth-of-type(3) button:hover {
-  background: rgba(255, 77, 79, 0.15) !important;
-  color: var(--danger) !important;
-  box-shadow: 0 0 8px rgba(255, 77, 79, 0.35) !important;
-}
-
-/* Press / active */
-.settings-card:nth-of-type(3) button:active {
-  background: rgba(255, 77, 79, 0.25) !important;
-  color: #fff !important;
+/* small screens */
+@media (max-width: 600px){
+  .messages-card{ padding: 14px 12px 18px; }
+  #messages-list{ grid-template-columns: 1fr; }
 }
