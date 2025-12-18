@@ -30,6 +30,7 @@ console.info(
   const startsWithQuote = raw.startsWith('"') || raw.startsWith("'");
   const endsWithQuote = raw.endsWith('"') || raw.endsWith("'");
   let parsed = null;
+
   try {
     if (raw) parsed = new URL(raw);
   } catch (e) {
@@ -63,9 +64,9 @@ const rateLimit = require('express-rate-limit');
 const { sequelize, testConnection } = require('./config/database');
 const userRoutes = require('./routes/user');
 const serviceRoutes = require('./routes/service');
-const ratingRoutes = require('./routes/rating'); // ratings API
-const messagesRoutes = require('./routes/messages'); // messages API
-const paymentsRoutes = require('./routes/payments'); // payments + webhook
+const ratingRoutes = require('./routes/rating');
+const messagesRoutes = require('./routes/messages');
+const paymentsRoutes = require('./routes/payments');
 
 const app = express();
 
@@ -73,9 +74,7 @@ const app = express();
 app.disable('x-powered-by');
 
 if (!process.env.JWT_SECRET && process.env.NODE_ENV === 'production') {
-  console.warn(
-    '?? JWT_SECRET is not set. Authentication will fail when creating or verifying tokens.',
-  );
+  console.warn('⚠️ JWT_SECRET is not set. Authentication may fail.');
 }
 
 /* ----------------- Trust proxy ----------------- */
@@ -84,7 +83,9 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 /* ---------------------- Security + performance ---------------------- */
-const helmetOptions = process.env.NODE_ENV === 'production' ? {} : { contentSecurityPolicy: false };
+const helmetOptions =
+  process.env.NODE_ENV === 'production' ? {} : { contentSecurityPolicy: false };
+
 app.use(helmet(helmetOptions));
 app.use(compression());
 
@@ -94,12 +95,12 @@ const limiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
 app.use(limiter);
 
 /* ---------------------------- CORS setup (improved) ---------------------------- */
 function normalizeOriginString(o) {
   if (!o || typeof o !== 'string') return '';
-  // trim whitespace, remove any trailing slashes, and lowercase for stable comparisons
   return o.trim().replace(/\/+$/, '').toLowerCase();
 }
 
@@ -108,20 +109,14 @@ let allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
   .map((s) => normalizeOriginString(s))
   .filter(Boolean);
 
-// If no explicit CORS_ALLOWED_ORIGINS but FRONTEND_URL is provided, add it as a convenience.
 if (allowedOrigins.length === 0 && process.env.FRONTEND_URL) {
-  try {
-    const f = normalizeOriginString(process.env.FRONTEND_URL || '');
-    if (f) {
-      allowedOrigins.push(f);
-      console.info('No CORS_ALLOWED_ORIGINS configured � added FRONTEND_URL to allowedOrigins:', f);
-    }
-  } catch (e) {
-    /* ignore parse errors */
+  const f = normalizeOriginString(process.env.FRONTEND_URL || '');
+  if (f) {
+    allowedOrigins.push(f);
+    console.info('No CORS_ALLOWED_ORIGINS configured — added FRONTEND_URL:', f);
   }
 }
 
-// In non-production, make local dev easier by allowing common localhost origins.
 if (process.env.NODE_ENV !== 'production') {
   const locals = [
     'http://localhost:3000',
@@ -129,32 +124,28 @@ if (process.env.NODE_ENV !== 'production') {
     'http://127.0.0.1:3000',
     'http://127.0.0.1:10000',
   ];
-  allowedOrigins = [...new Set([...allowedOrigins, ...locals.map(normalizeOriginString)])]; // dedupe
+  allowedOrigins = [...new Set([...allowedOrigins, ...locals.map(normalizeOriginString)])];
 }
 
 console.info('CORS allowedOrigins:', allowedOrigins.length ? allowedOrigins : '[none configured]');
 
 if (process.env.NODE_ENV === 'production' && allowedOrigins.length === 0) {
-  console.warn(
-    '?? CORS_ALLOWED_ORIGINS is empty while NODE_ENV=production � this will block browser requests from other origins.',
-  );
+  console.warn('⚠️ CORS_ALLOWED_ORIGINS is empty while NODE_ENV=production.');
 }
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      // If there's no Origin header (e.g., curl from server), allow it
       if (!origin) return callback(null, true);
 
       const normalizedOrigin = normalizeOriginString(origin);
 
-      // In non-production with no configured origins, allow any origin (existing behavior)
-      if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production')
+      if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production') {
         return callback(null, true);
+      }
 
       if (allowedOrigins.includes(normalizedOrigin)) return callback(null, true);
 
-      // not allowed
       return callback(null, false);
     },
     credentials: true,
@@ -169,8 +160,11 @@ app.options(
     origin: function (origin, callback) {
       if (!origin) return callback(null, true);
       const normalizedOrigin = normalizeOriginString(origin);
-      if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production')
+
+      if (allowedOrigins.length === 0 && process.env.NODE_ENV !== 'production') {
         return callback(null, true);
+      }
+
       if (allowedOrigins.includes(normalizedOrigin)) return callback(null, true);
       return callback(null, false);
     },
@@ -200,7 +194,7 @@ app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Credentials', 'true');
     originAllowed = true;
   } else {
-    if (rawOrigin) console.warn('Blocked origin by CORS:', rawOrigin);
+    console.warn('Blocked origin by CORS:', rawOrigin);
   }
 
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization');
@@ -214,22 +208,12 @@ app.use((req, res, next) => {
 });
 
 // TEMP DEBUG: log incoming origin & path.
-app.use((req, res, next) => {
+app.use((req, _res, next) => {
   if (req.headers && req.headers.origin) {
     console.info('DEBUG incoming origin:', req.headers.origin, 'path:', req.path);
   }
   next();
 });
-
-/* ------------------- Dev-only API request logger ------------------ */
-if (process.env.NODE_ENV !== 'production') {
-  app.use((req, res, next) => {
-    if (req.path && req.path.startsWith('/api/')) {
-      console.info(`[API] ${req.method} ${req.path} origin=${req.headers.origin || '<none>'}`);
-    }
-    next();
-  });
-}
 
 /* --------------------------- Webhook (raw body) -------------------------- */
 app.post(
@@ -247,7 +231,7 @@ app.get('/api/health', (_req, res) => {
   res.json({ ok: true, ts: Date.now() });
 });
 
-/* ----------------------------- Routes ------------------------------ */
+/* ----------------------------- API Routes ------------------------------ */
 app.use('/api/users', userRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/ratings', ratingRoutes);
@@ -256,8 +240,19 @@ app.use('/api/payments', paymentsRoutes);
 
 /* --------------------------- Static Files -------------------------- */
 const publicDir = path.join(__dirname, '../public');
+
+// ✅ serve all files in /public at site root (style.css, register.css, etc.)
 app.use(express.static(publicDir));
 
+// ✅ explicit routes for your HTML pages (prevents wildcard from hijacking them)
+app.get('/', (_req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+app.get('/index.html', (_req, res) => res.sendFile(path.join(publicDir, 'index.html')));
+app.get('/register.html', (_req, res) => res.sendFile(path.join(publicDir, 'register.html')));
+app.get('/profile.html', (_req, res) => res.sendFile(path.join(publicDir, 'profile.html')));
+app.get('/services.html', (_req, res) => res.sendFile(path.join(publicDir, 'services.html')));
+app.get('/messages.html', (_req, res) => res.sendFile(path.join(publicDir, 'messages.html')));
+
+// ✅ fallback: if it's not /api/* and not a real file, return index.html
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) return next();
   res.sendFile(path.join(publicDir, 'index.html'));
@@ -267,26 +262,24 @@ const PORT = process.env.PORT || 10000;
 
 /* ------------------------- App startup (exportable) ----------------------------- */
 async function startServer() {
-  // DB connection with retries
   await testConnection();
-  console.log('? Database connected');
+  console.log('✅ Database connected');
 
-  // Decide whether to ALTER or just SYNC, based on env.
   const useAlter =
     process.env.NODE_ENV !== 'production' &&
     (process.env.DB_ALTER === 'true' || process.env.DB_SYNC_ALTER === 'true');
 
   if (useAlter) {
-    console.log('?? Running sequelize.sync({ alter: true }) - development only');
+    console.log('⚠️ Running sequelize.sync({ alter: true }) - development only');
     await sequelize.sync({ alter: true });
   } else {
-    console.log('?? Running sequelize.sync() to ensure tables exist');
+    console.log('🧠 Running sequelize.sync() to ensure tables exist');
     await sequelize.sync();
   }
 
   if (require.main === module) {
     const server = app.listen(PORT, () => {
-      console.log(`?? Server running on http://localhost:${PORT}`);
+      console.log(`✅ Server running on http://localhost:${PORT}`);
     });
     return server;
   }
@@ -306,7 +299,7 @@ module.exports = { app, startServer };
 
 if (require.main === module) {
   startServer().catch((err) => {
-    console.error('? DB init error:', err && err.message ? err.message : err);
+    console.error('❌ DB init error:', err && err.message ? err.message : err);
     throw new Error('Exiting with status 1');
   });
 }
