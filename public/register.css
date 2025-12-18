@@ -1,3 +1,9 @@
+/* =========================================================
+   Surreal Systems – Unified Purple Theme CSS
+   (Converted from CodeCrowds blue to Surreal purple)
+   Works best when public/style.css is already loaded first.
+========================================================= */
+
 /* ---------- Reset / Base ---------- */
 *,
 *::before,
@@ -19,9 +25,11 @@ body {
   margin: 0;
   padding: 0;
   min-height: 100%;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-  background: linear-gradient(135deg, #4e54c8, #00aaff);
-  color: #fff;
+  font-family: "Inter", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  /* ✅ Use global theme background if available */
+  background: var(--page-bg, radial-gradient(circle at top left, #1a0630 0, #0b0313 60%, #05010a 100%));
+  color: var(--text, #e5e7eb);
 }
 
 img,
@@ -31,6 +39,7 @@ video {
   display: block;
 }
 
+/* ---------- Container ---------- */
 .container {
   max-width: 900px;
   width: 90%;
@@ -39,30 +48,36 @@ video {
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  background: rgba(255, 255, 255, 0.95);
+
+  /* ✅ glassy surface to match Surreal */
+  background: var(--surface-2, rgba(15, 23, 42, 0.96));
+  border: 1px solid var(--border, rgba(186, 160, 210, 0.25));
   border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
-  color: #333;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45);
+
+  color: var(--text, #e5e7eb);
   text-align: center;
 }
 
+/* Headings should NOT be blue */
 h1,
 h2 {
-  color: #4e54c8;
+  color: var(--text, #e5e7eb);
   margin-bottom: 0.5rem;
 }
 
 .section-subtle {
-  color: #666;
+  color: var(--muted, #b8a9d6);
   margin-top: -10px;
 }
 
+/* ---------- Spinner ---------- */
 .spinner {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border: 3px solid #ccc;
-  border-top-color: #4e54c8;
+  border: 3px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--brand-a, #7c3aed);
   border-radius: 50%;
   animation: spin 0.8s linear infinite;
 }
@@ -73,6 +88,7 @@ h2 {
   }
 }
 
+/* ---------- Fade ---------- */
 .fade-in {
   opacity: 0;
   transform: translateY(10px);
@@ -86,91 +102,93 @@ h2 {
   }
 }
 
+/* ---------- Profile description editable ---------- */
 #profile-description {
   min-height: 50px;
   margin-bottom: 10px;
 }
 
 #profile-description[contenteditable="true"] {
-  border: 1px solid #4e54c8;
-  border-radius: 8px;
-  padding: 8px;
-  background: #f0f0f0;
-  color: #333;
+  border: 1px solid var(--border, rgba(186, 160, 210, 0.25));
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--text, #e5e7eb);
 }
 
+/* Controls row */
 #descControls {
   display: flex;
   gap: 10px;
   justify-content: center;
 }
 
+/* ---------- Buttons (default purple) ---------- */
 button {
   padding: 12px 24px;
   font-size: 1.05rem;
   color: #fff;
-  background-color: #4e54c8;
-  border: none;
-  border-radius: 10px;
+
+  /* ✅ Surreal purple gradient button */
+  background: linear-gradient(135deg, var(--brand-a, #7c3aed), var(--brand-b, #a855f7));
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  border-radius: 12px;
   cursor: pointer;
   margin-top: 5px;
-  transition:
-    transform 0.3s,
-    opacity 0.3s;
+  transition: transform 0.18s ease, opacity 0.18s ease, box-shadow 0.18s ease;
+  box-shadow: 0 10px 26px rgba(124, 58, 237, 0.22);
 }
 
 button:hover {
-  transform: translateY(-5px);
-  opacity: 0.9;
+  transform: translateY(-4px);
+  opacity: 0.95;
+  box-shadow: 0 14px 34px rgba(124, 58, 237, 0.28);
 }
 
+/* Keep your intent colors */
 .logout-btn {
-  background-color: #ff4d4f;
+  background: linear-gradient(135deg, #ef4444, #b91c1c);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 26px rgba(239, 68, 68, 0.22);
 }
 
 .logout-btn:hover {
-  background-color: #c30000;
+  opacity: 0.95;
 }
 
 .save-btn {
-  background-color: #28a745;
-}
-
-.save-btn:hover {
-  background-color: #1e7e34;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 26px rgba(34, 197, 94, 0.22);
 }
 
 .cancel-btn {
-  background-color: #dc3545;
-}
-
-.cancel-btn:hover {
-  background-color: #a71d2a;
+  background: linear-gradient(135deg, #f97316, #ea580c);
+  border-color: rgba(255, 255, 255, 0.18);
+  box-shadow: 0 10px 26px rgba(249, 115, 22, 0.22);
 }
 
 .upgrade-btn {
-  background-color: #28a745;
-  color: #fff;
-  font-weight: bold;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  border-color: rgba(255, 255, 255, 0.18);
+  font-weight: 700;
 }
 
-.upgrade-btn:hover {
-  background-color: #218838;
-}
-
+/* ---------- Utility ---------- */
 .hidden {
   display: none !important;
 }
 
 /* ---------- Generic cards ---------- */
 .card {
-  background: #fff;
-  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid var(--border, rgba(186, 160, 210, 0.25));
+  border-radius: 14px;
   padding: 20px;
   text-align: left;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
-  color: #333;
-  transition: transform 0.2s;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35);
+  color: var(--text, #e5e7eb);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
   overflow-wrap: anywhere;
   word-break: break-word;
   -webkit-hyphens: auto;
@@ -179,20 +197,20 @@ button:hover {
 
 .card:hover {
   transform: translateY(-5px);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
 }
 
 .card h3 {
   margin-bottom: 10px;
-  color: #4e54c8;
+  color: var(--text, #e5e7eb);
 }
 
 .card p {
   margin: 5px 0;
-  color: #555;
+  color: var(--muted, #b8a9d6);
 }
 
 /* ---------- SERVICE GRID + SMALL SQUARE CARDS ---------- */
-/* container that holds all services on the profile page */
 #services-list {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -200,27 +218,24 @@ button:hover {
   margin-top: 18px;
 }
 
-/* add class="card service-card" to each service for these styles */
 .service-card {
-  background: #0f172a;
-  color: #e5e7eb;
-  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--text, #e5e7eb);
+  border: 1px solid var(--border, rgba(186, 160, 210, 0.25));
+  border-radius: 14px;
   padding: 14px 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
-  height: 190px;                /* controls the “square” feel */
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.45);
+  height: 190px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    background 0.2s ease;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
 }
 
 .service-card:hover {
   transform: translateY(-6px);
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.6);
-  background: #111827;
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.58);
+  background: rgba(0, 0, 0, 0.26);
 }
 
 .service-card h3 {
@@ -233,27 +248,25 @@ button:hover {
 .service-card p {
   margin: 2px 0;
   font-size: 0.9rem;
-  color: #cbd5e1;
+  color: rgba(229, 231, 235, 0.78);
 }
 
-/* price line inside card */
 .service-card .price {
   margin-top: 8px;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
-  color: #38bdf8;
+
+  /* ✅ Purple accent instead of blue */
+  color: var(--accent, #c084fc);
 }
 
-/* tiny footer text if you use it */
 .service-card .meta {
   font-size: 0.8rem;
-  color: #94a3b8;
+  color: rgba(184, 169, 214, 0.8);
 }
 
-/* ------------------- end service styles ------------------- */
-
 .muted {
-  color: #777;
+  color: rgba(184, 169, 214, 0.85);
   font-size: 0.95rem;
 }
 
@@ -262,6 +275,7 @@ button:hover {
   gap: 8px;
 }
 
+/* ---------- Forms / Inputs ---------- */
 .new-service {
   display: none;
   flex-direction: column;
@@ -280,15 +294,31 @@ input[type="text"],
 input[type="number"],
 textarea {
   padding: 10px;
-  border-radius: 8px;
-  border: 1px solid #ccc;
+  border-radius: 10px;
   width: 100%;
+
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--text, #e5e7eb);
+  border: 1px solid var(--border, rgba(186, 160, 210, 0.25));
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(229, 231, 235, 0.55);
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: rgba(124, 58, 237, 0.75);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
 }
 
 .input-number {
   max-width: 200px;
 }
 
+/* ---------- Stars ---------- */
 .stars {
   font-size: 1.2rem;
   letter-spacing: 2px;
@@ -296,6 +326,7 @@ textarea {
   flex-wrap: wrap;
 }
 
+/* ---------- Reviews ---------- */
 .review-list {
   display: grid;
   grid-template-columns: 1fr;
@@ -306,11 +337,12 @@ textarea {
 }
 
 .review {
-  background: #fff;
-  color: #333;
-  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.16);
+  color: var(--text, #e5e7eb);
+  border-radius: 14px;
+  border: 1px solid var(--border, rgba(186, 160, 210, 0.25));
   padding: 16px;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
   max-width: 100%;
   box-sizing: border-box;
   overflow-wrap: anywhere;
@@ -327,11 +359,12 @@ textarea {
 }
 
 .badge {
-  background: #eef2ff;
-  color: #4e54c8;
-  padding: 3px 8px;
+  background: rgba(124, 58, 237, 0.16);
+  color: var(--accent, #c084fc);
+  padding: 3px 10px;
   border-radius: 999px;
-  font-weight: 600;
+  font-weight: 700;
+  border: 1px solid rgba(192, 132, 252, 0.25);
 }
 
 .w-full {
@@ -354,46 +387,46 @@ textarea {
   justify-content: center;
 }
 
+/* ---------- Floating Buttons ---------- */
 .floating-btn {
   position: fixed;
   right: 20px;
   width: 180px;
   text-align: center;
   padding: 14px;
-  border-radius: 50px;
-  font-weight: bold;
+  border-radius: 999px;
+  font-weight: 800;
   font-size: 1.1rem;
   color: #fff;
   display: block;
   z-index: 100;
+
+  background: linear-gradient(135deg, var(--brand-a, #7c3aed), var(--brand-b, #a855f7));
+  border: 1px solid rgba(192, 132, 252, 0.35);
+  box-shadow: 0 14px 34px rgba(124, 58, 237, 0.22);
 }
 
 #goToServicesBtn {
-  background-color: #28a745;
   bottom: 200px;
 }
 
 #goToMessagesBtn {
-  background-color: #17a2b8;
   bottom: 140px;
 }
 
 #addNewServiceBtn {
-  background-color: #ffc107;
-  color: #333;
   bottom: 80px;
 }
 
 #editDescBtnFloat {
-  background-color: #6f42c1;
   bottom: 20px;
 }
 
 #backToMyProfileBtn {
-  background-color: #0ea5e9;
   bottom: 260px;
 }
 
+/* ---------- Mobile button row ---------- */
 .mobile-button-row {
   display: none;
   position: fixed;
@@ -401,27 +434,23 @@ textarea {
   left: 0;
   width: 100%;
   justify-content: space-around;
-  padding: 10px 0;
-  gap: 5px;
-  background-color: rgba(255, 255, 255, 0.95);
+  padding: 10px 10px;
+  gap: 8px;
+
+  background: rgba(15, 23, 42, 0.92);
+  border-top: 1px solid var(--border, rgba(186, 160, 210, 0.25));
   z-index: 9999;
 }
 
 .mobile-button-row button {
   flex: 1;
   border-radius: 12px;
-  font-weight: bold;
+  font-weight: 800;
   font-size: 1.05rem;
   padding: 14px;
-  background-color: #4e54c8;
-  color: #fff;
 }
 
-.mobile-button-row button:hover {
-  transform: translateY(-5px);
-  opacity: 0.9;
-}
-
+/* Responsive */
 @media (max-width: 480px) {
   .floating-btn {
     display: none;
@@ -441,29 +470,29 @@ textarea {
   }
 }
 
-/* ---------- High-contrast inputs for profile editing ---------- */
+/* ---------- High-contrast inputs for editing (keeps Surreal purple focus) ---------- */
 .card input,
 .card textarea {
-  background: #0f172a;          /* dark, but not pure black */
-  color: #f8fafc;               /* very light text */
-  border: 1px solid #475569;    /* clearer border */
+  background: rgba(0, 0, 0, 0.18);
+  color: #f8fafc;
+  border: 1px solid rgba(186, 160, 210, 0.25);
   font-size: 1rem;
 }
 
 .card input::placeholder,
 .card textarea::placeholder {
-  color: #9ca3af;               /* readable gray */
+  color: rgba(229, 231, 235, 0.55);
 }
 
 .card input:focus,
 .card textarea:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.6);
+  border-color: rgba(124, 58, 237, 0.75);
+  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.25);
   outline: none;
 }
 
 .card input[disabled] {
-  color: #cbd5e1;               /* brighter disabled text */
-  background: #0f172a;
+  color: rgba(229, 231, 235, 0.78);
+  background: rgba(0, 0, 0, 0.18);
   opacity: 1;
 }
