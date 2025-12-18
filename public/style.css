@@ -530,3 +530,24 @@ html, body{
     #ffffff 100%
   ) !important;
 }
+/* ---------- Purple tint boost (match index glow) ---------- */
+:root[data-theme="dark"]{
+  /* cards look more purple instead of navy */
+  --surface-2: rgba(18, 10, 32, 0.78);
+  --surface: rgba(18, 10, 32, 0.92);
+
+  /* slightly more purple border */
+  --border: rgba(168, 85, 247, 0.22);
+
+  /* stronger ambient glow */
+  --glow: rgba(168, 85, 247, 0.28);
+}
+
+/* make cards pick up a subtle glow like your login/index */
+:root[data-theme="dark"] .card,
+:root[data-theme="dark"] .sidebar{
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.55),
+    0 0 0 1px rgba(168,85,247,0.08),
+    0 0 40px rgba(168,85,247,0.10);
+}
