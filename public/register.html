@@ -6,6 +6,13 @@
     <title>Surreal Systems – Register</title>
     <meta name="description" content="Create your Surreal Systems account." />
 
+    <!-- ✅ Force DARK before CSS loads (beats init.js/localStorage) -->
+    <script>
+      document.documentElement.setAttribute("data-theme", "dark");
+      // Optional: if something previously saved "light", wipe it:
+      // localStorage.removeItem("theme");
+    </script>
+
     <!-- Fonts (match login/index) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,7 +25,7 @@
     <link rel="stylesheet" href="/style.css" />
     <link rel="stylesheet" href="/register.css" />
 
-    <!-- Init first so theme + API base is set (safe even if register.js doesn't need it) -->
+    <!-- Init first so theme + API base is set -->
     <script src="/init.js" defer></script>
     <script src="/register.js" defer></script>
 
@@ -71,35 +78,32 @@
         }
       }
 
-      /* Ensure both big panels feel like login */
       .panel {
         border-radius: 24px;
       }
 
-      /* ✅ IMPORTANT: make the LEFT big title match login (white + strong) */
+      /* Make the LEFT big title match login (white + strong) */
       .pitch-title {
         color: var(--text);
       }
 
-      /* ✅ Make register inputs feel like login (slightly glassy, not too dark) */
-      /* This only affects THIS page, without changing global style.css */
+      /* Make register inputs feel like login */
       .panel.card input,
       .panel.card textarea {
         background: rgba(15, 23, 42, 0.6);
       }
 
-      /* ✅ Keep textarea from feeling too tall */
+      /* Keep textarea from feeling too tall */
       .panel.card textarea {
         min-height: 110px;
         max-height: 140px;
       }
 
-      /* ✅ Give the CTA a bit more breathing room (premium feel) */
+      /* Give the CTA a bit more breathing room */
       #submitBtn {
         margin-top: 24px;
       }
 
-      /* Keep footer consistent with login/index */
       .site-footer {
         flex-shrink: 0;
         width: 100%;
@@ -109,28 +113,27 @@
         font-size: 0.85rem;
       }
 
-      /* Bottom-right logo watermark area (same idea as login) */
+      /* Bottom-right logo watermark area */
       .watermark-wrap {
         position: relative;
       }
 
       .watermark {
-  position: absolute;
-  right: 14px;
-  bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  opacity: 0.9;
-  pointer-events: none;
+        position: absolute;
+        right: 14px;
+        bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        opacity: 0.9;
+        pointer-events: none;
 
-  /* ✅ Cross-browser no-select */
-  -webkit-user-select: none; /* Safari / iOS */
-  -moz-user-select: none;    /* Firefox */
-  -ms-user-select: none;     /* Old Edge */
-  user-select: none;         /* Standard */
-}
-
+        /* ✅ Cross-browser no-select */
+        -webkit-user-select: none; /* Safari / iOS */
+        -moz-user-select: none;    /* Firefox */
+        -ms-user-select: none;     /* Old Edge */
+        user-select: none;         /* Standard */
+      }
 
       .watermark img {
         width: 84px;
@@ -191,8 +194,6 @@
             <div class="badge-premium">● Premium perks for power users</div>
           </div>
 
-          <!-- ✅ watermark (optional) -->
-          <!-- If your file name is different, update the src -->
           <div class="watermark" aria-hidden="true">
             <img src="/images/surrealsystems-logo.png" alt="" />
             <div class="wm-text">Surreal Systems</div>
