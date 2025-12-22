@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap");
 
 :root{
   --bg:#f5f0ff;
@@ -21,12 +21,11 @@ html, body{ height:100%; }
 
 body{
   margin:0;
-  font-family: "Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  font-family:"Inter", system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
   background: var(--bg);
   color: var(--text);
 }
 
-/* No scroll on desktop */
 .index-page{ overflow:hidden; }
 
 .shell{
@@ -50,7 +49,7 @@ body{
   display:flex;
   align-items:center;
   gap:10px;
-  font-weight:800;
+  font-weight:900;
 }
 
 .brand-dot{
@@ -70,17 +69,17 @@ body{
   border: 1px solid rgba(124,58,237,0.25);
   background: rgba(124,58,237,0.08);
   color: var(--brand-a);
-  font-weight: 800;
+  font-weight: 900;
 }
 .ghost-link:hover{ filter: brightness(0.98); }
 
 .grid{
-  flex: 1;
+  flex:1;
   display:grid;
   grid-template-columns: 1.15fr 0.85fr 0.85fr;
   gap: 18px;
   align-items:stretch;
-  min-height: 0;
+  min-height:0;
 }
 
 .panel{
@@ -91,25 +90,75 @@ body{
   padding: 18px;
   display:flex;
   flex-direction:column;
-  min-height: 0;
+  min-height:0;
 }
 
-/* LEFT */
+/* LEFT (pitch) */
+.pitch--sharktank{
+  position: relative;
+  overflow: hidden;
+}
+
+.pitch--sharktank::before{
+  content:"";
+  position:absolute;
+  inset:-2px;
+  background:
+    radial-gradient(circle at 10% 12%, rgba(124,58,237,0.20), transparent 55%),
+    radial-gradient(circle at 90% 22%, rgba(168,85,247,0.18), transparent 60%);
+  pointer-events:none;
+}
+
+.pitch--sharktank > *{
+  position: relative;
+  z-index: 1;
+}
+
+.pitch-kicker{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom: 10px;
+}
+
+.chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-size: 0.85rem;
+  border: 1px solid rgba(124,58,237,0.25);
+  background: rgba(124,58,237,0.10);
+  color: #4c1d95;
+}
+
+.chip-live{
+  background: linear-gradient(135deg, rgba(124,58,237,0.14), rgba(168,85,247,0.10));
+}
+
+.chip-deal{
+  background: rgba(255,255,255,0.65);
+}
+
 .pitch-title{
-  font-size: 2.1rem;
-  line-height: 1.05;
-  margin: 4px 0 10px;
+  font-size: 2.35rem;
+  line-height: 1.02;
+  margin: 2px 0 10px;
+  font-weight: 950;
+  letter-spacing: -0.02em;
 }
 
-/* Short + clean (no wall of text) */
 .pitch-subtitle{
-  margin: 0 0 12px;
+  margin:0 0 12px;
   color: var(--muted);
   line-height: 1.45;
+  font-size: 1.02rem;
 
-  display: -webkit-box;
+  display:-webkit-box;
   -webkit-box-orient: vertical;
-  overflow: hidden;
+  overflow:hidden;
   -webkit-line-clamp: 4;
   line-clamp: 4;
 }
@@ -124,45 +173,87 @@ body{
 
 .pitch-item{
   border-radius: 18px;
-  border: 1px solid rgba(124,58,237,0.22);
-  background: rgba(124,58,237,0.06);
+  border: 1px solid rgba(124,58,237,0.25);
+  background: rgba(124,58,237,0.07);
   padding: 14px;
+}
+
+.step{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom: 8px;
+}
+
+.step-num{
+  width:28px;
+  height:28px;
+  border-radius: 999px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight: 950;
+  color: white;
+  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+  box-shadow: 0 10px 20px rgba(124,58,237,0.18);
+}
+
+.step-label{
+  font-weight: 950;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-size: 0.78rem;
+  color: rgba(76,29,149,0.85);
 }
 
 .pitch-item h3{
   margin:0 0 6px;
-  font-size: 1.02rem;
+  font-size: 1.05rem;
+  font-weight: 950;
 }
 
 .pitch-item p{
   margin:0;
   color: var(--muted);
   line-height:1.35;
+  font-size: 0.95rem;
 
-  display: -webkit-box;
+  display:-webkit-box;
   -webkit-box-orient: vertical;
-  overflow: hidden;
+  overflow:hidden;
   -webkit-line-clamp: 3;
   line-clamp: 3;
 }
 
-/* Keep badge inside the tile (no floating into footer) */
 .badge-premium{
   display:inline-flex;
   margin-top: 10px;
-  padding: 7px 12px;
+  padding: 8px 12px;
   border-radius: 999px;
   border: 1px solid rgba(124,58,237,0.25);
-  background: rgba(124,58,237,0.12);
+  background: linear-gradient(135deg, rgba(124,58,237,0.14), rgba(168,85,247,0.10));
   color: #4c1d95;
-  font-weight: 800;
+  font-weight: 950;
   font-size: 0.88rem;
 }
 
-/* VIDEO */
+/* ✅ MIDDLE STACK (video + logo under it) */
+.middle-stack{
+  display:flex;
+  flex-direction:column;
+  gap: 12px;
+  min-height:0;
+}
+
+/* ✅ Make the video card shorter */
+.video--compact{
+  flex: 0 0 auto;
+}
+
 .video-head h2{
   margin: 4px 0 4px;
   font-size: 1.3rem;
+  font-weight: 950;
 }
 .video-head p{
   margin:0 0 12px;
@@ -170,7 +261,7 @@ body{
 }
 
 .video-frame{
-  flex:1;
+  height: 240px;            /* ✅ shorter than before */
   border-radius: 18px;
   border: 1px solid rgba(124,58,237,0.22);
   background: radial-gradient(circle at top left, rgba(124,58,237,0.18), rgba(168,85,247,0.06));
@@ -179,7 +270,6 @@ body{
   justify-content:center;
   gap: 14px;
   padding: 14px;
-  min-height: 0;
 }
 
 .video-badge{
@@ -189,7 +279,7 @@ body{
   display:flex;
   align-items:center;
   justify-content:center;
-  font-weight:900;
+  font-weight:950;
   color:white;
   background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
   box-shadow: 0 12px 24px rgba(124,58,237,0.22);
@@ -200,11 +290,8 @@ body{
   flex-direction:column;
   gap: 3px;
 }
-.video-text strong{ font-size: 1.02rem; }
-.video-text span{
-  color: var(--muted);
-  font-size: 0.92rem;
-}
+.video-text strong{ font-size: 1.02rem; font-weight: 950; }
+.video-text span{ color: var(--muted); font-size: 0.92rem; }
 
 .video-notes{
   margin-top: 10px;
@@ -222,10 +309,41 @@ body{
   background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
 }
 
-/* LOGIN */
+/* ✅ Logo under middle card */
+.mid-logo{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(124,58,237,0.18);
+  background: rgba(255,255,255,0.55);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.10);
+}
+
+.mid-logo img{
+  width: 34px;
+  height: auto;
+  display:block;
+  opacity: 0.9;
+}
+
+.mid-logo-text{
+  font-weight: 950;
+  letter-spacing: 0.22em;
+  font-size: 0.85rem;
+  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
+  -webkit-background-clip:text;
+  background-clip:text;
+  color: transparent;
+}
+
+/* RIGHT: login */
 .card h2{
   margin: 4px 0 6px;
   font-size: 1.6rem;
+  font-weight: 950;
 }
 .card > p{
   margin:0 0 12px;
@@ -240,7 +358,7 @@ body{
 }
 
 label{
-  font-weight:800;
+  font-weight: 950;
   color: var(--text);
   font-size: 0.92rem;
 }
@@ -271,7 +389,7 @@ input:focus{
   border: 1px solid rgba(124,58,237,0.25);
   background: rgba(124,58,237,0.10);
   color: var(--brand-a);
-  font-weight: 900;
+  font-weight: 950;
   cursor:pointer;
 }
 
@@ -282,7 +400,7 @@ input:focus{
   border:none;
   border-radius: 999px;
   color:white;
-  font-weight:900;
+  font-weight: 950;
   font-size: 1.02rem;
   cursor:pointer;
   background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
@@ -297,39 +415,11 @@ input:focus{
 
 .subtext a{
   color: var(--brand-a);
-  font-weight: 900;
+  font-weight: 950;
   text-decoration:none;
 }
 .subtext a:hover{ text-decoration:underline; }
 
-/* Bottom watermark */
-.bottom-brand{
-  position: absolute;
-  right: 12px;
-  bottom: 18px;
-  display:flex;
-  align-items:center;
-  gap: 12px;
-  opacity: 0.18;
-  pointer-events:none;
-}
-
-.bottom-brand img{
-  width: 56px;
-  height: auto;
-}
-
-.bottom-brand-text{
-  font-weight: 900;
-  letter-spacing: 0.22em;
-  font-size: 0.85rem;
-  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-  -webkit-background-clip: text;
-  background-clip:text;
-  color: transparent;
-}
-
-/* Footer */
 .site-footer{
   text-align:center;
   padding: 10px 0 2px;
@@ -341,5 +431,4 @@ input:focus{
 @media (max-width: 980px){
   .index-page{ overflow:auto; }
   .grid{ grid-template-columns: 1fr; }
-  .bottom-brand{ display:none; }
 }

@@ -29,54 +29,82 @@
     <!-- 3-panel layout -->
     <section class="grid">
 
-      <!-- LEFT: Investor/Partner focused pitch -->
-      <section class="panel pitch" aria-labelledby="pitch-title">
-        <h1 id="pitch-title" class="pitch-title">Bring your idea to life.</h1>
+      <!-- LEFT: Pitch -->
+      <section class="panel pitch pitch--sharktank" aria-labelledby="pitch-title">
+        <div class="pitch-kicker">
+          <span class="chip chip-live">● Live pitches</span>
+          <span class="chip chip-deal">Deal-based collabs</span>
+        </div>
+
+        <h1 id="pitch-title" class="pitch-title">
+          Bring your idea to life.
+        </h1>
 
         <p class="pitch-subtitle">
-          Surreal Systems connects founders with the missing piece — a business partner, builder, or investor.
-          Pitch your idea, match with the right people, and build it together.
+          Surreal Systems connects founders with the missing piece — a business partner,
+          builder, or investor. Pitch your idea, match with the right people, and build it together.
         </p>
 
         <div class="pitch-list" aria-label="How it works">
           <article class="pitch-item">
+            <div class="step">
+              <span class="step-num">1</span>
+              <span class="step-label">Pitch</span>
+            </div>
             <h3>Post your idea</h3>
             <p>Share the concept, the goal, and what you want to build — clearly and honestly.</p>
           </article>
 
           <article class="pitch-item">
+            <div class="step">
+              <span class="step-num">2</span>
+              <span class="step-label">Match</span>
+            </div>
             <h3>Get the missing piece</h3>
             <p>Find a co-founder, technical builder, marketer, operator, or investor who believes in it.</p>
           </article>
 
           <article class="pitch-item">
+            <div class="step">
+              <span class="step-num">3</span>
+              <span class="step-label">Deal</span>
+            </div>
             <h3>Agree &amp; build</h3>
             <p>Align on roles or percentages, then collaborate to turn the idea into something real.</p>
-
             <span class="badge-premium">● Premium boosts visibility &amp; matching</span>
           </article>
         </div>
       </section>
 
-      <!-- MIDDLE: Video placeholder -->
-      <section class="panel video" aria-labelledby="video-title">
-        <div class="video-head">
-          <h2 id="video-title">Quick intro</h2>
-          <p>60 seconds to explain Surreal Systems.</p>
-        </div>
+      <!-- MIDDLE: Video + Logo underneath -->
+      <section class="middle-stack" aria-label="Intro and brand">
 
-        <div class="video-frame" role="img" aria-label="Intro video placeholder">
-          <div class="video-badge">▶</div>
-          <div class="video-text">
-            <strong>Intro video goes here</strong>
-            <span>Drop in an iframe or MP4 later</span>
+        <section class="panel video video--compact" aria-labelledby="video-title">
+          <div class="video-head">
+            <h2 id="video-title">Quick intro</h2>
+            <p>60 seconds to explain Surreal Systems.</p>
           </div>
+
+          <div class="video-frame" role="img" aria-label="Intro video placeholder">
+            <div class="video-badge">▶</div>
+            <div class="video-text">
+              <strong>Intro video goes here</strong>
+              <span>Drop in an iframe or MP4 later</span>
+            </div>
+          </div>
+
+          <div class="video-notes">
+            <span class="note-dot" aria-hidden="true"></span>
+            <span>Later you can embed YouTube, Vimeo, or a self-hosted video.</span>
+          </div>
+        </section>
+
+        <!-- ✅ Logo under the middle panel -->
+        <div class="mid-logo" aria-hidden="true">
+          <img src="/surrealsystems-logo.png" alt="" />
+          <div class="mid-logo-text">SURREAL SYSTEMS</div>
         </div>
 
-        <div class="video-notes">
-          <span class="note-dot" aria-hidden="true"></span>
-          <span>Later you can embed YouTube, Vimeo, or a self-hosted video.</span>
-        </div>
       </section>
 
       <!-- RIGHT: Login -->
@@ -94,12 +122,7 @@
             <label for="password">Password</label>
             <div class="password-row">
               <input id="password" name="password" type="password" placeholder="Your password" required />
-              <button
-                type="button"
-                class="toggle-password"
-                id="togglePassword"
-                aria-label="Toggle password visibility"
-              >
+              <button type="button" class="toggle-password" id="togglePassword" aria-label="Toggle password visibility">
                 Show
               </button>
             </div>
@@ -115,12 +138,6 @@
       </section>
 
     </section>
-
-    <!-- Bottom brand mark -->
-    <aside class="bottom-brand" aria-hidden="true">
-      <img src="/surrealsystems-logo.png" alt="" />
-      <div class="bottom-brand-text">SURREAL SYSTEMS</div>
-    </aside>
 
     <footer class="site-footer">
       <span>© 2025 Surreal Systems. All rights reserved.</span>
