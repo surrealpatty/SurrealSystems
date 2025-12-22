@@ -26,7 +26,7 @@ body{
   color: var(--text);
 }
 
-/* ✅ Desktop: prevent scroll, but allow enough height so footer isn't cut */
+/* Desktop: keep one-screen */
 .index-page{ overflow:hidden; }
 
 .shell{
@@ -36,45 +36,10 @@ body{
   display:flex;
   flex-direction:column;
 
-  /* ✅ less top padding, more bottom padding so footer stays visible */
-  padding: 16px 0 18px;
+  /* ✅ topbar removed, so tighten top padding */
+  padding: 12px 0 18px;
   position:relative;
 }
-
-.topbar{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding: 0 6px 12px; /* ✅ tighter (removes that “extra strip” feel) */
-}
-
-.brand-row{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  font-weight:900;
-}
-
-.brand-dot{
-  width:10px;
-  height:10px;
-  border-radius:999px;
-  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-  box-shadow: 0 0 14px rgba(124,58,237,0.25);
-}
-
-.brand-text{ font-size: 1.05rem; }
-
-.ghost-link{
-  text-decoration:none;
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: 1px solid rgba(124,58,237,0.25);
-  background: rgba(124,58,237,0.08);
-  color: var(--brand-a);
-  font-weight: 900;
-}
-.ghost-link:hover{ filter: brightness(0.98); }
 
 .grid{
   flex:1;
@@ -254,9 +219,15 @@ body{
   min-height:0;
 }
 
-/* ✅ Keep middle tall enough so bottom not cut */
+.video-head h2{
+  margin: 4px 0 10px;
+  font-size: 1.3rem;
+  font-weight: 950;
+}
+
+/* ✅ balanced height so footer + logo fit */
 .video-frame{
-  height: 320px; /* balanced so footer/logo fit */
+  height: 320px;
   border-radius: 18px;
   border: 1px solid rgba(124,58,237,0.22);
   background: radial-gradient(circle at top left, rgba(124,58,237,0.18), rgba(168,85,247,0.06));
@@ -265,12 +236,6 @@ body{
   justify-content:center;
   gap: 14px;
   padding: 14px;
-}
-
-.video-head h2{
-  margin: 4px 0 10px;
-  font-size: 1.3rem;
-  font-weight: 950;
 }
 
 .video-badge{
@@ -294,19 +259,19 @@ body{
 .video-text strong{ font-size: 1.05rem; font-weight: 950; }
 .video-text span{ color: var(--muted); font-size: 0.94rem; }
 
-/* ✅ LOGO: NO bubble, BIGGER */
+/* ✅ LOGO: NO bubble, BIG */
 .mid-logo{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 0;           /* no bubble padding */
-  border: none;         /* no outline */
-  background: none;     /* no bubble bg */
-  box-shadow: none;     /* no bubble shadow */
+  padding: 0;
+  border: none;
+  background: none;
+  box-shadow: none;
 }
 
 .mid-logo img{
-  width: min(320px, 90%); /* ✅ big logo */
+  width: min(360px, 92%);
   height: auto;
   display:block;
   border-radius: 0;
@@ -316,6 +281,23 @@ body{
 /* ==========================
    RIGHT (Login)
 ========================== */
+
+.right-actions{
+  display:flex;
+  justify-content:flex-end;
+  margin-bottom: 6px;
+}
+
+.ghost-link{
+  text-decoration:none;
+  padding: 10px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(124,58,237,0.25);
+  background: rgba(124,58,237,0.08);
+  color: var(--brand-a);
+  font-weight: 900;
+}
+.ghost-link:hover{ filter: brightness(0.98); }
 
 .card h2{
   margin: 4px 0 6px;
@@ -397,7 +379,7 @@ input:focus{
 }
 .subtext a:hover{ text-decoration:underline; }
 
-/* ✅ Footer never cut */
+/* Footer */
 .site-footer{
   text-align:center;
   padding: 10px 0 2px;
