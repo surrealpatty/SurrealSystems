@@ -5,9 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Surreal Systems – Build, Connect, Create</title>
 
-  <!-- ✅ ALWAYS load global tokens first -->
+  <!-- Global tokens + base components -->
   <link rel="stylesheet" href="/style.css" />
-  <!-- ✅ Page-specific layout -->
+  <!-- Landing page layout -->
   <link rel="stylesheet" href="/index.css" />
 
   <script src="/init.js" defer></script>
@@ -126,7 +126,7 @@
 
     </section>
 
-    <!-- Bottom brand mark (soft, not covering content) -->
+    <!-- Bottom brand mark (soft watermark) -->
     <aside class="bottom-brand" aria-hidden="true">
       <img src="/surrealsystems-logo.png" alt="" />
       <div class="bottom-brand-text">Surreal Systems</div>
@@ -137,6 +137,7 @@
     </footer>
   </main>
 
+  <!-- password toggle -->
   <script>
     document.addEventListener("DOMContentLoaded", () => {
       const input = document.getElementById("password");
@@ -152,4 +153,3 @@
   </script>
 </body>
 </html>
-
