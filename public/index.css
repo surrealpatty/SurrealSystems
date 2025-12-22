@@ -127,7 +127,7 @@ body{
   letter-spacing: -0.02em;
 }
 
-/* ✅ Fixed clamp order + tighter height */
+/* ✅ clamp order: -webkit-line-clamp first, then line-clamp */
 .pitch-subtitle{
   margin:0 0 10px;
   color: var(--muted);
@@ -191,7 +191,7 @@ body{
   font-weight: 950;
 }
 
-/* ✅ Fixed clamp order */
+/* ✅ clamp order: -webkit-line-clamp first, then line-clamp */
 .pitch-item p{
   margin:0;
   color: var(--muted);
@@ -288,12 +288,11 @@ body{
   background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
 }
 
-/* ✅ Logo bigger + more hero */
+/* ✅ IMAGE-ONLY LOGO (no text) + MUCH BIGGER */
 .mid-logo{
   display:flex;
   align-items:center;
   justify-content:center;
-  gap: 14px;
   padding: 16px 20px;
   border-radius: 999px;
   border: 1px solid rgba(124,58,237,0.18);
@@ -301,21 +300,12 @@ body{
   box-shadow: 0 18px 40px rgba(0,0,0,0.10);
 }
 
+/* ✅ Increase this number if you want it even bigger */
 .mid-logo img{
-  width: 64px;
+  width: 160px; /* ✅ was 64 */
   height: auto;
   display:block;
-  filter: drop-shadow(0 0 16px rgba(124,58,237,0.25));
-}
-
-.mid-logo-text{
-  font-weight: 950;
-  letter-spacing: 0.28em;
-  font-size: 1.05rem;
-  background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-  -webkit-background-clip:text;
-  background-clip:text;
-  color: transparent;
+  filter: drop-shadow(0 0 18px rgba(124,58,237,0.28));
 }
 
 /* ==========================
