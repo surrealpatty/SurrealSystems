@@ -721,3 +721,25 @@ html[data-theme="light"],
 html[data-theme="light"] body{
   background: #f5f0ff !important;
 }
+.hero-video {
+  grid-column: span 2;
+  background: #0b0313;
+  border-radius: 22px;
+  border: 1px solid rgba(186,160,210,0.25);
+  padding: 20px;
+}
+
+.hero-video h2 {
+  margin-top: 0;
+}
+
+.hero-video-frame {
+  margin-top: 14px;
+  aspect-ratio: 16 / 9;
+  border-radius: 16px;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(232,224,255,0.6);
+}
