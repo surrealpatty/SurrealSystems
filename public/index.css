@@ -265,34 +265,37 @@ body{
 .video-text strong{ font-size: 1.05rem; font-weight: 950; }
 .video-text span{ color: var(--muted); font-size: 0.94rem; }
 
-/* ✅ Logo: no bubble, bigger, and constrained so it doesn't push into footer */
+/* ✅ Logo: NO bubble behind it + rounded image */
 .mid-logo{
   display:flex;
   align-items:center;
   justify-content:center;
-  padding: 0;
+
+  /* ✅ remove the panel look completely */
+  background: transparent;
   border: none;
-  background: none;
   box-shadow: none;
+  padding: 0;
 
   /* keep the logo from eating the footer space */
   flex: 0 0 auto;
 }
+
 .mid-logo img{
   width: min(360px, 96%);
   max-height: 260px;
   height: auto;
   display:block;
 
-  object-fit: cover;
+  /* ✅ show the whole logo (no cropping) */
+  object-fit: contain;
 
-  /* ✅ round the image itself */
+  /* ✅ round ONLY the image */
   border-radius: 24px;
 
-  /* ✅ clean, subtle depth (optional but recommended) */
+  /* ✅ subtle depth (optional) */
   box-shadow: 0 16px 36px rgba(0,0,0,0.18);
 }
-
 
 /* ==========================
    RIGHT (Login)
