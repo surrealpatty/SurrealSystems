@@ -26,28 +26,18 @@
   color: var(--text);
 }
 
-/* ✅ The main 2-panel grid */
+/* ✅ MATCH INDEX: 1fr + fixed sidebar width */
 .register-page .layout{
   display:grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  gap: 24px;
-  align-items: stretch; /* equal height */
+  grid-template-columns: 1fr 440px; /* ✅ like index */
+  gap: 40px;                        /* ✅ like index */
+  align-items: stretch;
 }
 
-/* ✅ cap panel height so the right side can't run too tall */
-.register-page .pitch,
-.register-page .form-card{
-  display:flex;
-  flex-direction:column;
-  min-height: 520px;
-  max-height: 640px;
-}
-
-/* ✅ right panel scrolls inside */
+/* ✅ IMPORTANT: remove internal scrolling vibe */
 .register-page .form-card form{
-  flex: 1 1 auto;
-  overflow: auto;
-  padding-right: 6px;
+  overflow: visible;  /* ✅ no scrollbar inside card */
+  padding-right: 0;
 }
 
 /* Make pitch panel look like index (soft lavender blocks) */
@@ -85,17 +75,17 @@
   width: fit-content;
 }
 
-/* form spacing */
+/* form spacing (slightly tighter so the right card stays closer to index height) */
 .register-page .hint{
   margin: 0 0 10px;
   color: var(--muted);
 }
 
 .register-page .field{
-  margin-top: 12px;
+  margin-top: 10px;     /* ✅ slightly tighter */
   display:flex;
   flex-direction:column;
-  gap: 8px;
+  gap: 6px;             /* ✅ slightly tighter */
 }
 
 .register-page .field-label-row{
@@ -120,9 +110,9 @@
   flex: 1;
 }
 
-/* Slightly smaller textarea so the right panel doesn't balloon */
+/* ✅ Keep textarea compact like index */
 .register-page textarea{
-  min-height: 90px;
+  min-height: 74px;
 }
 
 /* Show button should look like your index pills */
@@ -138,15 +128,6 @@
 
 .register-page .toggle-password:hover{
   filter: brightness(1.03);
-}
-
-/* ✅ keep Create account visible at bottom of right card */
-.register-page #submitBtn{
-  position: sticky;
-  bottom: 0;
-  z-index: 2;
-  margin-top: 14px;
-  box-shadow: var(--shadow-1);
 }
 
 .register-page .message{
@@ -174,24 +155,8 @@
 @media (max-width: 980px){
   .register-page .layout{
     grid-template-columns: 1fr;
+    gap: 20px;
   }
-
-  /* ✅ remove caps on mobile (no min-height:auto needed) */
-  .register-page .pitch,
-  .register-page .form-card{
-    max-height: none;
-    min-height: 0; /* safe + prevents any weird overflow */
-  }
-
-  .register-page .form-card form{
-    overflow: visible;
-    padding-right: 0;
-  }
-
-  .register-page #submitBtn{
-    position: static;
-  }
-
   .register-page .pitch-title{
     font-size: 1.8rem;
   }
