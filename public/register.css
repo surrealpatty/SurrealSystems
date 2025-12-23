@@ -31,7 +31,23 @@
   display:grid;
   grid-template-columns: 1.15fr 0.85fr;
   gap: 24px;
-  align-items: start;
+  align-items: stretch; /* equal height */
+}
+
+/* ✅ cap panel height so the right side can't run too tall */
+.register-page .pitch,
+.register-page .form-card{
+  display:flex;
+  flex-direction:column;
+  min-height: 520px;
+  max-height: 640px;
+}
+
+/* ✅ right panel scrolls inside */
+.register-page .form-card form{
+  flex: 1 1 auto;
+  overflow: auto;
+  padding-right: 6px;
 }
 
 /* Make pitch panel look like index (soft lavender blocks) */
@@ -104,7 +120,12 @@
   flex: 1;
 }
 
-/* Show button should look like your index pills, not a big gradient */
+/* Slightly smaller textarea so the right panel doesn't balloon */
+.register-page textarea{
+  min-height: 90px;
+}
+
+/* Show button should look like your index pills */
 .register-page .toggle-password{
   padding: 10px 14px;
   border-radius: 999px;
@@ -117,6 +138,15 @@
 
 .register-page .toggle-password:hover{
   filter: brightness(1.03);
+}
+
+/* ✅ keep Create account visible at bottom of right card */
+.register-page #submitBtn{
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  margin-top: 14px;
+  box-shadow: var(--shadow-1);
 }
 
 .register-page .message{
@@ -145,6 +175,23 @@
   .register-page .layout{
     grid-template-columns: 1fr;
   }
+
+  /* ✅ remove caps on mobile (no min-height:auto needed) */
+  .register-page .pitch,
+  .register-page .form-card{
+    max-height: none;
+    min-height: 0; /* safe + prevents any weird overflow */
+  }
+
+  .register-page .form-card form{
+    overflow: visible;
+    padding-right: 0;
+  }
+
+  .register-page #submitBtn{
+    position: static;
+  }
+
   .register-page .pitch-title{
     font-size: 1.8rem;
   }
