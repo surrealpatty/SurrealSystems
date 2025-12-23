@@ -2,7 +2,7 @@
 const { sequelize } = require('../config/database');
 const buildUser = require('./user');
 const buildMessage = require('./message');
-const buildproject = require('./project');
+const buildproject = require('./service');
 const buildRating = require('./rating');
 const buildBilling = require('./billing'); // <- new
 
