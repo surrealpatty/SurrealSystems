@@ -601,6 +601,36 @@ html[data-theme="light"] #messageModal .modal-content {
 }
 
 /* =========================================================
+   DASHBOARD WIDTH FIX (services/messages/profile)
+   These pages use .dash-wrapper (seen in DevTools),
+   so they ignore .container/.profile-wrapper rules.
+========================================================= */
+
+.dash-wrapper{
+  max-width: var(--max-width) !important;
+  width: 92% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Ensure dashboard grids & panels can expand */
+.dash-layout,
+.profile-layout{
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.dash-main,
+.main-content,
+.content,
+.content-panel{
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+/* =========================================================
    FORCE PURPLE (single clean override section)
 ========================================================= */
 
@@ -722,5 +752,6 @@ html[data-theme="light"] .pill-btn {
   align-items: center;
   justify-content: center;
   color: rgba(232, 224, 255, 0.6);
+  border: 1px solid rgba(186, 160, 210, 0.18);
   border: 1px solid rgba(186, 160, 210, 0.18);
 }
