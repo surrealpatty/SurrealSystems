@@ -125,17 +125,23 @@ body {
   width: 92%;
   padding: 3.5rem 2rem 140px 2rem;
   margin: 12px auto 0;
+
   display: flex;
   flex-direction: column;
   gap: 2rem;
+
   background: var(--surface);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-2);
   color: var(--text);
   text-align: left;
-  align-items: center;
+
+  /* ✅ IMPORTANT FIX: don’t “center + narrow” children */
+  align-items: stretch;
 }
 
+/* ✅ REMOVED: this was clamping profile/services/messages to 920px */
+/*
 .container > header,
 .container > section,
 .container > .card,
@@ -145,6 +151,7 @@ body {
   margin-left: auto;
   margin-right: auto;
 }
+*/
 
 .container--transparent {
   background: transparent;
@@ -445,10 +452,12 @@ select:focus {
    PROFILE LAYOUT
 ========================================================= */
 
+/* ✅ IMPORTANT: make wrapper use the same width rules as container */
 .profile-wrapper {
-  max-width: 1100px;
+  max-width: var(--max-width);
+  width: 92%;
   margin: 0 auto;
-  padding: 24px 16px 40px;
+  padding: 24px 0 40px;
 }
 
 .profile-layout {
@@ -583,6 +592,11 @@ html[data-theme="light"] #messageModal .modal-content {
   .btn {
     font-size: 0.95rem;
     padding: 8px 14px;
+  }
+
+  .profile-wrapper {
+    width: 94%;
+    padding: 18px 0 34px;
   }
 }
 
