@@ -10,23 +10,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&family=Poppins:wght@300;400;600&display=swap"
     rel="stylesheet"
   />
 
   <!-- ✅ Global theme -->
   <link rel="stylesheet" href="/style.css" />
-  <!-- ✅ Register page layout + index vibe -->
+  <!-- ✅ Register-only layout -->
   <link rel="stylesheet" href="/register.css" />
 
   <script src="/init.js" defer></script>
   <script src="/register.js" defer></script>
 </head>
 
-<body class="register-page">
-  <main class="register-shell">
-    <!-- Top Brand Row (same vibe as index) -->
-    <header class="register-topbar">
+<body class="auth-page register-page">
+  <div class="page">
+    <!-- Top bar -->
+    <header class="topbar">
       <div class="brand-row">
         <span class="brand-dot" aria-hidden="true"></span>
         <span class="brand-text">Surreal Systems</span>
@@ -37,42 +37,40 @@
       </div>
     </header>
 
-    <!-- ✅ TWO PANEL LAYOUT -->
-    <section class="register-grid">
-      <!-- LEFT -->
-      <section class="panel panel-left">
-        <h1 class="hero-title">Offer your coding skills to the world.</h1>
-        <p class="hero-subtitle">
+    <!-- ✅ TWO PANELS -->
+    <div class="layout">
+      <!-- LEFT PANEL -->
+      <section class="card pitch">
+        <h1 class="pitch-title">Offer your coding skills to the world.</h1>
+        <p class="pitch-subtitle">
           Create posts, connect with developers, and get noticed by clients worldwide.
         </p>
 
-        <div class="pitch-list">
-          <div class="pitch-item">
-            <h3>Offer Your Services</h3>
-            <p>Create posts to sell your skills and showcase your best work.</p>
-          </div>
+        <div class="pitch-item">
+          <h3>Offer Your Services</h3>
+          <p>Create posts to sell your skills and showcase your best work.</p>
+        </div>
 
-          <div class="pitch-item">
-            <h3>Connect &amp; Collaborate</h3>
-            <p>Rate and interact with other developers, build credibility, and grow your professional network.</p>
-          </div>
+        <div class="pitch-item">
+          <h3>Connect &amp; Collaborate</h3>
+          <p>Rate and interact with other developers, build credibility, and grow your professional network.</p>
+        </div>
 
-          <div class="pitch-item">
-            <h3>Ad-Free &amp; Premium</h3>
-            <p>Upgrade for ad-free experience, lower fees, and better visibility.</p>
-            <div class="badge-premium">● Premium perks for power users</div>
-          </div>
+        <div class="pitch-item">
+          <h3>Ad-Free &amp; Premium</h3>
+          <p>Upgrade for ad-free experience, lower fees, and better visibility.</p>
+          <div class="badge-premium">● Premium perks for power users</div>
         </div>
       </section>
 
-      <!-- RIGHT -->
-      <section class="panel panel-right" aria-labelledby="register-heading">
-        <h2 id="register-heading" class="form-title">Create your account</h2>
-        <p class="form-hint">
+      <!-- RIGHT PANEL -->
+      <section class="card form-card" aria-labelledby="register-heading">
+        <h2 id="register-heading">Create your account</h2>
+        <p class="hint">
           Join Surreal Systems to create posts, manage your messages, and grow your projects.
         </p>
 
-        <form id="registerForm" class="form" novalidate>
+        <form id="registerForm" novalidate>
           <div class="field">
             <div class="field-label-row">
               <label for="registerUsername">Username</label>
@@ -84,9 +82,9 @@
               type="text"
               placeholder="e.g. dev_ally"
               autocomplete="username"
-              required
               minlength="3"
               maxlength="32"
+              required
             />
           </div>
 
@@ -115,8 +113,8 @@
                 type="password"
                 placeholder="Create a strong password"
                 autocomplete="new-password"
-                required
                 minlength="8"
+                required
               />
               <button type="button" class="toggle-password" id="togglePassword" aria-pressed="false">
                 Show
@@ -131,9 +129,9 @@
           <div class="field">
             <div class="field-label-row">
               <label for="registerDescription">
-                Tell us about yourself <span class="opt">(optional)</span>
+                Tell us about yourself <span class="field-hint">(optional)</span>
               </label>
-              <span class="field-hint" id="descCounter">0 / 400</span>
+              <span id="descCounter" class="field-hint">0 / 400</span>
             </div>
 
             <textarea
@@ -156,10 +154,9 @@
           </p>
         </form>
       </section>
-    </section>
-  </main>
+    </div>
+  </div>
 
-  <!-- ✅ Footer will never overlap -->
   <footer class="site-footer">
     <div class="footer-inner">
       <span>&copy; 2025 Surreal Systems. All rights reserved.</span>
