@@ -239,6 +239,8 @@ app.use('/api/users', userRoutes);
 app.use('/api/ratings', ratingRoutes);
 app.use('/api/messages', messagesRoutes);
 app.use('/api/payments', paymentsRoutes);
+app.use('/api/services', serviceRoutes);
+app.use('/api/projects', serviceRoutes); // alias: “projects” uses same routes as “services”
 
 /* --------------------------- Static Files -------------------------- */
 const publicDir = path.join(__dirname, '../public');
