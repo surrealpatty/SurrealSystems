@@ -18,6 +18,18 @@ function err(res, message = 'Something went wrong', status = 500, details) {
   return res.status(status).json(out);
 }
 
+// Equity validation helper (0.5 to 99.5, step 0.5)
+function normalizeEquity(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+
+  // force to 0.5 steps
+  const stepped = Math.round(n * 2) / 2;
+
+  if (stepped < 0.5 || stepped > 99.5) return null;
+  return stepped;
+}
+
 /* ------------------------------ LIST ------------------------------- */
 router.get(
   '/',
@@ -41,7 +53,16 @@ router.get(
       // fetch services with owner
       const rows = await Service.findAll({
         where: Object.keys(where).length ? where : undefined,
-        attributes: ['id', 'userId', 'title', 'description', 'price', 'createdAt', 'updatedAt'],
+        attributes: [
+          'id',
+          'userId',
+          'title',
+          'description',
+          'needs',
+          'equityPercentage',
+          'createdAt',
+          'updatedAt',
+        ],
         include: [{ model: User, as: 'owner', attributes: ['id', 'username'] }],
         order: [['createdAt', 'DESC']],
         limit,
@@ -51,14 +72,9 @@ router.get(
       if (!rows || !rows.length)
         return ok(res, { services: [], hasMore: false, nextOffset: offset });
 
-      // Try raw aggregation using COALESCE(stars, score).
-      // Use DB column names (camelCase) and alias to serviceId for JS code.
       const serviceIds = rows.map((r) => r.id);
-      console.info(
-        '[services] fetched rows count=%d, serviceIds=%o',
-        rows.length,
-        serviceIds.slice(0, 5),
-      );
+      console.info('[services] fetched rows count=%d, serviceIds=%o', rows.length, serviceIds.slice(0, 5));
+
       const summaryMap = {};
 
       try {
@@ -85,8 +101,6 @@ router.get(
           };
         });
       } catch (e) {
-        // If raw aggregation fails because column doesn't exist (or other DB issue),
-        // we continue without summaries (avgRating=null) and log the error for debugging.
         console.info(
           'Ratings aggregation skipped or failed (no service-level ratings or DB schema mismatch):',
           e && e.message ? e.message : e,
@@ -99,7 +113,8 @@ router.get(
           id: s.id,
           title: s.title,
           description: s.description,
-          price: s.price,
+          needs: s.needs,
+          equityPercentage: s.equityPercentage,
           owner: s.owner || null,
           user: s.owner || null,
           userId: s.userId,
@@ -119,28 +134,47 @@ router.get(
   },
 );
 
-/* ----------------------------- other routes unmodified ------------------------------ */
-// CREATE / GET by ID / UPDATE / DELETE remain unchanged - keep original code below
-
+/* ------------------------------ CREATE ------------------------------ */
 router.post(
   '/',
   authenticateToken,
   [
     body('title').isString().isLength({ min: 3 }).withMessage('Title is required (min 3 chars)'),
-    body('description').optional({ nullable: true }).isString().isLength({ max: 2000 }),
-    body('price').optional({ nullable: true }).isDecimal().withMessage('Invalid price'),
+    body('description')
+      .isString()
+      .isLength({ min: 3, max: 2000 })
+      .withMessage('Description is required (min 3 chars, max 2000)'),
+    body('needs')
+      .isString()
+      .isLength({ min: 3, max: 2000 })
+      .withMessage('Needs is required (min 3 chars, max 2000)'),
+    body('equityPercentage')
+      .exists()
+      .withMessage('equityPercentage is required')
+      .custom((value) => normalizeEquity(value) !== null)
+      .withMessage('Equity must be between 0.5 and 99.5 (steps of 0.5)'),
   ],
   validate,
   async (req, res) => {
     try {
       const userId = Number(req.user.id);
-      const { title, description, price } = req.body;
+
+      const title = String(req.body.title).trim();
+      const description = String(req.body.description).trim();
+      const needs = String(req.body.needs).trim();
+      const equity = normalizeEquity(req.body.equityPercentage);
+
+      // normalizeEquity already validated by middleware, but keep a safe guard
+      if (equity === null) {
+        return err(res, 'Equity must be between 0.5 and 99.5 (steps of 0.5)', 400);
+      }
 
       const svc = await Service.create({
         userId,
-        title: String(title).trim(),
-        description: description ? String(description).trim() : null,
-        price: price != null ? Number(price) : null,
+        title,
+        description,
+        needs,
+        equityPercentage: equity,
       });
 
       return ok(res, { service: svc }, 201);
@@ -151,6 +185,7 @@ router.post(
   },
 );
 
+/* ----------------------------- GET by ID ---------------------------- */
 router.get('/:id', [param('id').isInt({ min: 1 }).toInt()], validate, async (req, res) => {
   try {
     const id = Number(req.params.id);
@@ -165,14 +200,31 @@ router.get('/:id', [param('id').isInt({ min: 1 }).toInt()], validate, async (req
   }
 });
 
+/* ------------------------------ UPDATE ------------------------------ */
 router.put(
   '/:id',
   authenticateToken,
   [
     param('id').isInt({ min: 1 }).toInt(),
-    body('title').optional().isString().isLength({ min: 3 }),
-    body('description').optional({ nullable: true }).isString().isLength({ max: 2000 }),
-    body('price').optional({ nullable: true }).isDecimal(),
+
+    body('title').optional().isString().isLength({ min: 3 }).withMessage('Title must be at least 3 chars'),
+
+    body('description')
+      .optional()
+      .isString()
+      .isLength({ min: 3, max: 2000 })
+      .withMessage('Description must be 3-2000 chars'),
+
+    body('needs')
+      .optional()
+      .isString()
+      .isLength({ min: 3, max: 2000 })
+      .withMessage('Needs must be 3-2000 chars'),
+
+    body('equityPercentage')
+      .optional()
+      .custom((value) => normalizeEquity(value) !== null)
+      .withMessage('Equity must be between 0.5 and 99.5 (steps of 0.5)'),
   ],
   validate,
   async (req, res) => {
@@ -182,17 +234,19 @@ router.put(
       if (!svc) return err(res, 'Service not found', 404);
       if (Number(svc.userId) !== Number(req.user.id)) return err(res, 'Forbidden', 403);
 
-      const { title, description, price } = req.body;
-      await svc.update({
-        title: title !== undefined ? String(title).trim() : svc.title,
-        description:
-          description !== undefined
-            ? description
-              ? String(description).trim()
-              : null
-            : svc.description,
-        price: price !== undefined ? (price !== null ? Number(price) : null) : svc.price,
-      });
+      const updates = {};
+
+      if (req.body.title !== undefined) updates.title = String(req.body.title).trim();
+      if (req.body.description !== undefined) updates.description = String(req.body.description).trim();
+      if (req.body.needs !== undefined) updates.needs = String(req.body.needs).trim();
+
+      if (req.body.equityPercentage !== undefined) {
+        const equity = normalizeEquity(req.body.equityPercentage);
+        if (equity === null) return err(res, 'Equity must be between 0.5 and 99.5 (steps of 0.5)', 400);
+        updates.equityPercentage = equity;
+      }
+
+      await svc.update(updates);
       return ok(res, { service: svc });
     } catch (e) {
       console.error('Update service error:', e && e.stack ? e.stack : e);
@@ -201,6 +255,7 @@ router.put(
   },
 );
 
+/* ------------------------------ DELETE ------------------------------ */
 router.delete(
   '/:id',
   authenticateToken,
