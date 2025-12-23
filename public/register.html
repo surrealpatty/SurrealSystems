@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,270 +10,73 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Poppins:wght@300;400;600&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap"
     rel="stylesheet"
   />
 
-  <!-- ✅ Global theme first -->
+  <!-- ✅ Global theme -->
   <link rel="stylesheet" href="/style.css" />
-  <!-- ✅ Page css (keep) -->
+  <!-- ✅ Register page layout + index vibe -->
   <link rel="stylesheet" href="/register.css" />
 
-  <style>
-    /* ==========================================
-       REGISTER PAGE FIXES (match other pages)
-       - Layout only + "anti-white-card" overrides
-       - No inline styles, no broken theme
-    ========================================== */
-
-    body{
-      margin:0;
-      min-height:100vh;
-      display:flex;
-      flex-direction:column;
-      align-items:center;
-      justify-content:flex-start;
-      font-family:"Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-    }
-
-    .page{
-      width:100%;
-      max-width:1100px;
-      padding:20px 20px 24px;
-      flex:1 0 auto;
-    }
-
-    .brand-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin-bottom:20px;
-      font-weight:600;
-      font-size:1rem;
-      color: var(--text);
-    }
-
-    .brand-dot{
-      width:10px;
-      height:10px;
-      border-radius:999px;
-      background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-      box-shadow: 0 0 18px rgba(192, 132, 252, 0.35);
-      flex:0 0 auto;
-    }
-
-    .layout{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap:28px;
-      align-items:start;
-    }
-
-    /* ✅ IMPORTANT:
-       These overrides prevent “white cards” even if register.css sets white backgrounds.
-       They force the same dark glass look as profile/services/messages. */
-    .card,
-    .pitch{
-      border-radius:24px;
-      border:1px solid var(--border);
-      background: var(--surface-2);
-      color: var(--text);
-      box-shadow: var(--shadow-1);
-    }
-
-    /* Give padding here so it works even if register.css is incomplete */
-    .card{ padding: 22px 22px 20px; }
-    .pitch{ padding: 22px 22px 20px; }
-
-    .pitch-title{ margin:0 0 8px; font-size:2.1rem; letter-spacing:-0.02em; }
-    .pitch-subtitle{ margin:0 0 18px; color: var(--muted); }
-
-    .pitch-item{
-      border-radius:16px;
-      border:1px solid var(--border);
-      background: rgba(2,6,23,0.35);
-      padding:12px 14px;
-      margin-bottom:10px;
-    }
-    :root[data-theme="light"] .pitch-item{ background:#ffffff; }
-
-    .pitch-item h3{ margin:0 0 4px; font-size:1rem; }
-    .pitch-item p{ margin:0; color: var(--muted); }
-
-    .badge-premium{
-      margin-top:10px;
-      display:inline-flex;
-      align-items:center;
-      gap:7px;
-      padding:6px 12px;
-      border-radius:999px;
-      font-size:0.82rem;
-      border:1px solid var(--border);
-      background: rgba(124, 58, 237, 0.18);
-      color: var(--text);
-      width: fit-content;
-    }
-
-    h2{ margin:0 0 8px; font-size:1.35rem; }
-    .hint{ font-size:0.82rem; color: var(--muted); margin:0 0 10px; }
-
-    form{ margin-top:10px; }
-
-    .field{
-      margin-top:12px;
-      display:flex;
-      flex-direction:column;
-      gap:6px;
-    }
-
-    .field-label-row{
-      display:flex;
-      justify-content:space-between;
-      align-items:baseline;
-      gap:10px;
-    }
-
-    label{ font-weight:600; font-size:0.92rem; color: var(--text); }
-
-    .field-hint{
-      font-size:0.78rem;
-      color: var(--muted);
-    }
-
-    /* Inputs match the rest of your site */
-    input, textarea{
-      width:100%;
-      border-radius: 14px;
-      border: 1px solid var(--input-border);
-      background: var(--input-bg);
-      color: var(--text);
-      padding: 12px 12px;
-      outline: none;
-      font-size: 0.95rem;
-    }
-
-    input:focus, textarea:focus{
-      border-color: rgba(192, 132, 252, 0.65);
-      box-shadow: 0 0 0 4px rgba(192, 132, 252, 0.15);
-    }
-
-    textarea{ resize: vertical; min-height: 110px; }
-
-    .password-row{
-      display:flex;
-      gap:10px;
-      align-items:center;
-    }
-    .password-row input{ flex:1; }
-
-    .toggle-password{
-      padding:10px 14px;
-      border-radius:999px;
-      border:1px solid var(--input-border);
-      background: var(--input-bg);
-      color: var(--text);
-      cursor:pointer;
-      font-size:0.85rem;
-      font-weight:600;
-      white-space:nowrap;
-    }
-    .toggle-password:hover{ filter: brightness(1.06); }
-
-    .meta-row{
-      margin-top:4px;
-      display:flex;
-      justify-content:flex-end;
-      font-size:0.78rem;
-      color: var(--muted);
-    }
-
-    .w-full{ width:100%; }
-
-    /* Button matches your site */
-    .btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding: 0.8rem 1.1rem;
-      border-radius: 999px;
-      font-size: 0.95rem;
-      font-weight: 700;
-      cursor: pointer;
-      border: none;
-      text-decoration: none;
-    }
-    .btn-primary{
-      background: linear-gradient(135deg, var(--brand-a), var(--brand-b));
-      color: #ffffff;
-    }
-    .btn-primary:hover{ filter: brightness(1.06); }
-
-    .message{
-      margin: 10px 0 0;
-      min-height: 18px;
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-
-    .subtext{
-      margin: 12px 0 0;
-      font-size: 0.9rem;
-      color: var(--muted);
-    }
-    .subtext a{ color: var(--brand-b); text-decoration:none; }
-    .subtext a:hover{ text-decoration:underline; }
-
-    @media (max-width: 960px){
-      .layout{ grid-template-columns: 1fr; }
-      .card{ margin-top: 16px; }
-      .pitch-title{ font-size:1.8rem; }
-    }
-  </style>
+  <script src="/init.js" defer></script>
+  <script src="/register.js" defer></script>
 </head>
 
-<body>
-  <div class="page">
-    <div class="brand-row">
-      <span class="brand-dot"></span>
-      <span class="brand-text">Surreal Systems</span>
-    </div>
+<body class="register-page">
+  <main class="register-shell">
+    <!-- Top Brand Row (same vibe as index) -->
+    <header class="register-topbar">
+      <div class="brand-row">
+        <span class="brand-dot" aria-hidden="true"></span>
+        <span class="brand-text">Surreal Systems</span>
+      </div>
 
-    <div class="layout">
-      <section class="pitch">
-        <h1 class="pitch-title">Offer your coding skills to the world.</h1>
-        <p class="pitch-subtitle">
+      <div class="top-actions">
+        <a class="pill" href="/index.html">Back</a>
+      </div>
+    </header>
+
+    <!-- ✅ TWO PANEL LAYOUT -->
+    <section class="register-grid">
+      <!-- LEFT -->
+      <section class="panel panel-left">
+        <h1 class="hero-title">Offer your coding skills to the world.</h1>
+        <p class="hero-subtitle">
           Create posts, connect with developers, and get noticed by clients worldwide.
         </p>
 
-        <div class="pitch-item">
-          <h3>Offer Your Services</h3>
-          <p>Create posts to sell your skills and showcase your best work.</p>
-        </div>
+        <div class="pitch-list">
+          <div class="pitch-item">
+            <h3>Offer Your Services</h3>
+            <p>Create posts to sell your skills and showcase your best work.</p>
+          </div>
 
-        <div class="pitch-item">
-          <h3>Connect &amp; Collaborate</h3>
-          <p>Rate and interact with other developers, build credibility, and grow your professional network.</p>
-        </div>
+          <div class="pitch-item">
+            <h3>Connect &amp; Collaborate</h3>
+            <p>Rate and interact with other developers, build credibility, and grow your professional network.</p>
+          </div>
 
-        <div class="pitch-item">
-          <h3>Ad-Free &amp; Premium</h3>
-          <p>Upgrade for ad-free experience, lower fees, and better visibility.</p>
-          <div class="badge-premium">● Premium perks for power users</div>
+          <div class="pitch-item">
+            <h3>Ad-Free &amp; Premium</h3>
+            <p>Upgrade for ad-free experience, lower fees, and better visibility.</p>
+            <div class="badge-premium">● Premium perks for power users</div>
+          </div>
         </div>
       </section>
 
-      <section class="card" aria-labelledby="register-heading">
-        <h2 id="register-heading">Create your account</h2>
-        <p class="hint">
+      <!-- RIGHT -->
+      <section class="panel panel-right" aria-labelledby="register-heading">
+        <h2 id="register-heading" class="form-title">Create your account</h2>
+        <p class="form-hint">
           Join Surreal Systems to create posts, manage your messages, and grow your projects.
         </p>
 
-        <form id="registerForm" novalidate>
+        <form id="registerForm" class="form" novalidate>
           <div class="field">
             <div class="field-label-row">
               <label for="registerUsername">Username</label>
-              <span class="field-hint">3-32 characters</span>
+              <span class="field-hint">3–32 characters</span>
             </div>
             <input
               id="registerUsername"
@@ -326,9 +129,13 @@
           </div>
 
           <div class="field">
-            <label for="registerDescription">
-              Tell us about yourself <span class="field-hint">(optional)</span>
-            </label>
+            <div class="field-label-row">
+              <label for="registerDescription">
+                Tell us about yourself <span class="opt">(optional)</span>
+              </label>
+              <span class="field-hint" id="descCounter">0 / 400</span>
+            </div>
+
             <textarea
               id="registerDescription"
               name="description"
@@ -336,7 +143,6 @@
               maxlength="400"
               placeholder="What do you offer? What are your skills?"
             ></textarea>
-            <div class="meta-row"><span id="descCounter">0 / 400</span></div>
           </div>
 
           <button id="submitBtn" class="btn btn-primary w-full" type="submit">
@@ -346,15 +152,14 @@
           <p id="registerMessage" class="message" role="status" aria-live="polite"></p>
 
           <p class="subtext">
-            Already have an account? <a href="/login.html">Log in</a>
+            Already have an account? <a href="/index.html">Log in</a>
           </p>
         </form>
       </section>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <script src="/register.js" defer></script>
-
+  <!-- ✅ Footer will never overlap -->
   <footer class="site-footer">
     <div class="footer-inner">
       <span>&copy; 2025 Surreal Systems. All rights reserved.</span>
