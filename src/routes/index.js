@@ -1,6 +1,6 @@
 // models/index.js
 const User = require('./user');
-const Service = require('./service');
+const Service = require('./services');
 const Rating = require('./rating');
 
 // Services

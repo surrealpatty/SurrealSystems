@@ -63,7 +63,7 @@ const rateLimit = require('express-rate-limit');
 
 const { sequelize, testConnection } = require('./config/database');
 const userRoutes = require('./routes/user');
-const serviceRoutes = require('./routes/service');
+const serviceRoutes = require('./routes/services');
 const ratingRoutes = require('./routes/rating');
 const messagesRoutes = require('./routes/messages');
 const paymentsRoutes = require('./routes/payments');
